@@ -4,66 +4,146 @@
     {
       "id": "EVO-001",
       "nama": "Peaceful Calm",
-      "ukuran": "50ml",
-      "konsentrasi": "Eau de Parfum",
-      "gender": "Unisex",
-      "karakter": ["Fresh", "Citrus", "Elegant"],
-      "image": "Artboard 1",
-      "notes": {
-        "top_notes": ["Bergamot", "Mandarin Orange"],
-        "middle_notes": ["Green Tea", "Black Currant"],
-        "base_notes": ["Musk", "Sandalwood"]
+      "deskripsi": "Awali hari Anda dengan kesegaran Peaceful Calm. Perpaduan cerah dari bergamot dan teh hijau yang menenangkan, ditutup dengan kelembutan musk dan sandalwood. Aroma ini dirancang untuk memberikan kesan bersih, segar, dan profesional yang bertahan sepanjang aktivitas Anda.",
+      "spesifikasi": {
+        "ukuran": "50ml",
+        "konsentrasi": "Eau de Parfum (EDP)",
+        "gender": "Unisex",
+        "performa": {
+          "ketahanan": "6-8 Jam",
+          "sillage": "Medium",
+          "proyeksi": "1-2 Meter"
+        }
       },
-      "harga": 25000,
-      "stok": 45
+      "profil_aroma": {
+        "karakter": ["Fresh", "Citrus", "Elegant"],
+        "vibe": "Refreshing morning, clean laundry, and professional",
+        "piramida_notes": {
+          "top_notes": ["Bergamot", "Mandarin Orange"],
+          "middle_notes": ["Green Tea", "Black Currant"],
+          "base_notes": ["Musk", "Sandalwood"]
+        }
+      },
+      "media": {
+        "image_url": "https://assets.evomi.id/products/peaceful-calm.jpg",
+        "artboard_ref": "Artboard 1"
+      },
+      "transaksi": {
+        "harga_retail": 25000,
+        "mata_uang": "IDR",
+        "inventaris": {
+          "stok_tersedia": 45,
+          "status": "In Stock"
+        }
+      }
     },
     {
       "id": "EVO-002",
       "nama": "Sweet Shy",
-      "ukuran": "50ml",
-      "konsentrasi": "Eau de Parfum",
-      "gender": "Unisex",
-      "karakter": ["Floral", "Sweet", "Mysterious"],
-      "image": "Artboard 2",
-      "notes": {
-        "top_notes": ["Pear", "Pink Pepper"],
-        "middle_notes": ["Coffee", "Jasmine", "Almond"],
-        "base_notes": ["Vanilla", "Patchouli", "Cedar"]
+      "deskripsi": "Pancarkan pesona manis dan misterius Anda dengan Sweet Shy. Wangi adiktif ini dibuka dengan kesegaran buah pir, bertransisi elegan menjadi aroma kopi dan melati yang memikat, serta diakhiri dengan pelukan hangat vanilla dan patchouli. Sempurna untuk melengkapi momen romantis Anda.",
+      "spesifikasi": {
+        "ukuran": "50ml",
+        "konsentrasi": "Eau de Parfum (EDP)",
+        "gender": "Unisex",
+        "performa": {
+          "ketahanan": "8-10 Jam",
+          "sillage": "Strong",
+          "proyeksi": "2 Meter"
+        }
       },
-      "harga": 25000,
-      "stok": 20
+      "profil_aroma": {
+        "karakter": ["Floral", "Sweet", "Mysterious"],
+        "vibe": "Romantic dinner, sweet addiction, and feminine charm",
+        "piramida_notes": {
+          "top_notes": ["Pear", "Pink Pepper"],
+          "middle_notes": ["Coffee", "Jasmine", "Almond"],
+          "base_notes": ["Vanilla", "Patchouli", "Cedar"]
+        }
+      },
+      "media": {
+        "image_url": "https://assets.evomi.id/products/sweet-shy.jpg",
+        "artboard_ref": "Artboard 2"
+      },
+      "transaksi": {
+        "harga_retail": 25000,
+        "mata_uang": "IDR",
+        "inventaris": {
+          "stok_tersedia": 20,
+          "status": "Limited Stock"
+        }
+      }
     },
     {
       "id": "EVO-003",
       "nama": "Rabel Brave",
-      "ukuran": "50ml",
-      "konsentrasi": "Eau de Parfum",
-      "gender": "Unisex",
-      "karakter": ["Woody", "Smoky", "Bold"],
-      "image": "Artboard 3",
-      "notes": {
-        "top_notes": ["Saffron", "Rose"],
-        "middle_notes": ["Agarwood (Oud)", "Praline"],
-        "base_notes": ["Vanilla", "Guaiac Wood"]
+      "deskripsi": "Tampil berani dan penuh percaya diri dengan Rabel Brave. Sebuah mahakarya mewah yang memadukan eksotisme saffron, kemewahan oud, dan manisnya praline. Menghasilkan aroma smoky dan woody yang intens, dirancang khusus untuk memikat perhatian di gemerlap malam.",
+      "spesifikasi": {
+        "ukuran": "50ml",
+        "konsentrasi": "Eau de Parfum (EDP)",
+        "gender": "Unisex",
+        "performa": {
+          "ketahanan": "10-12 Jam",
+          "sillage": "Strong",
+          "proyeksi": "2-3 Meter"
+        }
       },
-      "harga": 25000,
-      "stok": 12
+      "profil_aroma": {
+        "karakter": ["Woody", "Smoky", "Bold"],
+        "vibe": "Night out, confident, intense, and luxurious",
+        "piramida_notes": {
+          "top_notes": ["Saffron", "Rose"],
+          "middle_notes": ["Agarwood (Oud)", "Praline"],
+          "base_notes": ["Vanilla", "Guaiac Wood"]
+        }
+      },
+      "media": {
+        "image_url": "https://assets.evomi.id/products/rabel-brave.jpg",
+        "artboard_ref": "Artboard 3"
+      },
+      "transaksi": {
+        "harga_retail": 25000,
+        "mata_uang": "IDR",
+        "inventaris": {
+          "stok_tersedia": 12,
+          "status": "Low Stock"
+        }
+      }
     },
     {
       "id": "EVO-004",
       "nama": "Purpose Prestige",
-      "ukuran": "50ml",
-      "konsentrasi": "Eau de Parfum",
-      "gender": "Unisex",
-      "karakter": ["Woody", "Smoky", "Bold"],
-      "image": "Artboard 4",
-      "notes": {
-        "top_notes": ["Saffron", "Rose"],
-        "middle_notes": ["Agarwood (Oud)", "Praline"],
-        "base_notes": ["Vanilla", "Guaiac Wood"]
+      "deskripsi": "Simbol dari kesuksesan dan keanggunan, Purpose Prestige memancarkan wibawa tingkat tinggi. Dengan komposisi ambery-woody yang mendalam dan sentuhan mawar yang elegan, parfum ini memberikan karisma dan kehangatan yang tak tertandingi untuk acara eksklusif dan figur eksekutif.",
+      "spesifikasi": {
+        "ukuran": "50ml",
+        "konsentrasi": "Eau de Parfum (EDP)",
+        "gender": "Unisex",
+        "performa": {
+          "ketahanan": "10-12 Jam",
+          "sillage": "Strong",
+          "proyeksi": "2 Meter"
+        }
       },
-      "harga": 25000,
-      "stok": 12
+      "profil_aroma": {
+        "karakter": ["Woody", "Ambery", "Sophisticated"],
+        "vibe": "High-end events, executive presence, and deep warmth",
+        "piramida_notes": {
+          "top_notes": ["Saffron", "Rose"],
+          "middle_notes": ["Agarwood (Oud)", "Praline"],
+          "base_notes": ["Vanilla", "Guaiac Wood"]
+        }
+      },
+      "media": {
+        "image_url": "https://assets.evomi.id/products/purpose-prestige.jpg",
+        "artboard_ref": "Artboard 4"
+      },
+      "transaksi": {
+        "harga_retail": 25000,
+        "mata_uang": "IDR",
+        "inventaris": {
+          "stok_tersedia": 12,
+          "status": "Low Stock"
+        }
+      }
     }
   ]
 }

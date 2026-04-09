@@ -8,7 +8,6 @@ import localFont from "next/font/local";
 
 // --------------------------------------------------
 // Konfigurasi Local Font 
-// (Sesuaikan path '../../..' jika struktur folder berbeda)
 // --------------------------------------------------
 const fontJudul = localFont({
   src: "./../../fonts/8 Heavy.ttf",
@@ -22,7 +21,6 @@ const fontCaption = localFont({
   display: "swap",
 });
 
-// Typing untuk params
 interface ProductDetailProps {
   params: {
     id: string;
@@ -30,28 +28,23 @@ interface ProductDetailProps {
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailProps) {
-  
-  // Asumsikan nama variabelnya adalah dataPromise
-  const data = await params;
+  // Menunggu params (Next.js 15+ pattern)
+  const resolvedParams = await params;
 
-  // Cari produk berdasarkan ID yang ada di URL
+  // Cari produk berdasarkan ID
   const produk = evomiData.kategori_produk.find(
-    (p) => p.id.toString() === data.id,
-
+    (p) => p.id === resolvedParams.id
   );
 
-  // Testing Log
-  console.log("data id adalah : ", data.id); // Output: EVO-001
-
-  // Jika produk tidak ditemukan di JSON, kembalikan halaman 404
+  // Jika produk tidak ditemukan, kembalikan halaman 404
   if (!produk) {
     return notFound();
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 font-sans">
+    <div className={`${fontCaption.variable} min-h-screen bg-stone-50 text-stone-900 font-sans`}>
 
-      {/* NAVBAR SEDERHANA UNTUK DETAIL PAGE */}
+      {/* NAVBAR */}
       <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="brand-logo">
@@ -59,9 +52,9 @@ export default async function ProductDetailPage({ params }: ProductDetailProps) 
               <Image
                 src="/img/Logo Evomi.png"
                 alt="Evomi Logo"
-                className="object-cover brightness-0" // Dibuat gelap untuk nav terang
+                className="brightness-0"
                 width={100}
-                height={100}
+                height={40}
                 priority
               />
             </Link>
@@ -92,7 +85,8 @@ export default async function ProductDetailPage({ params }: ProductDetailProps) 
           {/* KIRI: PRODUCT IMAGE */}
           <div className="relative w-full h-[500px] lg:h-[700px] bg-stone-100 rounded-2xl overflow-hidden sticky top-28">
             <Image
-              src={`/img/produk/${produk.image}.jpeg`}
+              // Menggunakan artboard_ref sebagai penanda file lokal jika image_url adalah placeholder
+              src={`/img/produk/${produk.media.artboard_ref}.jpeg`}
               alt={`Parfum ${produk.nama} by Evomi`}
               fill
               priority
@@ -106,10 +100,10 @@ export default async function ProductDetailPage({ params }: ProductDetailProps) 
             <div className="mb-8 border-b border-stone-200 pb-8">
               <div className="flex items-center gap-3 mb-4">
                 <span className="bg-stone-200 text-stone-700 text-xs px-3 py-1 rounded-full uppercase tracking-widest font-medium">
-                  {produk.gender}
+                  {produk.spesifikasi.gender}
                 </span>
                 <span className="text-stone-500 text-sm tracking-wider uppercase">
-                  {produk.konsentrasi} • {produk.ukuran}
+                  {produk.spesifikasi.konsentrasi} • {produk.spesifikasi.ukuran}
                 </span>
               </div>
 
@@ -117,12 +111,16 @@ export default async function ProductDetailPage({ params }: ProductDetailProps) 
                 {produk.nama}
               </h1>
 
-              <p className="text-3xl font-light text-stone-900 mb-4">
-                Rp {produk.harga.toLocaleString("id-ID")}
+              <p className="text-3xl font-light text-stone-900 mb-6">
+                {produk.transaksi.mata_uang} {produk.transaksi.harga_retail.toLocaleString("id-ID")}
               </p>
 
-              <div className="flex flex-wrap gap-2 mt-4">
-                {produk.karakter.map((karakter, index) => (
+              <p className="text-stone-600 leading-relaxed mb-6 italic">
+                &quot;{produk.deskripsi}&quot;
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                {produk.profil_aroma.karakter.map((karakter, index) => (
                   <span
                     key={index}
                     className="border border-amber-800 text-amber-800 text-xs px-3 py-1 rounded-full uppercase tracking-wider"
@@ -139,64 +137,66 @@ export default async function ProductDetailPage({ params }: ProductDetailProps) 
                 Olfactory Notes
               </h3>
 
-              <div className="space-y-6">
-                <div className="flex gap-4 items-start">
-                  <div className="w-16 pt-1">
-                    <span className="text-xs font-bold uppercase tracking-widest text-stone-400">Top</span>
+              <div className="space-y-4">
+                {[
+                  { label: "Top", data: produk.profil_aroma.piramida_notes.top_notes },
+                  { label: "Middle", data: produk.profil_aroma.piramida_notes.middle_notes },
+                  { label: "Base", data: produk.profil_aroma.piramida_notes.base_notes },
+                ].map((note) => (
+                  <div key={note.label} className="flex gap-4 items-start">
+                    <div className="w-16 pt-1">
+                      <span className="text-xs font-bold uppercase tracking-widest text-stone-400">{note.label}</span>
+                    </div>
+                    <div className="flex-1 bg-white border border-stone-100 p-4 rounded-lg shadow-sm">
+                      <p className={`${fontCaption.className} text-stone-700 leading-relaxed`}>
+                        {note.data.join(", ")}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 bg-stone-100 p-4 rounded-lg">
-                    <p className={`${fontCaption.className} text-stone-700 leading-relaxed`}>
-                      {produk.notes.top_notes.join(", ")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4 items-start">
-                  <div className="w-16 pt-1">
-                    <span className="text-xs font-bold uppercase tracking-widest text-stone-400">Middle</span>
-                  </div>
-                  <div className="flex-1 bg-stone-100 p-4 rounded-lg">
-                    <p className={`${fontCaption.className} text-stone-700 leading-relaxed`}>
-                      {produk.notes.middle_notes.join(", ")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4 items-start">
-                  <div className="w-16 pt-1">
-                    <span className="text-xs font-bold uppercase tracking-widest text-stone-400">Base</span>
-                  </div>
-                  <div className="flex-1 bg-stone-100 p-4 rounded-lg">
-                    <p className={`${fontCaption.className} text-stone-700 leading-relaxed`}>
-                      {produk.notes.base_notes.join(", ")}
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
+            </div>
+
+            {/* PERFORMA SHORTCUT */}
+            <div className="grid grid-cols-3 gap-4 mb-10 border-t border-stone-100 pt-8">
+                <div className="text-center">
+                    <p className="text-[10px] uppercase text-stone-400 mb-1">Longevity</p>
+                    <p className="text-xs font-bold">{produk.spesifikasi.performa.ketahanan}</p>
+                </div>
+                <div className="text-center border-x border-stone-100">
+                    <p className="text-[10px] uppercase text-stone-400 mb-1">Sillage</p>
+                    <p className="text-xs font-bold">{produk.spesifikasi.performa.sillage}</p>
+                </div>
+                <div className="text-center">
+                    <p className="text-[10px] uppercase text-stone-400 mb-1">Projection</p>
+                    <p className="text-xs font-bold">{produk.spesifikasi.performa.proyeksi}</p>
+                </div>
             </div>
 
             {/* ADD TO CART & STOCK */}
             <div className="mt-auto">
               <div className="flex items-center justify-between mb-4">
                 <span className={`${fontCaption.className} text-sm text-stone-500`}>
-                  Status: {produk.stok > 0 ? (
-                    <span className="text-green-600">In Stock ({produk.stok} available)</span>
+                  Status: {produk.transaksi.inventaris.stok_tersedia > 0 ? (
+                    <span className="text-emerald-600 font-medium">
+                        {produk.transaksi.inventaris.status} ({produk.transaksi.inventaris.stok_tersedia} units)
+                    </span>
                   ) : (
-                    <span className="text-red-600">Sold Out</span>
+                    <span className="text-red-600 font-medium">Sold Out</span>
                   )}
                 </span>
               </div>
 
               <button
-                disabled={produk.stok === 0}
+                disabled={produk.transaksi.inventaris.stok_tersedia === 0}
                 className="w-full bg-stone-900 hover:bg-stone-800 text-white py-4 transition-colors uppercase tracking-widest text-sm font-medium disabled:bg-stone-300 disabled:cursor-not-allowed"
               >
                 Add to Cart
               </button>
 
               <div className="mt-4 text-center">
-                <p className={`${fontCaption.className} text-xs text-stone-500`}>
-                  Pengiriman dilakukan H+1 setelah pembayaran terkonfirmasi.
+                <p className={`${fontCaption.className} text-[10px] text-stone-400 uppercase tracking-tight`}>
+                  Safe Packaging • Nationwide Shipping • 100% Authentic
                 </p>
               </div>
             </div>
@@ -204,7 +204,6 @@ export default async function ProductDetailPage({ params }: ProductDetailProps) 
           </div>
         </div>
       </main>
-
     </div>
   );
 }

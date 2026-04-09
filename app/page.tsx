@@ -20,6 +20,7 @@ const fontCaption = localFont({
 });
 
 export default function EvomiLandingPage() {
+  // Mengambil 4 produk pertama berdasarkan struktur JSON baru
   const topFourProducts = evomiData.kategori_produk.slice(0, 4);
 
   return (
@@ -31,7 +32,7 @@ export default function EvomiLandingPage() {
 
       <div className="min-h-screen bg-[#FBFBF9] text-stone-900 font-sans antialiased">
 
-        {/* NAVBAR - Dibuat lebih tipis & minimalis */}
+        {/* NAVBAR */}
         <nav className="fixed w-full z-50 bg-white/70 backdrop-blur-xl border-b border-stone-100">
           <div className="max-w-7xl mx-auto px-8 h-20 flex items-center justify-between">
             <Link href="/" className="hover:opacity-70 transition-opacity">
@@ -55,7 +56,7 @@ export default function EvomiLandingPage() {
           </div>
         </nav>
 
-        {/* HERO SECTION - Teks dibuat lebih proporsional */}
+        {/* HERO SECTION */}
         <section className="relative h-screen flex items-center justify-center text-center px-6 overflow-hidden">
           <div className="absolute inset-0">
             <Image
@@ -73,7 +74,7 @@ export default function EvomiLandingPage() {
               The Artisan Fragrance House
             </span>
             <h1 className={`${fontJudul.className} text-7xl md:text-9xl tracking-tighter`}>
-              EVOMI
+              {evomiData.brand.toUpperCase()}
             </h1>
             <p className={`${fontCaption.className} max-w-xl mx-auto text-lg md:text-xl font-light opacity-90 leading-relaxed tracking-wide`}>
               "Aroma yang mendefinisikan identitas, <br />esensi kemewahan dalam setiap tetes."
@@ -87,13 +88,12 @@ export default function EvomiLandingPage() {
             </div>
           </div>
 
-          {/* Scroll Indicator */}
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-50">
             <div className="w-[1px] h-12 bg-white"></div>
           </div>
         </section>
 
-        {/* ABOUT SECTION - Dibuat lebih "Editorial" */}
+        {/* ABOUT SECTION */}
         <section id="about" className="py-32 px-8 max-w-7xl mx-auto">
           <div className="grid md:grid-cols-12 gap-16 items-center">
             <div className="md:col-span-4">
@@ -118,14 +118,14 @@ export default function EvomiLandingPage() {
           </div>
         </section>
 
-        {/* CAMPAIGN - Full Width biar dramatis */}
+        {/* CAMPAIGN */}
         <section className="bg-stone-50 py-20">
           <div className="max-w-screen-2xl mx-auto px-4">
             <ImageCarousel />
           </div>
         </section>
 
-        {/* PRODUCT SECTION - Card diredesain agar lebih bersih */}
+        {/* PRODUCT SECTION */}
         <section id="product" className="py-32 px-8 bg-white">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-end mb-20">
@@ -144,7 +144,8 @@ export default function EvomiLandingPage() {
                   {/* Image Wrapper */}
                   <div className="relative aspect-[3/4] overflow-hidden bg-stone-100 mb-6">
                     <Image
-                      src={`/img/produk/${parfum.image}.jpeg`}
+                      /* Menggunakan artboard_ref sebagai nama file atau sesuaikan dengan konvensi penamaan Anda */
+                      src={`/img/produk/${parfum.media.artboard_ref}.jpeg`}
                       alt={parfum.nama}
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -161,13 +162,15 @@ export default function EvomiLandingPage() {
 
                   {/* Info */}
                   <div className="space-y-2 text-center">
-                    <span className="text-[10px] text-stone-400 uppercase tracking-widest">{parfum.gender}</span>
+                    <span className="text-[10px] text-stone-400 uppercase tracking-widest">
+                      {parfum.spesifikasi.gender} • {parfum.spesifikasi.ukuran}
+                    </span>
                     <h3 className={`${fontJudul.className} text-xl text-stone-800`}>{parfum.nama}</h3>
                     <p className="text-stone-500 text-sm font-light italic">
-                      {parfum.karakter.slice(0, 2).join(" • ")}
+                      {parfum.profil_aroma.karakter.slice(0, 3).join(" • ")}
                     </p>
                     <p className="text-stone-900 font-medium pt-2">
-                      Rp {parfum.harga.toLocaleString('id-ID')}
+                      Rp {parfum.transaksi.harga_retail.toLocaleString('id-ID')}
                     </p>
                   </div>
                 </div>
@@ -176,7 +179,7 @@ export default function EvomiLandingPage() {
           </div>
         </section>
 
-        {/* WHY CHOOSE US - Minimalist Icons */}
+        {/* WHY CHOOSE US */}
         <section id="why" className="py-32 bg-stone-50 px-8 text-center">
           <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12">
             {[
@@ -193,7 +196,7 @@ export default function EvomiLandingPage() {
           </div>
         </section>
 
-        {/* TESTIMONIAL - Dark & Bold */}
+        {/* TESTIMONIAL */}
         <section className="py-32 bg-stone-900 text-white px-8">
           <div className="max-w-5xl mx-auto text-center space-y-16">
             <div className="space-y-4">
@@ -203,9 +206,10 @@ export default function EvomiLandingPage() {
               </h2>
             </div>
             <div className="grid md:grid-cols-3 gap-16">
-              {[{ name: "Clara S.", text: "Velvet Night adalah aroma paling elegan yang pernah saya miliki." },
-              { name: "Dimas R.", text: "Kesegaran Oceanic Mist tidak tertandingi. Tahan lama seharian." },
-              { name: "Sarah W.", text: "Packaging Evomi sangat mewah, benar-benar brand berkelas." }
+              {[
+                { name: "Clara S.", text: "Peaceful Calm adalah aroma paling segar yang pernah saya miliki." },
+                { name: "Dimas R.", text: "Rabel Brave sangat memikat perhatian di malam hari." },
+                { name: "Sarah W.", text: "Packaging Evomi sangat mewah, benar-benar brand berkelas." }
               ].map((t, i) => (
                 <div key={i} className="space-y-6 group">
                   <p className="text-stone-400 font-light leading-relaxed italic opacity-80 group-hover:opacity-100 transition-opacity">"{t.text}"</p>
@@ -220,7 +224,7 @@ export default function EvomiLandingPage() {
         <footer className="bg-white pt-24 pb-12 px-8 border-t border-stone-100">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
             <div className="col-span-1 md:col-span-2">
-              <h2 className={`${fontJudul.className} text-3xl mb-6 tracking-widest`}>EVOMI</h2>
+              <h2 className={`${fontJudul.className} text-3xl mb-6 tracking-widest`}>{evomiData.brand.toUpperCase()}</h2>
               <p className="max-w-xs text-stone-400 font-light leading-relaxed">
                 Menghadirkan pengalaman sensorik melalui kurasi aroma terbaik. Bergabunglah dengan perjalanan kami.
               </p>
@@ -246,7 +250,7 @@ export default function EvomiLandingPage() {
             </div>
           </div>
           <div className="text-center text-[10px] text-stone-300 uppercase tracking-[0.5em] pt-12 border-t border-stone-50">
-            &copy; {new Date().getFullYear()} EVOMI FRAGRANCE HOUSE
+            &copy; {new Date().getFullYear()} {evomiData.brand.toUpperCase()} FRAGRANCE HOUSE
           </div>
         </footer>
 

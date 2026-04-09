@@ -25,14 +25,15 @@ const ProductCard = ({ parfum }) => {
       {/* Image Area */}
       <div className="relative w-full h-72 overflow-hidden bg-stone-100">
         <Image
-          src={`/img/produk/${parfum.image}.jpeg`}
+          // Menggunakan artboard_ref sebagai fallback nama file lokal
+          src={`/img/produk/${parfum.media.artboard_ref}.jpeg`}
           alt={parfum.nama}
           fill
           className="object-cover group-hover:scale-110 transition-transform duration-700"
         />
         <div className="absolute top-4 right-4">
           <span className="bg-white/90 backdrop-blur-sm text-stone-600 text-[10px] uppercase tracking-widest px-3 py-1 rounded-full font-medium shadow-sm">
-            {parfum.gender}
+            {parfum.spesifikasi.gender}
           </span>
         </div>
       </div>
@@ -44,13 +45,13 @@ const ProductCard = ({ parfum }) => {
             {parfum.nama}
           </h3>
           <p className="text-xs text-stone-400 uppercase tracking-tighter">
-            {parfum.konsentrasi} • {parfum.ukuran}
+            {parfum.spesifikasi.konsentrasi} • {parfum.spesifikasi.ukuran}
           </p>
         </div>
 
         {/* Character Badges */}
         <div className="flex flex-wrap gap-1.5 mb-5">
-          {parfum.karakter.map((char, index) => (
+          {parfum.profil_aroma.karakter.map((char: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined, index: React.Key | null | undefined) => (
             <span key={index} className="text-[10px] bg-stone-50 text-stone-500 border border-stone-200 px-2 py-0.5 rounded">
               {char}
             </span>
@@ -60,7 +61,7 @@ const ProductCard = ({ parfum }) => {
         {/* Fragrance Notes Snippet */}
         <div className="mb-6 space-y-1 border-l-2 border-amber-100 pl-3">
           <p className="text-[11px] text-stone-500 leading-relaxed">
-            <span className="font-semibold text-stone-700">Top:</span> {parfum.notes.top_notes.slice(0, 2).join(', ')}...
+            <span className="font-semibold text-stone-700">Top:</span> {parfum.profil_aroma.piramida_notes.top_notes.slice(0, 2).join(', ')}...
           </p>
         </div>
 
@@ -69,7 +70,7 @@ const ProductCard = ({ parfum }) => {
           <div>
             <p className="text-[10px] text-stone-400 uppercase">Investment</p>
             <p className="text-lg font-bold text-stone-900">
-              Rp {parfum.harga.toLocaleString('id-ID')}
+              {parfum.transaksi.mata_uang} {parfum.transaksi.harga_retail.toLocaleString('id-ID')}
             </p>
           </div>
           <Link
@@ -93,7 +94,7 @@ export default function Products() {
   return (
     <div className={`${fontJudul.variable} ${fontCaption.variable} font-body selection:bg-amber-100`}>
       <Head>
-        <title>Our Collections | EVOMI Fragrance</title>
+        <title>Our Collections | {evomiData.brand} Fragrance</title>
         <meta name="description" content="Explore the signature scents of Evomi. Redefining presence through scent." />
       </Head>
 
@@ -144,7 +145,9 @@ export default function Products() {
         <footer id="footer" className="bg-stone-900 text-stone-300 py-20 px-6">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="md:col-span-2">
-              <h2 className="font-brand text-white text-3xl mb-6 tracking-[0.2em]">EVOMI</h2>
+              <h2 className="font-brand text-white text-3xl mb-6 tracking-[0.2em] uppercase">
+                {evomiData.brand}
+              </h2>
               <p className="max-w-sm text-stone-400 leading-relaxed italic">
                 &quot;Redefining Presence through Scent.&quot; Kami percaya bahwa parfum adalah identitas yang tidak terlihat namun paling berkesan.
               </p>
@@ -170,7 +173,7 @@ export default function Products() {
           </div>
 
           <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] uppercase tracking-widest text-stone-500">
-            <p>&copy; {new Date().getFullYear()} EVOMI FRAGRANCE. ALL RIGHTS RESERVED.</p>
+            <p>&copy; {new Date().getFullYear()} {evomiData.brand.toUpperCase()} FRAGRANCE. ALL RIGHTS RESERVED.</p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#">Privacy Policy</a>
               <a href="#">Terms of Service</a>
