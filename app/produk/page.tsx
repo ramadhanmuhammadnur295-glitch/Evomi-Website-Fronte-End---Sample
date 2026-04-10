@@ -17,9 +17,9 @@ const fontCaption = localFont({
   variable: "--font-body",
   display: 'swap',
 });
+type Parfum = typeof evomiData.kategori_produk[number];
 
-// --- Sub-Component: Product Card ---
-const ProductCard = ({ parfum }) => {
+const ProductCard = ({ parfum }: { parfum: Parfum }) => {
   return (
     <div className="group flex flex-col bg-white border border-stone-100 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-stone-200/50 transition-all duration-500">
       {/* Image Area */}
@@ -99,17 +99,17 @@ export default function Products() {
       </Head>
 
       <div className="min-h-screen bg-[#FDFCFB] text-stone-900">
-        
+
         {/* NAVBAR */}
         <nav className="fixed w-full z-50 bg-white/70 backdrop-blur-lg border-b border-stone-100">
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <Link href="/" className="hover:opacity-70 transition-opacity">
-              <Image 
-                src="/img/Logo Evomi.png" 
-                alt="Evomi Logo" 
-                width={100} 
-                height={40} 
-                className="brightness-0" 
+              <Image
+                src="/img/Logo Evomi.png"
+                alt="Evomi Logo"
+                width={100}
+                height={40}
+                className="brightness-0"
               />
             </Link>
             <div className="hidden md:flex space-x-8 text-[11px] uppercase tracking-[0.2em] font-medium">

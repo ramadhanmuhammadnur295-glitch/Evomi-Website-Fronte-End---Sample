@@ -19,7 +19,23 @@ const fontCaption = localFont({
   display: 'swap',
 });
 
-export default function EvomiLandingPage() {
+// Get Produk
+async function getProducts() {
+  const res = await fetch('http://localhost:8000/api/v1/products', {
+    cache: 'no-store', // Memastikan data selalu segar (bukan cache statis)
+  });
+
+  if (!res.ok) {
+    throw new Error('Gagal mengambil data produk');
+  }
+
+  return res.json();
+}
+
+export default async function EvomiLandingPage() {
+
+  const products = await getProducts();
+
   // Mengambil 4 produk pertama berdasarkan struktur JSON baru
   const topFourProducts = evomiData.kategori_produk.slice(0, 4);
 
@@ -33,63 +49,94 @@ export default function EvomiLandingPage() {
       <div className="min-h-screen bg-[#FBFBF9] text-stone-900 font-sans antialiased">
 
         {/* NAVBAR */}
-        <nav className="fixed w-full z-50 bg-white/70 backdrop-blur-xl border-b border-stone-100">
+        <nav className="fixed w-full z-50 bg-[#0081D1] backdrop-blur-xl border-b border-white/10">
           <div className="max-w-7xl mx-auto px-8 h-20 flex items-center justify-between">
-            <Link href="/" className="hover:opacity-70 transition-opacity">
-              <Image
-                src="/img/Logo Evomi.png"
-                alt="Evomi Logo"
-                width={100}
-                height={40}
-                className="brightness-0"
-              />
-            </Link>
 
-            <div className={`hidden md:flex items-center space-x-12 ${fontJudul.className} text-[14px] tracking-[0.2em] uppercase`}>
-              <a href="#about" className="hover:text-amber-800 transition-colors">About</a>
-              <a href="#product" className="hover:text-amber-800 transition-colors">Collection</a>
-              <a href="#why" className="hover:text-amber-800 transition-colors">Why</a>
-              <Link href="/produk" className="bg-stone-900 text-white px-6 py-2 hover:bg-amber-900 transition-all rounded-full">
-                Shop
+            {/* KIRI - LOGO (FIXED WHITE) */}
+            <div className="w-1/3 flex justify-start">
+              <Link href="/" className="hover:opacity-70 transition-opacity">
+                <Image
+                  src="/img/Logo Evomi.png"
+                  alt="Evomi Logo"
+                  width={100}
+                  height={40}
+                  /* Trik rahasia: Hitamkan dulu (brightness-0) lalu balikkan ke Putih (invert) */
+                  className="brightness-0 invert"
+                />
               </Link>
             </div>
+
+            {/* TENGAH - MENU UTAMA */}
+            <div className={`hidden md:flex w-1/3 justify-center items-center space-x-10 ${fontJudul.className} text-[13px] tracking-[0.2em] uppercase text-white`}>
+              <a href="#about" className="hover:text-white/70 transition-colors">About</a>
+              <a href="#product" className="hover:text-white/70 transition-colors">Collection</a>
+              <Link href="/produk" className="hover:text-white/70 transition-colors">Shop</Link>
+            </div>
+
+            {/* KANAN - LOGIN & REGISTER */}
+            <div className={`hidden md:flex w-1/3 justify-end items-center space-x-6 ${fontJudul.className} text-[12px] tracking-[0.15em] uppercase`}>
+              <Link href="/login" className="text-white hover:text-white/70 transition-colors">
+                Log In
+              </Link>
+              <Link href="/register" className="bg-white text-[#0081D1] px-7 py-2.5 hover:bg-stone-100 transition-all rounded-full font-bold">
+                Register
+              </Link>
+            </div>
+
+            {/* MOBILE MENU TOGGLE */}
+            <div className="md:hidden flex justify-end w-1/3 text-white">
+              <button className="p-2">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="1.5" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+              </button>
+            </div>
+
           </div>
         </nav>
 
         {/* HERO SECTION */}
-        <section className="relative h-screen flex items-center justify-center text-center px-6 overflow-hidden">
-          <div className="absolute inset-0">
-            <Image
-              src="/img/poster/Artboard 2.jpeg"
-              alt="Background"
-              fill
-              className="object-contain scale-100"
-              priority
-            />
-            <div className="absolute inset-0 bg-stone-900/70 backdrop-brightness-90"></div>
-          </div>
+        <section className="relative h-screen flex items-center justify-center bg-white overflow-hidden">
 
-          <div className="relative z-10 text-white space-y-8">
-            <span className={`${fontCaption.className} uppercase tracking-[0.5em] text-xs md:text-sm animate-fade-in`}>
-              The Artisan Fragrance House
-            </span>
-            <h1 className={`${fontJudul.className} text-7xl md:text-9xl tracking-tighter`}>
-              {evomiData.brand.toUpperCase()}
-            </h1>
-            <p className={`${fontCaption.className} max-w-xl mx-auto text-lg md:text-xl font-light opacity-90 leading-relaxed tracking-wide`}>
-              "Aroma yang mendefinisikan identitas, <br />esensi kemewahan dalam setiap tetes."
-            </p>
-            <div className="pt-8">
-              <Link href="/produk" className="group relative inline-flex items-center justify-center px-10 py-4 overflow-hidden border border-white transition-all hover:bg-white">
-                <span className="relative z-10 text-white group-hover:text-stone-900 uppercase tracking-widest text-xs font-bold transition-colors">
-                  Explore Collection
-                </span>
+          <div className="relative z-10 text-center px-4 max-w-3xl mx-auto space-y-8">
+            <div className="space-y-4">
+              {/* Sub-header */}
+              <p className="text-stone-400 tracking-[0.5em] uppercase text-[10px] md:text-xs">
+                The Artisan Fragrance House
+              </p>
+
+              {/* Judul Utama */}
+              <h1 className={`${fontJudul.className} text-7xl md:text-[120px] leading-none text-stone-900 tracking-tighter uppercase`}>
+                EVOMI
+              </h1>
+
+              {/* DESKRIPSI BARU */}
+              <p className="text-stone-500 text-sm md:text-base font-light leading-relaxed max-w-xl mx-auto italic">
+                "Kurasi aroma yang melampaui waktu. Kami meracik memori dalam setiap tetes esens organik, menghadirkan kemewahan alam yang tenang ke dalam ruang personal Anda."
+              </p>
+            </div>
+
+            {/* Tombol Aksi */}
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-4">
+              <Link
+                href="/produk"
+                className="bg-stone-900 text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#0081D1] transition-all duration-300 shadow-lg shadow-stone-200"
+              >
+                Explore Collection
+              </Link>
+
+              <Link
+                href="#about"
+                className="text-stone-900 border-b border-stone-900 pb-1 text-[10px] font-bold uppercase tracking-widest hover:text-[#0081D1] hover:border-[#0081D1] transition-all duration-300"
+              >
+                Our Story
               </Link>
             </div>
           </div>
 
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-50">
-            <div className="w-[1px] h-12 bg-white"></div>
+          {/* Scroll Indicator */}
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-4">
+            <div className="w-[1px] h-16 bg-gradient-to-b from-stone-300 to-transparent"></div>
           </div>
         </section>
 
@@ -97,7 +144,8 @@ export default function EvomiLandingPage() {
         <section id="about" className="py-32 px-8 max-w-7xl mx-auto">
           <div className="grid md:grid-cols-12 gap-16 items-center">
             <div className="md:col-span-4">
-              <h2 className={`${fontJudul.className} text-4xl text-stone-400 leading-tight uppercase`}>
+              {/* text-stone-900 membuat tulisan menjadi hitam pekat dan elegan */}
+              <h2 className={`${fontJudul.className} text-4xl text-stone-900 leading-tight uppercase`}>
                 Crafting <br /> Memories
               </h2>
             </div>
@@ -119,40 +167,67 @@ export default function EvomiLandingPage() {
         </section>
 
         {/* CAMPAIGN */}
-        <section className="bg-stone-50 py-20">
+        <section className="bg-stone-50 py-24">
           <div className="max-w-screen-2xl mx-auto px-4">
+
+            {/* JUDUL CAMPAIGN */}
+            <div className="flex flex-col items-center text-center mb-16 space-y-3">
+              <span className="text-[#0081D1] tracking-[0.4em] uppercase text-[10px] font-bold">
+                Editorial
+              </span>
+              <h2 className={`${fontJudul.className} text-4xl md:text-6xl text-stone-900 uppercase tracking-tighter`}>
+                The Seasonal <span className="italic font-light text-stone-400">Campaign</span>
+              </h2>
+              <p className="text-stone-500 text-sm max-w-lg font-light leading-relaxed">
+                Menangkap esensi kemewahan dalam setiap bingkai. Jelajahi cerita di balik koleksi terbaru kami melalui lensa artistik.
+              </p>
+            </div>
+
+            {/* CAROUSEL COMPONENT */}
             <ImageCarousel />
+
           </div>
         </section>
 
         {/* PRODUCT SECTION */}
         <section id="product" className="py-32 px-8 bg-white">
           <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-end mb-20">
-              <div>
-                <h2 className={`${fontJudul.className} text-5xl uppercase tracking-tighter text-stone-800`}>The Edit</h2>
-                <p className="text-stone-400 mt-2 tracking-[0.2em] uppercase text-xs">Featured Collection</p>
+
+            {/* HEADER: Sekarang Centered */}
+            <div className="flex flex-col items-center text-center mb-20 space-y-4">
+              <div className="space-y-2">
+                <h2 className={`${fontJudul.className} text-5xl md:text-6xl uppercase tracking-tighter text-stone-800`}>
+                  Signature Essence
+                </h2>
+                <div className="flex items-center justify-center space-x-4">
+                  <div className="w-8 h-[1px] bg-stone-200"></div>
+                  <p className="text-stone-400 tracking-[0.3em] uppercase text-[10px] md:text-xs">
+                    Featured Collection
+                  </p>
+                  <div className="w-8 h-[1px] bg-stone-200"></div>
+                </div>
               </div>
-              <Link href="/produk" className="text-stone-400 hover:text-stone-900 transition-colors uppercase text-xs tracking-widest border-b border-stone-200 pb-1">
-                View All
-              </Link>
+
+              <div className="pt-4">
+                <Link href="/produk" className="text-stone-400 hover:text-stone-900 transition-colors uppercase text-[10px] tracking-widest border-b border-stone-200 pb-1">
+                  View All Collection
+                </Link>
+              </div>
             </div>
 
+            {/* GRID PRODUK (Tetap sama) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
               {topFourProducts.map((parfum) => (
                 <div key={parfum.id} className="group cursor-pointer">
-                  {/* Image Wrapper */}
+                  {/* ... (Konten produk Anda tetap sama seperti sebelumnya) ... */}
                   <div className="relative aspect-[3/4] overflow-hidden bg-stone-100 mb-6">
                     <Image
-                      /* Menggunakan artboard_ref sebagai nama file atau sesuaikan dengan konvensi penamaan Anda */
                       src={`/img/produk/${parfum.media.artboard_ref}.jpeg`}
                       alt={parfum.nama}
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"></div>
-
-                    {/* Hover Button Quick View */}
                     <div className="absolute bottom-4 left-4 right-4 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                       <Link href={`/produk/${parfum.id}`} className="block w-full bg-white/90 backdrop-blur text-center py-3 text-[10px] uppercase font-bold tracking-widest text-stone-900">
                         Lihat Detail
@@ -160,7 +235,6 @@ export default function EvomiLandingPage() {
                     </div>
                   </div>
 
-                  {/* Info */}
                   <div className="space-y-2 text-center">
                     <span className="text-[10px] text-stone-400 uppercase tracking-widest">
                       {parfum.spesifikasi.gender} • {parfum.spesifikasi.ukuran}
