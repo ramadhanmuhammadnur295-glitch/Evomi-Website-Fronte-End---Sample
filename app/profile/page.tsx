@@ -225,7 +225,7 @@ export default function LuxuryProfilePage() {
                   <div className="flex flex-col items-center space-y-4 pb-4">
                     <div className="relative group">
                       <div className="w-24 h-24 bg-stone-100 rounded-[2rem] overflow-hidden border-2 border-dashed border-stone-200 flex items-center justify-center transition-all group-hover:border-[#0081D1]">
-                        {imagePreview || (user.image ? `http://127.0.0.1:8000/storage/profiles/${user.image}` : null) ? (
+                        {user.image != 'default-avatar.png' ? (
                           <img
                             src={imagePreview || `http://127.0.0.1:8000/storage/profiles/${user.image}`}
                             className="w-full h-full object-cover"
@@ -361,10 +361,10 @@ export default function LuxuryProfilePage() {
 
             <div className="relative inline-block">
               <div className="w-32 h-40 bg-stone-200 rounded-[2.5rem] overflow-hidden relative">
-                {user.image ? (
+                {user.image != 'default-avatar.png' ? (
                   <Image
                     src={`http://127.0.0.1:8000/storage/profiles/${user.image}`}
-                    alt={user.image}
+                    alt="Profile Picture"
                     fill
                     className="object-cover object-center"
                   />
