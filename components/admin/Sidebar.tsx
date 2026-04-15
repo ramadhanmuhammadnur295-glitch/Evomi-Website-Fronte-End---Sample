@@ -16,6 +16,16 @@ export default function Sidebar() {
         </svg>
       ),
     },
+    // Menu Products Ditambahkan di sini
+    {
+      name: 'Products',
+      path: '/admin/products',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+        </svg>
+      ),
+    },
     {
       name: 'User Profile',
       path: '/admin/profile',
@@ -31,23 +41,24 @@ export default function Sidebar() {
     <aside className="w-64 h-screen bg-white border-r border-gray-200 fixed left-0 top-0 flex flex-col">
       {/* Brand Logo */}
       <div className="p-6 flex items-center gap-3">
-        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">E</div>
-        <span className="text-xl font-bold text-gray-800 tracking-tight">Evomi</span>
+        <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold">E</div>
+        <span className="text-xl font-bold text-gray-900 tracking-tight">Evomi</span>
       </div>
 
       {/* Menu List */}
       <nav className="flex-1 px-4 space-y-1">
         {menuItems.map((item) => {
-          const isActive = pathname === item.path;
+          // Cek apakah pathname saat ini cocok dengan item.path ATAU berawalan item.path (untuk handle sub-route seperti /admin/products/create)
+          const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
+
           return (
             <Link
               key={item.path}
               href={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                isActive
-                  ? 'bg-indigo-50 text-indigo-600 shadow-sm'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-              }`}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
+                  ? 'bg-black text-white shadow-md' // Penyesuaian warna aktif agar lebih clean & contrast
+                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+                }`}
             >
               {item.icon}
               {item.name}
@@ -58,13 +69,13 @@ export default function Sidebar() {
 
       {/* Footer Sidebar (User Info) */}
       <div className="p-4 border-t border-gray-100">
-        <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden">
-             {/* Placeholder Avatar */}
-             <div className="w-full h-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">R</div>
+        <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-3 border border-gray-100/50">
+          <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
+            {/* Placeholder Avatar */}
+            <div className="w-full h-full bg-black flex items-center justify-center text-white font-bold text-xs">R</div>
           </div>
           <div className="overflow-hidden">
-            <p className="text-xs font-bold text-gray-800 truncate">Rama Admin</p>
+            <p className="text-xs font-bold text-gray-900 truncate">Rama Admin</p>
             <p className="text-[10px] text-gray-500 truncate">rama@evomi.com</p>
           </div>
         </div>

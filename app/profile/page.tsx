@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import ShoppingBag from "@/components/ShoppingBag";
 
-// Font Setup (Sesuaikan path jika perlu)
+// Font Setup
 const fontJudul = localFont({
   src: "../fonts/8 Heavy.ttf",
   variable: "--font-brand",
@@ -20,41 +20,73 @@ const fontCaption = localFont({
 });
 
 export default function LuxuryProfilePage() {
-
-  // State untuk menyimpan data form (jika diperlukan untuk modifikasi identitas)
   const [formData, setFormData] = useState({
+    id: '',
     name: '',
     username: '',
     email: '',
+
+    current_password: '', // Tambahan
+    new_password: '',     // Tambahan
+    new_password_confirmation: '', // Tambahan (Laravel biasanya butuh _confirmation)
+    image: null as File | null, // Tambahkan ini
   });
 
-  // State untuk mengelola modal (jika diperlukan untuk modifikasi identitas)
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Handler untuk perubahan gambar
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
+      setImagePreview(URL.createObjectURL(file)); // Buat preview lokal
+    }
+  };
+
+  // Fungsi reset form saat modal ditutup
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setFormData(prev => ({
+      ...prev,
+      current_password: '',
+      new_password: '',
+      new_password_confirmation: '',
+      image: null
+    }));
+    setImagePreview(null);
+    setStatusMessage({ type: null, text: "" });
+  };
+
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Tambahan state untuk pesan sukses/error yang elegan
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | null, text: string }>({ type: null, text: "" });
+
   const router = useRouter();
   const [user, setUser] = useState<{
+    id: string; // Tipe diubah jadi string untuk id
     name: string;
     username: string;
     email: string;
+    password: string;
+    image?: string; // Tambahkan properti image
   } | null>(null);
+
   const [activeTab, setActiveTab] = useState("cart");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-
     const fetchUserData = async () => {
       const token = localStorage.getItem("access_token");
-
-      // Jika tidak ada token, langsung kembalikan ke halaman login
       if (!token) {
         router.push("/login");
         return;
       }
 
       try {
-        // Memanggil endpoint bawaan Laravel Sanctum untuk mengambil data user yang sedang login
         const response = await fetch("http://127.0.0.1:8000/api/user", {
           method: "GET",
           headers: {
@@ -66,22 +98,16 @@ export default function LuxuryProfilePage() {
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
-
-          // (Opsional) Perbarui localStorage agar tetap sinkron untuk kebutuhan komponen lain
           localStorage.setItem("user_data", JSON.stringify(userData));
         } else if (response.status === 401) {
-          // Token kadaluarsa atau tidak valid, bersihkan sesi dan tendang ke login
           localStorage.removeItem("access_token");
           localStorage.removeItem("user_data");
           router.push("/login");
         }
       } catch (error) {
         console.error("Gagal mengambil data identitas:", error);
-        // Fallback: Gunakan data lokal jika server sedang gangguan
         const savedUser = localStorage.getItem("user_data");
-        if (savedUser) {
-          setUser(JSON.parse(savedUser));
-        }
+        if (savedUser) setUser(JSON.parse(savedUser));
       }
     };
 
@@ -95,48 +121,56 @@ export default function LuxuryProfilePage() {
     router.refresh();
   };
 
-  // Fungsi untuk menangani submit form modifikasi identitas
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setStatusMessage({ type: null, text: "" });
 
     const token = localStorage.getItem("access_token");
 
+    // Gunakan FormData untuk mendukung upload file
+    const data = new FormData();
+    data.append('_method', 'PUT'); // Spoofing method agar Laravel mengenalnya sebagai PUT
+    data.append('name', formData.name);
+    data.append('username', formData.username);
+
+    if (formData.image) {
+      data.append('image', formData.image);
+    }
+    if (formData.current_password) {
+      data.append('current_password', formData.current_password);
+      data.append('new_password', formData.new_password);
+      data.append('new_password_confirmation', formData.new_password_confirmation);
+    }
+
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/user/update", { // Sesuaikan endpoint Laravel Anda
-        method: "PUT",
+      const response = await fetch(`http://127.0.0.1:8000/api/users/${formData.id}`, {
+        method: "POST", // Tetap POST karena kita pakai _method: 'PUT' di dalam data
         headers: {
-          "Content-Type": "application/json",
           "Accept": "application/json",
           "Authorization": `Bearer ${token}`,
+          // JANGAN set Content-Type header secara manual saat mengirim FormData
         },
-        body: JSON.stringify({
-          name: formData.name,
-          username: formData.username,
-          // email biasanya tidak diubah di sini
-        }),
+        body: data,
       });
 
       if (response.ok) {
         const updatedUser = await response.json();
+        setUser(updatedUser.data || updatedUser);
+        localStorage.setItem("user_data", JSON.stringify(updatedUser.data || updatedUser));
+        setStatusMessage({ type: 'success', text: "Identity successfully refined." });
 
-        // 1. Update state user lokal agar UI langsung berubah
-        setUser(updatedUser);
-
-        // 2. Update localStorage agar saat refresh data tetap baru
-        localStorage.setItem("user_data", JSON.stringify(updatedUser));
-
-        // 3. Tutup modal
-        setIsModalOpen(false);
-
-        alert("Identity successfully refined.");
+        setTimeout(() => {
+          setIsModalOpen(false);
+          setStatusMessage({ type: null, text: "" });
+          setImagePreview(null);
+        }, 2000);
       } else {
         const errorData = await response.json();
-        alert(errorData.message || "Failed to update profile.");
+        setStatusMessage({ type: 'error', text: errorData.message || "Failed to update profile." });
       }
     } catch (error) {
-      console.error("Update error:", error);
-      alert("Connection to server failed.");
+      setStatusMessage({ type: 'error', text: "Connection to server failed." });
     } finally {
       setLoading(false);
     }
@@ -145,24 +179,20 @@ export default function LuxuryProfilePage() {
   if (!mounted || !user) return null;
 
   return (
-    <div
-      className={`${fontCaption.variable} ${fontJudul.variable} min-h-screen bg-[#FBFBF9] font-sans text-stone-900 selection:bg-[#0081D1]/20`}
-    >
+    <div className={`${fontCaption.variable} ${fontJudul.variable} min-h-screen bg-[#FBFBF9] font-sans text-stone-900 selection:bg-[#0081D1]/20`}>
 
       {/* MODAL MODIFY IDENTITY */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            {/* Overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsModalOpen(false)}
+              onClick={() => !loading && setIsModalOpen(false)} // Cegah tutup saat loading
               className="absolute inset-0 bg-stone-900/40 backdrop-blur-md"
             />
 
-            {/* Modal Content */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -177,53 +207,108 @@ export default function LuxuryProfilePage() {
                   <p className="text-[10px] text-stone-400 uppercase tracking-widest">Update your digital presence</p>
                 </div>
 
-                <form className="space-y-6" onSubmit={handleSubmit}>
-                  <div className="space-y-2">
-                    <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Full Name</label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full bg-stone-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-[#0081D1]/20 outline-none transition-all"
-                      placeholder="Enter your name"
-                    />
+                {/* Pesan Sukses / Error yang elegan menggantikan Alert */}
+                {statusMessage.text && (
+                  <div className={`p-4 rounded-2xl text-xs font-medium ${statusMessage.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                    {statusMessage.text}
+                  </div>
+                )}
+
+                {/* MODAL CONTENT - Bagian Form */}
+                <form className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar" onSubmit={handleSubmit}>
+
+                  {/* Letakkan ini di dalam <form> sebelum bagian Basic Info */}
+                  <div className="flex flex-col items-center space-y-4 pb-4">
+                    <div className="relative group">
+                      <div className="w-24 h-24 bg-stone-100 rounded-[2rem] overflow-hidden border-2 border-dashed border-stone-200 flex items-center justify-center transition-all group-hover:border-[#0081D1]">
+                        {imagePreview || (user.image ? `http://127.0.0.1:8000/storage/profiles/${user.image}` : null) ? (
+                          <img
+                            src={imagePreview || `http://127.0.0.1:8000/storage/profiles/${user.image}`}
+                            className="w-full h-full object-cover"
+                            alt="Preview"
+                          />
+                        ) : (
+                          <span className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">No Image</span>
+                        )}
+                      </div>
+                      <label className="absolute inset-0 cursor-pointer flex items-center justify-center bg-stone-900/40 opacity-0 group-hover:opacity-100 rounded-[2rem] transition-opacity">
+                        <span className="text-[9px] text-white font-black uppercase tracking-widest">Change</span>
+                        <input type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
+                      </label>
+                    </div>
+                    <p className="text-[9px] text-stone-300 uppercase tracking-widest font-bold">Portrait Silhouette</p>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Username</label>
-                    <input
-                      type="text"
-                      value={formData.username}
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      className="w-full bg-stone-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-[#0081D1]/20 outline-none transition-all"
-                      placeholder="Unique handle"
-                    />
+                  {/* SECTION: IDENTITY */}
+                  <div className="space-y-4">
+                    <p className="text-[10px] font-black text-[#0081D1] uppercase tracking-[0.2em]">Basic Info</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Full Name</label>
+                        <input
+                          type="text"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          className="w-full bg-stone-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-[#0081D1]/20 outline-none transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Username</label>
+                        <input
+                          type="text"
+                          value={formData.username}
+                          onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                          className="w-full bg-stone-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-[#0081D1]/20 outline-none transition-all"
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Digital Post (Email)</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      disabled
-                      className="w-full bg-stone-100 border-none rounded-2xl px-6 py-4 text-sm text-stone-400 cursor-not-allowed italic"
-                    />
+                  <hr className="border-stone-100" />
+
+                  {/* SECTION: SECURITY */}
+                  <div className="space-y-4 pt-2">
+                    <p className="text-[10px] font-black text-[#0081D1] uppercase tracking-[0.2em]">Security (Leave blank to keep current)</p>
+
+                    <div className="space-y-2">
+                      <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Current Password</label>
+                      <input
+                        type="password"
+                        placeholder="••••••••"
+                        value={formData.current_password}
+                        onChange={(e) => setFormData({ ...formData, current_password: e.target.value })}
+                        className="w-full bg-stone-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-[#0081D1]/20 outline-none transition-all"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">New Password</label>
+                        <input
+                          type="password"
+                          placeholder="New secret"
+                          value={formData.new_password}
+                          onChange={(e) => setFormData({ ...formData, new_password: e.target.value })}
+                          className="w-full bg-stone-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-[#0081D1]/20 outline-none transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Confirm New</label>
+                        <input
+                          type="password"
+                          placeholder="Repeat secret"
+                          value={formData.new_password_confirmation}
+                          onChange={(e) => setFormData({ ...formData, new_password_confirmation: e.target.value })}
+                          className="w-full bg-stone-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-[#0081D1]/20 outline-none transition-all"
+                        />
+                      </div>
+                    </div>
                   </div>
 
+                  {/* Tombol Simpan (Tetap sama seperti kode sebelumnya) */}
                   <div className="pt-4 flex gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setIsModalOpen(false)}
-                      className="flex-1 px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest border border-stone-100 hover:bg-stone-50 transition-all"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="flex-1 bg-stone-900 text-white px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#0081D1] transition-all shadow-lg shadow-stone-200"
-                    >
-                      Save Changes
-                    </button>
+                    <button type="button" onClick={closeModal} className="...">Cancel</button>
+                    <button type="submit" className="...">Save Refinements</button>
                   </div>
                 </form>
               </div>
@@ -234,7 +319,6 @@ export default function LuxuryProfilePage() {
           </div>
         )}
       </AnimatePresence>
-
 
       {/* AMBIENT BACKGROUND */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -269,36 +353,27 @@ export default function LuxuryProfilePage() {
       <main className="relative pt-32 pb-20 px-8 max-w-7xl mx-auto grid md:grid-cols-12 gap-16">
         {/* LEFT: IDENTITY SECTION */}
         <div className="md:col-span-4 space-y-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+
             <div className="relative inline-block">
-              <div className="w-32 h-40 bg-stone-200 rounded-[2.5rem] overflow-hidden relative shadow-2xl shadow-stone-200">
-                <div className="absolute inset-0 bg-gradient-to-tr from-stone-900 to-stone-700 flex items-center justify-center">
-                  <span
-                    className={`${fontJudul.className} text-5xl text-white uppercase`}
-                  >
-                    {user.name.charAt(0)}
-                  </span>
-                </div>
-              </div>
-              <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-[#0081D1] rounded-full border-4 border-[#FBFBF9] flex items-center justify-center">
-                <svg
-                  className="w-4 h-4 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
+              <div className="w-32 h-40 bg-stone-200 rounded-[2.5rem] overflow-hidden relative">
+                {user.image ? (
+                  <Image
+                    src={`http://127.0.0.1:8000/storage/profiles/${user.image}`}
+                    alt={user.name}
+                    fill
+                    className="object-cover object-center"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-tr from-stone-900 to-stone-700 flex items-center justify-center">
+                    <span className="text-5xl text-white uppercase">{user.name.charAt(0)}</span>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="space-y-1">
-              <h2
-                className={`${fontJudul.className} text-2xl uppercase tracking-tighter text-stone-900 leading-tight`}
-              >
+              <h2 className={`${fontJudul.className} text-2xl uppercase tracking-tighter text-stone-900 leading-tight`}>
                 {user.name}
               </h2>
               <p className="text-stone-400 font-light lowercase">
@@ -307,27 +382,21 @@ export default function LuxuryProfilePage() {
             </div>
 
             <div className="pt-8 space-y-2">
-              <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">
-                Curated By
-              </p>
-              <p className="text-sm font-medium italic text-stone-600">
-                "Scent is the most intense form of memory."
-              </p>
+              <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Curated By</p>
+              <p className="text-sm font-medium italic text-stone-600">"Scent is the most intense form of memory."</p>
             </div>
+
           </motion.div>
 
           {/* DASHBOARD NAV */}
           <div className="flex flex-col space-y-4 pt-10 border-t border-stone-200/50">
-            {/* Menambahkan 'cart' ke dalam array menu */}
             {["cart", "identity"].map((item) => (
               <button
                 key={item}
                 onClick={() => setActiveTab(item)}
                 className={`text-left text-[11px] uppercase tracking-[0.3em] font-bold transition-all ${activeTab === item ? "text-[#0081D1] pl-4 border-l-2 border-[#0081D1]" : "text-stone-300 hover:text-stone-500"}`}
               >
-                {/* {item === "vault" && "Scent Vault"} */}
                 {item === "cart" && "Shopping Bag"}
-                {/* {item === "history" && "Acquisition History"} */}
                 {item === "identity" && "Identity Details"}
               </button>
             ))}
@@ -345,51 +414,8 @@ export default function LuxuryProfilePage() {
               transition={{ duration: 0.5, ease: "circOut" }}
               className="bg-white rounded-[3rem] p-12 shadow-sm border border-stone-100 min-h-[500px]"
             >
-              {/* {activeTab === "vault" && (
-                <div className="space-y-10">
-                  <div className="flex justify-between items-end">
-                    <h3 className={`${fontJudul.className} text-2xl uppercase`}>
-                      Personal Vault
-                    </h3>
-                    <span className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
-                      3 Signature Essences
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-8">
-                    {["Peaceful Calm", "Sweet Shy", "Rabel Brave"].map(
-                      (scent, i) => (
-                        <div key={i} className="group cursor-pointer space-y-4">
-                          <div className="aspect-[3/4] bg-stone-50 rounded-2xl overflow-hidden relative">
-                            <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/5 transition-all duration-500"></div>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-[10px] font-black uppercase tracking-widest">
-                              {scent}
-                            </p>
-                            <p className="text-[9px] text-stone-400 uppercase">
-                              Owned • 50ml
-                            </p>
-                          </div>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </div>
-              )} */}
-
-              {/* TAB BARU: CART / SHOPPING BAG */}
               {activeTab === "cart" && (
                 <div className="space-y-10 flex flex-col h-full">
-                  {/* <div className="flex justify-between items-end">
-                    <h3 className={`${fontJudul.className} text-2xl uppercase`}>
-                      Shopping Bag
-                    </h3>
-                    <span className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
-                      2 Items
-                    </span>
-                  </div> */}
-
-                  {/* Area Konten Utama */}
                   <div className="lg:col-span-2">
                     <ShoppingBag />
                   </div>
@@ -398,29 +424,25 @@ export default function LuxuryProfilePage() {
 
               {activeTab === "identity" && (
                 <div className="space-y-12">
-                  <h3 className={`${fontJudul.className} text-2xl uppercase`}>
-                    Identity Details
-                  </h3>
+                  <h3 className={`${fontJudul.className} text-2xl uppercase`}>Identity Details</h3>
                   <div className="grid md:grid-cols-2 gap-12">
                     <DetailItem label="Full Name" value={user.name} />
-                    <DetailItem
-                      label="Unique Identifier"
-                      value={`@${user.username}`}
-                    />
+                    <DetailItem label="Unique Identifier" value={`@${user.username}`} />
                     <DetailItem label="Digital Post" value={user.email} />
                     <DetailItem label="Member Status" value="Evomi Collector" />
                   </div>
                   <div className="pt-10">
-                    {/* <button className="bg-stone-900 text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#0081D1] transition-all shadow-xl shadow-stone-200">
-                      Modify Identity
-                    </button> */}
-
                     <button
                       onClick={() => {
                         setFormData({
+                          id: user.id,
                           name: user.name,
                           username: user.username,
-                          email: user.email
+                          email: user.email,
+                          current_password: '', // Tambahan
+                          new_password: '',     // Tambahan
+                          new_password_confirmation: '', // Tambahan (Laravel biasanya butuh _confirmation)
+                          image: null, // Tambahan
                         });
                         setIsModalOpen(true);
                       }}
@@ -431,34 +453,6 @@ export default function LuxuryProfilePage() {
                   </div>
                 </div>
               )}
-
-              {/* {activeTab === "history" && (
-                <div className="flex flex-col items-center justify-center h-full py-20 text-center space-y-6">
-                  <div className="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center text-stone-200">
-                    <svg
-                      className="w-8 h-8"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="square"
-                        strokeWidth="1"
-                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                      />
-                    </svg>
-                  </div>
-                  <p className="text-stone-400 text-[10px] uppercase tracking-[0.3em]">
-                    No acquisitions found in your records.
-                  </p>
-                  <Link
-                    href="/produk"
-                    className="text-[#0081D1] text-[10px] font-bold uppercase tracking-widest border-b border-blue-200 pb-1"
-                  >
-                    Begin Journey
-                  </Link>
-                </div>
-              )} */}
             </motion.div>
           </AnimatePresence>
         </div>

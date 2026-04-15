@@ -153,18 +153,22 @@ export default function ProductsPage() {
       <section className="pb-32 px-8">
         <div className="max-w-7xl mx-auto">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+            /* Skeleton Loading - Tetap menggunakan Grid agar rapi saat loading */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
               {[1, 2, 3, 4].map((n) => (
                 <div
                   key={n}
-                  className="h-[600px] bg-stone-100 animate-pulse rounded-2xl"
+                  className="h-[500px] bg-stone-100 animate-pulse rounded-2xl"
                 ></div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+            /* Product List - Menggunakan Flexbox untuk centering yang sempurna */
+            <div className="flex flex-wrap justify-center gap-12">
               {products.map((parfum: any) => (
-                <ProductCard key={parfum.id} parfum={parfum} />
+                <div key={parfum.id} className="w-full sm:w-[calc(50%-24px)] lg:w-[calc(25%-36px)] max-w-[320px]">
+                  <ProductCard parfum={parfum} />
+                </div>
               ))}
             </div>
           )}

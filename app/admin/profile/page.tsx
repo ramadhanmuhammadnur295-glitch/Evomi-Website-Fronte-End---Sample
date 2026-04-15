@@ -11,6 +11,7 @@ export default function UserProfilePage() {
     email: "",
     password: "",
   });
+
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
@@ -22,12 +23,12 @@ export default function UserProfilePage() {
 
   const fetchUserData = async () => {
     // Menggunakan admin_token agar sama dengan dashboard home kamu
-    const token = localStorage.getItem("admin_token"); 
+    const token = localStorage.getItem("admin_token");
     try {
       const res = await fetch("http://127.0.0.1:8000/api/admin/me", {
-        headers: { 
-            Authorization: `Bearer ${token}`, 
-            Accept: "application/json" 
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json"
         },
       });
 
@@ -142,35 +143,34 @@ export default function UserProfilePage() {
         </header>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          
+
           {/* Left Side: Profile Card */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+
               <div className="flex flex-col items-center text-center">
                 <div className="relative mb-4">
+
                   <div className="h-28 w-28 rounded-full border-4 border-gray-50 p-1 bg-white shadow-sm">
                     <div className="flex h-full w-full items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-3xl font-bold border border-indigo-100">
                       {formData.name.charAt(0).toUpperCase()}
                     </div>
                   </div>
+
                   <button className="absolute bottom-1 right-1 rounded-full bg-white border border-gray-200 p-2 text-gray-600 hover:text-indigo-600 hover:shadow-md transition-all">
                     <Camera size={16} />
                   </button>
+
                 </div>
                 <h3 className="text-xl font-bold text-gray-900">{formData.name}</h3>
                 <p className="text-gray-500 text-sm">@{formData.username}</p>
-                
+
                 <div className="mt-4 flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-xs font-bold uppercase tracking-wider rounded-full border border-green-100">
                   <ShieldCheck size={14} />
                   Verified Admin
                 </div>
               </div>
 
-              <div className="mt-8 pt-6 border-t border-gray-50 space-y-1">
-                <button className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold bg-indigo-50 text-indigo-700 transition-all">
-                  <User size={18} /> Ringkasan Profil
-                </button>
-              </div>
             </div>
           </div>
 
@@ -178,11 +178,10 @@ export default function UserProfilePage() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               {message.text && (
-                <div className={`mb-6 flex items-center gap-2 rounded-xl border p-4 text-sm font-medium ${
-                  message.type === "success" 
-                    ? "border-green-200 bg-green-50 text-green-700" 
-                    : "border-red-200 bg-red-50 text-red-700"
-                }`}>
+                <div className={`mb-6 flex items-center gap-2 rounded-xl border p-4 text-sm font-medium ${message.type === "success"
+                  ? "border-green-200 bg-green-50 text-green-700"
+                  : "border-red-200 bg-red-50 text-red-700"
+                  }`}>
                   <p>{message.text}</p>
                 </div>
               )}
