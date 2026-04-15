@@ -86,6 +86,8 @@ export default function LuxuryProfilePage() {
         return;
       }
 
+      console.log("Fetching user data :", token);
+
       try {
         const response = await fetch("http://127.0.0.1:8000/api/user", {
           method: "GET",
@@ -129,14 +131,16 @@ export default function LuxuryProfilePage() {
     const token = localStorage.getItem("access_token");
 
     // Gunakan FormData untuk mendukung upload file
+    // Di dalam handleSubmit (Next.js)
     const data = new FormData();
-    data.append('_method', 'PUT'); // Spoofing method agar Laravel mengenalnya sebagai PUT
+    data.append('_method', 'PUT'); // Laravel akan membaca ini sebagai PUT
     data.append('name', formData.name);
     data.append('username', formData.username);
 
     if (formData.image) {
-      data.append('image', formData.image);
+      data.append('image', formData.image); // File dikirim di sini
     }
+
     if (formData.current_password) {
       data.append('current_password', formData.current_password);
       data.append('new_password', formData.new_password);
@@ -145,11 +149,11 @@ export default function LuxuryProfilePage() {
 
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/users/${formData.id}`, {
-        method: "POST", // Tetap POST karena kita pakai _method: 'PUT' di dalam data
+        method: "POST", // Browser mengirim sebagai POST agar file terbaca
         headers: {
           "Accept": "application/json",
           "Authorization": `Bearer ${token}`,
-          // JANGAN set Content-Type header secara manual saat mengirim FormData
+          // JANGAN isi Content-Type manual
         },
         body: data,
       });
@@ -360,7 +364,7 @@ export default function LuxuryProfilePage() {
                 {user.image ? (
                   <Image
                     src={`http://127.0.0.1:8000/storage/profiles/${user.image}`}
-                    alt={user.name}
+                    alt={user.image}
                     fill
                     className="object-cover object-center"
                   />
