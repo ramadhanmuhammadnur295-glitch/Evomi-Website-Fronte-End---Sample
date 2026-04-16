@@ -10,8 +10,11 @@ export default function UserProfilePage() {
     username: "",
     email: "",
     password: "",
+    image: null as File | null, // Tambahan state image
+    image_url: "", // Untuk menyimpan URL gambar dari database
   });
 
+  const [imagePreview, setImagePreview] = useState<string | null>(null); // State untuk preview lokal
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
@@ -22,7 +25,6 @@ export default function UserProfilePage() {
   }, []);
 
   const fetchUserData = async () => {
-    // Menggunakan admin_token agar sama dengan dashboard home kamu
     const token = localStorage.getItem("admin_token");
     try {
       const res = await fetch("http://127.0.0.1:8000/api/admin/me", {
@@ -39,12 +41,26 @@ export default function UserProfilePage() {
 
       const result = await res.json();
       if (result.success) {
-        setFormData({ ...result.data, password: "" });
+        setFormData({
+          ...result.data,
+          password: "",
+          image: null,
+          image_url: result.data.image || "default-avatar.png" // Sesuaikan dengan field di DB kamu
+        });
       }
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handler untuk perubahan gambar (Local Preview)
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -56,21 +72,41 @@ export default function UserProfilePage() {
     setMessage({ type: "", text: "" });
     const token = localStorage.getItem("admin_token");
 
+    // Gunakan FormData untuk mendukung upload file
+    const data = new FormData();
+    data.append('_method', 'PUT'); // Laravel membaca ini sebagai PUT
+    data.append('name', formData.name);
+    data.append('username', formData.username);
+    data.append('email', formData.email);
+
+    if (formData.password) {
+      data.append('password', formData.password);
+    }
+
+    if (formData.image) {
+      data.append('image', formData.image); // File dikirim di sini
+    }
+
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/admin/users/${formData.id}`, {
-        method: "PUT",
+        method: "POST", // Berubah jadi POST agar multipart/form-data terbaca
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`,
+          // HAPUS "Content-Type": "application/json" agar browser mengaturnya otomatis
         },
-        body: JSON.stringify(formData),
+        body: data,
       });
 
       const result = await res.json();
-      if (res.ok) {
+      if (res.ok || result.success) {
         setMessage({ type: "success", text: "Profil berhasil diperbarui!" });
-        setFormData({ ...formData, password: "" });
+        setFormData({
+          ...formData,
+          password: "",
+          image: null,
+          image_url: result.data?.image || formData.image_url // Update gambar jika ada kembalian dari API
+        });
       } else {
         setMessage({ type: "error", text: result.message || "Gagal memperbarui profil" });
       }
@@ -107,7 +143,7 @@ export default function UserProfilePage() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* --- NAVBAR (Identik dengan Dashboard) --- */}
+      {/* --- NAVBAR --- */}
       <nav className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
@@ -147,21 +183,38 @@ export default function UserProfilePage() {
           {/* Left Side: Profile Card */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-
               <div className="flex flex-col items-center text-center">
-                <div className="relative mb-4">
 
-                  <div className="h-28 w-28 rounded-full border-4 border-gray-50 p-1 bg-white shadow-sm">
-                    <div className="flex h-full w-full items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-3xl font-bold border border-indigo-100">
-                      {formData.name.charAt(0).toUpperCase()}
-                    </div>
+                {/* PHOTO WRAPPER */}
+                <div className="relative mb-4 group">
+                  <div className="h-28 w-28 rounded-full border-4 border-gray-50 p-1 bg-white shadow-sm overflow-hidden flex items-center justify-center">
+
+                    {/* Logika untuk menampilkan Image Preview vs DB Image vs Inisial */}
+                    {formData.image_url != 'default-avatar.png' ? (
+                      <img
+                        src={imagePreview || `http://127.0.0.1:8000/storage/profiles/${formData.image_url}`}
+                        alt="Profile"
+                        className="h-full w-full object-cover rounded-full"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-3xl font-bold border border-indigo-100">
+                        {formData.name ? formData.name.charAt(0).toUpperCase() : "A"}
+                      </div>
+                    )}
                   </div>
 
-                  <button className="absolute bottom-1 right-1 rounded-full bg-white border border-gray-200 p-2 text-gray-600 hover:text-indigo-600 hover:shadow-md transition-all">
+                  {/* Tombol Kamera dibungkus label agar input file aktif ketika di-klik */}
+                  <label className="absolute bottom-1 right-1 rounded-full bg-white border border-gray-200 p-2 text-gray-600 hover:text-indigo-600 hover:shadow-md transition-all cursor-pointer">
                     <Camera size={16} />
-                  </button>
-
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={handleImageChange}
+                      accept="image/*"
+                    />
+                  </label>
                 </div>
+
                 <h3 className="text-xl font-bold text-gray-900">{formData.name}</h3>
                 <p className="text-gray-500 text-sm">@{formData.username}</p>
 
@@ -170,7 +223,6 @@ export default function UserProfilePage() {
                   Verified Admin
                 </div>
               </div>
-
             </div>
           </div>
 

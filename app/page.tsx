@@ -30,7 +30,11 @@ export default function EvomiLandingPage() {
     email: string;
     name: string;
     username: string;
+    image: string;
   } | null>(null);
+
+  // State untuk Menu Profile Dropdown
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // State untuk Data Produk dari API
   const [products, setProducts] = useState<any[]>([]);
@@ -62,7 +66,6 @@ export default function EvomiLandingPage() {
         const result = await response.json();
 
         // Asumsi API mengembalikan array langsung, atau object { data: [...] }
-        // Sesuaikan dengan response Laravel kamu
         setProducts(result.data ? result.data : result);
       } catch (error) {
         console.error("Gagal mengambil data produk:", error);
@@ -88,11 +91,10 @@ export default function EvomiLandingPage() {
       localStorage.removeItem("access_token");
       localStorage.removeItem("user_data");
       setUser(null);
+      setIsMenuOpen(false); // Tutup menu saat logout
       router.refresh();
     }
   };
-
-  if (!mounted) return null;
 
   // Mengambil 4 produk pertama dari data API
   const topFourProducts = products.slice(0, 4);
@@ -155,20 +157,96 @@ export default function EvomiLandingPage() {
               className={`hidden md:flex w-1/3 justify-end items-center space-x-6 ${fontJudul.className} text-[11px] tracking-[0.15em] uppercase text-white`}
             >
               {user ? (
-                <div className="flex items-center space-x-6">
-                  {/* Tampilan Baru: @username */}
-                  {/* Ubah <span> menjadi <Link> */}
-                  <Link href="/profile" className="cursor-pointer group">
-                    <span className="opacity-90 lowercase font-sans font-medium tracking-normal border-b border-white/20 pb-0.5 group-hover:border-white transition-all text-white">
-                      @{user.username}
-                    </span>
-                  </Link>
+                <div className="relative">
+                  {/* Tampilan Baru: Tombol Menu Profile (Avatar + Name) */}
                   <button
-                    onClick={handleLogout}
-                    className="bg-white text-[#0081D1] px-6 py-2 hover:bg-red-50 hover:text-red-600 transition-all rounded-full font-bold"
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className="flex items-center space-x-3 bg-white/10 hover:bg-white/20 transition-all rounded-full py-1.5 px-2 pr-4 border border-white/20"
                   >
-                    Logout
+                    {/* Avatar Generate dari Nama User */}
+                    {/* <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center shrink-0">
+                     
+                      {user.image != 'default-avatar.png' ? (
+                        <img
+                          src={`http://127.0.0.1:8000/storage/profiles/${user.image}`}
+                          alt="Profile"
+                          className="h-full w-full object-cover rounded-full"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-3xl font-bold border border-indigo-100">
+                          {user.name ? user.name.charAt(0).toUpperCase() : "A"}
+                        </div>
+                      )}
+                    </div> */}
+
+
+                    <div className="relative inline-block">
+                      <div className="w-8 h-8 rounded-fulloverflow-hidden relative">
+                        {user.image != 'default-avatar.png' ? (
+                          <Image
+                            src={`http://127.0.0.1:8000/storage/profiles/${user.image}`}
+                            alt="Profile Picture"
+                            fill
+                            className="h-full w-full object-cover rounded-full"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center rounded-full from-stone-900 to-stone-700 flex items-center justify-center">
+                            <span className="text-2xl text-white uppercase">{user.name.charAt(0)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+
+                    {/* Nama User */}
+                    <span className="font-sans font-medium tracking-normal text-white normal-case text-sm">
+                      {user.username}
+                    </span>
+
+                    {/* Icon Dropdown Arrow */}
+                    <svg
+                      className={`w-4 h-4 text-white transition-transform duration-300 ${isMenuOpen ? "rotate-180" : "rotate-0"
+                        }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
                   </button>
+
+                  {/* Dropdown Menu */}
+                  {isMenuOpen && (
+                    <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-stone-100 overflow-hidden py-2 flex flex-col font-sans normal-case tracking-normal z-50">
+                      <Link
+                        href="/profile"
+                        className="px-4 py-2.5 text-stone-700 hover:bg-stone-50 hover:text-[#0081D1] transition-colors flex items-center space-x-3 text-sm font-medium"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span>My Profile</span>
+                      </Link>
+
+                      <div className="border-t border-stone-100 my-1"></div>
+
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors flex items-center space-x-3 text-sm font-medium"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <>
