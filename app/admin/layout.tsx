@@ -53,7 +53,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             console.error("Gagal logout:", error);
         } finally {
             localStorage.removeItem('admin_token');
-            router.push('/admin/login');
+            router.push('/admin-login');
         }
     };
 

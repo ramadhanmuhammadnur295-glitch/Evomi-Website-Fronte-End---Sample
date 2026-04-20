@@ -198,52 +198,104 @@ export default function ProductsMenu() {
                 {/* Tabel Produk */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="bg-gray-50 border-b border-gray-100">
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase">Produk</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase">Info</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase">Harga</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase">Stok</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-right">Aksi</th>
+                        <table className="w-full text-left border-collapse">
+                            {/* Header: Sembunyikan di Mobile, Tampilkan di Desktop */}
+                            <thead className="hidden md:table-header-group bg-gray-50 border-b border-gray-100">
+                                <tr>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Produk</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Info</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Harga</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Stok</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+
+                            <tbody className="divide-y divide-gray-50 flex flex-col md:table-row-group">
                                 {isLoading ? (
-                                    <tr><td colSpan={5} className="p-10 text-center text-gray-400">Menghubungkan ke database...</td></tr>
+                                    <tr>
+                                        <td colSpan={5} className="p-10 text-center text-gray-400">
+                                            Menghubungkan ke database...
+                                        </td>
+                                    </tr>
                                 ) : products.map((p) => (
-                                    <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="px-6 py-4">
+                                    /* TR: Diubah menjadi flex-col di mobile agar menumpuk ke bawah */
+                                    <tr
+                                        key={p.id}
+                                        className="hover:bg-gray-50/50 transition-colors flex flex-col md:table-row p-4 md:p-0"
+                                    >
+                                        {/* Kolom Produk */}
+                                        <td className="px-0 py-2 md:px-6 md:py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden border">
-                                                    {p.image_url ? <img src={p.image_url} alt={p.nama} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">No Img</div>}
+                                                <div className="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-100">
+                                                    {p.image_url ? (
+                                                        <img src={p.image_url} alt={p.nama} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">No Img</div>
+                                                    )}
                                                 </div>
-                                                <div>
-                                                    <div className="text-sm font-bold text-gray-900">{p.nama}</div>
-                                                    <div className="text-[10px] text-gray-400 font-mono">{p.id}</div>
+                                                <div className="overflow-hidden">
+                                                    <div className="text-sm font-bold text-gray-900 truncate">{p.nama}</div>
+                                                    <div className="text-[10px] text-gray-400 font-mono tracking-tighter">{p.id}</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-xs text-gray-600">{p.ukuran} | {p.konsentrasi}</div>
-                                            <div className="text-[10px] text-gray-400 italic mt-1 line-clamp-1">{p.vibe}</div>
+
+                                        {/* Kolom Info */}
+                                        <td className="px-0 py-2 md:px-6 md:py-4">
+                                            <div className="flex flex-col">
+                                                <span className="md:hidden text-[9px] font-bold text-gray-400 uppercase mb-1">Detail Produk</span>
+                                                <div className="text-xs text-gray-600 font-medium">{p.ukuran} | {p.konsentrasi}</div>
+                                                <div className="text-[10px] text-gray-400 italic mt-1 line-clamp-1">{p.vibe}</div>
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 text-sm font-medium">Rp {Number(p.harga_retail).toLocaleString('id-ID')}</td>
-                                        <td className="px-6 py-4">
+
+                                        {/* Kolom Harga & Stok: Dibuat berdampingan di mobile */}
+                                        <td className="px-0 py-2 md:px-6 md:py-4">
+                                            <div className="flex md:block justify-between items-center">
+                                                <div className="flex flex-col md:block">
+                                                    <span className="md:hidden text-[9px] font-bold text-gray-400 uppercase">Harga</span>
+                                                    <span className="text-sm font-bold text-stone-900">Rp {Number(p.harga_retail).toLocaleString('id-ID')}</span>
+                                                </div>
+
+                                                {/* Stok (Hanya terlihat labelnya di mobile) */}
+                                                <div className="md:hidden flex flex-col items-end">
+                                                    <span className="text-[9px] font-bold text-gray-400 uppercase mb-1">Persediaan</span>
+                                                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${p.stok_tersedia > 10 ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'}`}>
+                                                        {p.stok_tersedia} Pcs
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        {/* Kolom Stok Original (Hanya tampil di Desktop) */}
+                                        <td className="hidden md:table-cell px-6 py-4">
                                             <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${p.stok_tersedia > 10 ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'}`}>
                                                 {p.stok_tersedia} Pcs
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right space-x-3">
-                                            <button onClick={() => openEditModal(p)} className="text-xs font-bold text-indigo-600 hover:text-indigo-800">Edit</button>
-                                            <button onClick={() => handleDelete(p.id)} className="text-xs font-bold text-red-500 hover:text-red-700">Hapus</button>
+
+                                        {/* Kolom Aksi */}
+                                        <td className="px-0 py-4 md:px-6 md:py-4 border-t md:border-t-0 mt-2 md:mt-0 pt-4 md:pt-4">
+                                            <div className="flex items-center justify-end gap-4 md:gap-3">
+                                                <button
+                                                    onClick={() => openEditModal(p)}
+                                                    className="flex-1 md:flex-none py-2 md:py-0 bg-indigo-50 md:bg-transparent text-indigo-600 hover:text-indigo-800 text-xs font-bold rounded-lg transition-all"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(p.id)}
+                                                    className="flex-1 md:flex-none py-2 md:py-0 bg-red-50 md:bg-transparent text-red-500 hover:text-red-700 text-xs font-bold rounded-lg transition-all"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-
                 </div>
 
                 {/* Modal CRUD */}

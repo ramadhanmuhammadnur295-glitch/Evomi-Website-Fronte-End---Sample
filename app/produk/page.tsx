@@ -21,51 +21,45 @@ const fontCaption = localFont({
 // Komponen Card yang disesuaikan dengan field Database/API
 const ProductCard = ({ parfum }: { parfum: any }) => {
   return (
-    // Ubah rounded-2xl menjadi rounded-lg agar lebih persegi
-    <div className="group flex flex-col bg-white border border-stone-200 rounded-lg hover:shadow-xl transition-all duration-500 overflow-hidden">
+    // 1. Mengubah rounded-2xl menjadi rounded-sm atau rounded-none untuk kesan lebih kotak
+    // 2. Mengubah shadow menjadi lebih tipis atau flat border
+    <div className="group flex flex-col bg-white border border-stone-200 rounded-sm hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
 
       {/* Image Area */}
-      <div className="relative w-full h-[400px] bg-stone-100">
+      <div className="relative w-full h-[300px] bg-stone-100">
         <Image
           src={parfum.image_url || "/img/placeholder.jpg"}
           alt={parfum.nama}
           fill
           unoptimized
-          className="object-cover group-hover:scale-105 transition-transform duration-700"
+          className="object-cover"
         />
-        <div className="absolute top-4 left-4">
-          <span className="bg-white/90 backdrop-blur-md text-stone-800 text-[9px] uppercase tracking-[0.2em] px-3 py-1 font-bold">
-            EDP • {parfum.ukuran || "50ML"}
+        {/* Badge tetap bisa dipertahankan dengan sudut tajam */}
+        <div className="absolute top-2 left-2">
+          <span className="bg-white text-stone-900 text-[8px] uppercase tracking-widest px-2 py-1 font-bold border border-stone-900">
+            {parfum.ukuran || "50ML"}
           </span>
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="p-6 flex flex-col flex-grow text-center">
-        <div className="mb-4">
-          <h3
-            className={`${fontJudul.className} text-xl text-stone-900 mb-2`}
-          >
-            {parfum.nama}
-          </h3>
-          <div className="h-[1px] w-8 bg-stone-300 mx-auto"></div>
-        </div>
-
-        <p className="text-[11px] text-stone-500 leading-relaxed mb-6 italic font-light line-clamp-2">
-          &quot;{parfum.deskripsi || "A signature masterpiece."}&quot;
+      <div className="p-4 flex flex-col flex-grow text-left">
+        <h3 className={`${fontJudul.className} text-sm text-stone-900 mb-1 tracking-wider`}>
+          {parfum.nama}
+        </h3>
+        <p className="text-[10px] text-stone-500 italic mb-4 line-clamp-1">
+          {parfum.deskripsi}
         </p>
 
-        <div className="mt-auto flex flex-col items-center gap-4">
-          <p className="text-sm font-bold text-stone-900">
+        <div className="mt-auto pt-4 border-t border-stone-100 flex items-center justify-between">
+          <p className="text-[11px] font-bold text-stone-900">
             IDR {Number(parfum.harga_retail).toLocaleString("id-ID")}
           </p>
-
           <Link
             href={`/produk/${parfum.id}`}
-            // Tombol juga disesuaikan menjadi rounded-none atau rounded-sm untuk kesan persegi
-            className="w-full py-3 bg-stone-900 text-white text-[10px] uppercase tracking-[0.2em] font-bold hover:bg-stone-700 transition-colors rounded-sm"
+            className="text-[9px] uppercase tracking-widest font-bold underline underline-offset-4 hover:text-stone-500"
           >
-            Explore Scent
+            View
           </Link>
         </div>
       </div>
@@ -151,25 +145,24 @@ export default function ProductsPage() {
       </section>
 
       {/* PRODUCT GRID */}
-      <section className="pb-32 px-8">
+      {/* PRODUCT GRID */}
+      <section className="pb-32 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
           {loading ? (
-            /* Skeleton Loading - Tetap menggunakan Grid agar rapi saat loading */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+            /* Skeleton Loading: Dibuat 2 kolom di mobile, 4 di desktop */
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
               {[1, 2, 3, 4].map((n) => (
                 <div
                   key={n}
-                  className="h-[500px] bg-stone-100 animate-pulse rounded-2xl"
+                  className="h-[300px] md:h-[500px] bg-stone-100 animate-pulse rounded-lg"
                 ></div>
               ))}
             </div>
           ) : (
-            /* Product List - Menggunakan Flexbox untuk centering yang sempurna */
-            <div className="flex flex-wrap justify-center gap-12">
+            /* Product List: Menggunakan CSS Grid untuk konsistensi 2 kolom */
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-12">
               {products.map((parfum: any) => (
-                <div key={parfum.id} className="w-full sm:w-[calc(50%-24px)] lg:w-[calc(25%-36px)] max-w-[320px]">
-                  <ProductCard parfum={parfum} />
-                </div>
+                <ProductCard key={parfum.id} parfum={parfum} />
               ))}
             </div>
           )}

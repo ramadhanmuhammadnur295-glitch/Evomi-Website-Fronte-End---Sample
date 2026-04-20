@@ -1,5 +1,6 @@
 "use client";
 
+// Halaman landing page.tsx untuk Evomi, dengan desain yang dioptimalkan untuk mobile dan desktop, serta fitur user authentication dan dynamic product fetching.
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -7,18 +8,21 @@ import Link from "next/link";
 import localFont from "next/font/local";
 import { useRouter } from "next/navigation";
 
+// Definisikan font lokal untuk judul dan caption
 const fontJudul = localFont({
   src: "./fonts/8 Heavy.ttf",
   variable: "--font-brand",
   display: "swap",
 });
 
+// Font untuk caption dan teks pendukung, menggunakan Nohemi Regular yang lebih ringan dan mudah dibaca untuk teks yang lebih kecil
 const fontCaption = localFont({
   src: "./fonts/Nohemi-Regular.otf",
   variable: "--font-body",
   display: "swap",
 });
 
+// Komponen utama untuk halaman landing Evomi
 export default function EvomiLandingPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ email: string; name: string; username: string; image: string; } | null>(null);
@@ -27,6 +31,7 @@ export default function EvomiLandingPage() {
   const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // useEffect untuk memeriksa token dan mengambil data produk saat komponen dimount
   useEffect(() => {
     setMounted(true);
     const token = localStorage.getItem("access_token");
@@ -45,6 +50,7 @@ export default function EvomiLandingPage() {
     fetchProducts();
   }, []);
 
+  // Fungsi untuk menangani logout, menghapus token dan data user, serta menyegarkan halaman
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("access_token");
@@ -70,8 +76,10 @@ export default function EvomiLandingPage() {
 
   if (!mounted) return null;
 
+  // Ambil 4 produk pertama untuk ditampilkan di halaman utama
   const topFourProducts = products.slice(0, 4);
 
+  // Render halaman dengan struktur yang dioptimalkan untuk mobile dan desktop, termasuk navbar, hero section, about section, product grid, stats, testimonial, dan footer.
   return (
     <div className={`${fontCaption.variable} ${fontJudul.variable} selection:bg-amber-100`}>
       <div className="min-h-screen bg-[#FBFBF9] text-stone-900 font-sans antialiased">
