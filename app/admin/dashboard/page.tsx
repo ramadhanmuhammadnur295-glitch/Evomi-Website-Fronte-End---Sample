@@ -256,10 +256,10 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/admin/dashboard')}>
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+              {/* <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
                 E
-              </div>
-              <span className="text-xl font-bold text-gray-800 tracking-tight">Evomi Admin</span>
+              </div> */}
+              {/* <span className="text-xl font-bold text-gray-800 tracking-tight">Evomi Admin</span> */}
             </div>
 
             <div className="flex items-center gap-4">

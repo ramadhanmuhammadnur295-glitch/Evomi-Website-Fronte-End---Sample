@@ -194,19 +194,21 @@ export default function EvomiLandingPage() {
               )}
 
               {/* Navigation Links */}
-              <div className={`${fontJudul.className} flex flex-col space-y-6 text-2xl tracking-[0.2em] uppercase text-white`}>
+              <div className={`${fontJudul.className} flex flex-col space-y-5 text-lg tracking-[0.2em] uppercase text-white`}>
+                {/* Menu Utama - Diperkecil dari text-2xl ke text-lg */}
                 <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/60 transition-colors">About</a>
                 <a href="#product" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/60 transition-colors">Collection</a>
                 <Link href="/produk" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/60 transition-colors">Shop</Link>
 
                 {user ? (
                   <>
-                    <div className="h-[1px] bg-white/10 w-full my-2"></div>
-                    <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-lg opacity-80">My Profile</Link>
-                    <button onClick={handleLogout} className="text-lg text-red-300 text-left">Logout</button>
+                    <div className="h-[1px] bg-white/10 w-full my-1"></div>
+                    {/* Menu User - Diperkecil dari text-lg ke text-sm */}
+                    <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-sm opacity-70 font-sans tracking-widest">My Profile</Link>
+                    <button onClick={handleLogout} className="text-sm text-red-300/80 text-left font-sans tracking-widest">Logout</button>
                   </>
                 ) : (
-                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="bg-white text-[#0081D1] text-center py-4 rounded-xl font-bold text-sm tracking-widest mt-4">Login / Register</Link>
+                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="bg-white text-[#0081D1] text-center py-3 rounded-xl font-bold text-[10px] tracking-widest mt-2">Login / Register</Link>
                 )}
               </div>
             </div>
@@ -214,10 +216,14 @@ export default function EvomiLandingPage() {
         </nav>
 
         {/* HERO SECTION - Adjusted Typography for Mobile */}
-        <section className="relative min-h-[90vh] md:h-screen flex items-center justify-center bg-white px-6 overflow-hidden">
-          <div className="relative z-10 text-center space-y-6 md:space-y-8 max-w-4xl">
+        {/* HERO SECTION - Center Vertical Alignment */}
+        <section className="relative min-h-screen flex flex-col items-center justify-center bg-white px-6 overflow-hidden">
+          {/* Tambahkan padding top (pt-20) untuk mengimbangi tinggi navbar agar konten benar-benar di tengah area yang terlihat */}
+          <div className="relative z-10 text-center space-y-6 md:space-y-8 max-w-4xl pt-20">
             <div className="space-y-2 md:space-y-4">
-              <p className="text-stone-400 tracking-[0.3em] md:tracking-[0.5em] uppercase text-[9px] md:text-xs">The Artisan Fragrance House</p>
+              <p className="text-stone-400 tracking-[0.3em] md:tracking-[0.5em] uppercase text-[9px] md:text-xs">
+                The Artisan Fragrance House
+              </p>
               <h1 className={`${fontJudul.className} text-5xl sm:text-7xl md:text-[120px] leading-tight md:leading-none text-stone-900 tracking-tighter uppercase`}>
                 EVOMI
               </h1>
@@ -225,6 +231,7 @@ export default function EvomiLandingPage() {
                 "Kurasi aroma yang melampaui waktu. Kami meracik memori dalam setiap tetes esens organik."
               </p>
             </div>
+
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6">
               <Link href="/produk" className="w-full sm:w-auto bg-stone-900 text-white px-8 md:px-10 py-3 md:py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#0081D1] transition-all">
                 Explore Collection
@@ -256,30 +263,45 @@ export default function EvomiLandingPage() {
         </section>
 
         {/* PRODUCT GRID - Optimized Columns */}
-        <section id="product" className="py-20 md:py-32 px-6 md:px-8 bg-white border-y border-stone-100">
+        <section id="product" className="py-12 md:py-32 px-4 md:px-8 bg-white border-y border-stone-100">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12 md:mb-20 space-y-4">
-              <h2 className={`${fontJudul.className} text-4xl md:text-6xl uppercase tracking-tighter text-stone-800`}>Signature Essence</h2>
+            <div className="text-center mb-10 md:mb-20 space-y-3">
+              <h2 className={`${fontJudul.className} text-3xl md:text-6xl uppercase tracking-tighter text-stone-800`}>Signature Essence</h2>
               <div className="flex items-center justify-center space-x-3">
                 <div className="w-6 md:w-8 h-[1px] bg-stone-200"></div>
-                <p className="text-stone-400 tracking-[0.2em] uppercase text-[9px] md:text-xs">Featured Collection</p>
+                <p className="text-stone-400 tracking-[0.2em] uppercase text-[8px] md:text-xs">Featured Collection</p>
                 <div className="w-6 md:w-8 h-[1px] bg-stone-200"></div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10">
+            {/* GRID: Menggunakan 2 kolom di mobile (grid-cols-2) */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-10">
               {topFourProducts.map((parfum) => (
                 <div key={parfum.id} className="group">
-                  <div className="relative aspect-[4/5] overflow-hidden bg-stone-100 mb-4 rounded-sm">
-                    <Image src={parfum.image_url || "/img/placeholder.jpg"} alt={parfum.nama} fill unoptimized className="object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <Link href={`/produk/${parfum.id}`} className="absolute inset-0 z-10 opacity-0 group-hover:opacity-100 bg-black/5 transition-opacity flex items-end p-4">
-                      <div className="w-full bg-white/90 backdrop-blur py-3 text-[9px] uppercase font-bold tracking-widest text-center translate-y-2 group-hover:translate-y-0 transition-transform">Lihat Detail</div>
+                  <div className="relative aspect-[4/5] overflow-hidden bg-stone-100 mb-3 rounded-2xl border border-stone-50 transition-all duration-500 hover:shadow-sm">
+                    <Image
+                      src={parfum.image_url || "/img/placeholder.jpg"}
+                      alt={parfum.nama}
+                      fill
+                      unoptimized
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    {/* Overlay Lihat Detail: Disembunyikan di mobile agar tidak mengganggu tap, muncul di desktop */}
+                    <Link href={`/produk/${parfum.id}`} className="absolute inset-0 z-10 opacity-0 md:group-hover:opacity-100 bg-black/5 transition-opacity flex items-end p-2 md:p-4">
+                      <div className="w-full bg-white/90 backdrop-blur py-2 md:py-3 text-[8px] md:text-[9px] uppercase font-bold tracking-widest text-center translate-y-2 group-hover:translate-y-0 transition-transform rounded-lg">
+                        Lihat Detail
+                      </div>
                     </Link>
                   </div>
-                  <div className="text-center space-y-1">
-                    <span className="text-[9px] text-stone-400 uppercase tracking-widest">Unisex • {parfum.ukuran}</span>
-                    <h3 className={`${fontJudul.className} text-lg md:text-xl text-stone-800 uppercase`}>{parfum.nama}</h3>
-                    <p className="text-stone-900 font-semibold text-sm">Rp {Number(parfum.harga_retail).toLocaleString("id-ID")}</p>
+
+                  <div className="text-center space-y-1 px-1">
+                    <span className="text-[7px] md:text-[9px] text-stone-400 uppercase tracking-widest">Unisex • {parfum.ukuran}</span>
+                    <h3 className={`${fontJudul.className} text-sm md:text-xl text-stone-800 uppercase leading-tight line-clamp-1`}>
+                      {parfum.nama}
+                    </h3>
+                    <p className="text-stone-900 font-semibold text-[10px] md:text-sm">
+                      Rp {Number(parfum.harga_retail).toLocaleString("id-ID")}
+                    </p>
                   </div>
                 </div>
               ))}
