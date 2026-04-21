@@ -90,6 +90,64 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="min-h-screen bg-white text-stone-900 selection:bg-stone-900 selection:text-white">
+
+      {/* MODAL POPUP SUCCESS */}
+      {/* --- UI MODAL BARU --- */}
+      {showModal && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-6">
+          {/* Backdrop dengan Blur Mewah */}
+          <div
+            className="absolute inset-0 bg-stone-900/40 backdrop-blur-md transition-opacity duration-500"
+            onClick={() => setShowModal(false)}
+          />
+
+          {/* Box Modal */}
+          <div className="relative bg-white w-full max-w-sm rounded-[2rem] p-10 shadow-2xl border border-stone-100 transform transition-all scale-100 animate-in fade-in zoom-in duration-300">
+            <div className="text-center">
+              {/* Icon Centang Elegan */}
+              <div className="w-20 h-20 bg-stone-50 border border-stone-100 rounded-full flex items-center justify-center mx-auto mb-8">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-8 w-8 text-stone-800"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+
+              <h2 className="text-2xl font-bold text-stone-900 mb-2 uppercase tracking-tighter">
+                Scent Added
+              </h2>
+              <p className="text-stone-500 text-sm mb-10 leading-relaxed font-light">
+                {produk?.nama} telah masuk ke dalam daftar koleksi Anda.
+              </p>
+
+              <div className="space-y-3">
+                <Link
+                  href="/profile"
+                  className="block w-full bg-stone-900 text-white py-4 rounded-full text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-amber-900 transition-colors"
+                >
+                  View Shopping Bag
+                </Link>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="block w-full text-stone-400 py-2 text-[10px] uppercase tracking-[0.2em] font-medium hover:text-stone-900 transition-colors"
+                >
+                  Continue Browsing
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MOBILE NAVIGATION BAR (Sticky di atas) */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-100 px-4 py-4 flex items-center justify-between lg:px-16">
         <Link href="/produk" className="flex items-center gap-2 text-stone-500 hover:text-black transition-colors">
@@ -97,7 +155,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <span className="text-[10px] uppercase tracking-widest font-bold hidden sm:inline">Back to Collection</span>
         </Link>
         <div className={`${fontJudul.className} text-lg tracking-widest`}>EVOMI</div>
-        
+
         {/* Share Button */}
         {/* <button className="text-stone-500 hover:text-black">
           <Share2 size={20} />
