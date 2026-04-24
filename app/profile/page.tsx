@@ -5,18 +5,40 @@ import Image from "next/image";
 import Link from "next/link";
 import localFont from "next/font/local";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import ShoppingBag from "@/components/ShoppingBag";
 
-// Font Setup
+// --- Animasi Variants ---
+const fadeInUp: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] } 
+  }
+};
+
+const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    }
+  }
+};
+
+// --- Font Configuration ---
 const fontJudul = localFont({
   src: "../fonts/8 Heavy.ttf",
   variable: "--font-brand",
+  display: "swap",
 });
 
 const fontCaption = localFont({
   src: "../fonts/Nohemi-Regular.otf",
   variable: "--font-body",
+  display: "swap",
 });
 
 export default function LuxuryProfilePage() {
@@ -25,57 +47,20 @@ export default function LuxuryProfilePage() {
     name: '',
     username: '',
     email: '',
-
-    current_password: '', // Tambahan
-    new_password: '',     // Tambahan
-    new_password_confirmation: '', // Tambahan (Laravel biasanya butuh _confirmation)
-    image: null as File | null, // Tambahkan ini
+    current_password: '',
+    new_password: '',
+    new_password_confirmation: '',
+    image: null as File | null,
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-
-  // Handler untuk perubahan gambar
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFormData({ ...formData, image: file });
-      setImagePreview(URL.createObjectURL(file)); // Buat preview lokal
-    }
-  };
-
-  // Fungsi reset form saat modal ditutup
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setFormData(prev => ({
-      ...prev,
-      current_password: '',
-      new_password: '',
-      new_password_confirmation: '',
-      image: null
-    }));
-    setImagePreview(null);
-    setStatusMessage({ type: null, text: "" });
-  };
-
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  // Tambahan state untuk pesan sukses/error yang elegan
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | null, text: string }>({ type: null, text: "" });
-
-  const router = useRouter();
-  const [user, setUser] = useState<{
-    id: string; // Tipe diubah jadi string untuk id
-    name: string;
-    username: string;
-    email: string;
-    password: string;
-    image?: string; // Tambahkan properti image
-  } | null>(null);
-
+  const [user, setUser] = useState<{ id: string; name: string; username: string; email: string; image?: string; } | null>(null);
   const [activeTab, setActiveTab] = useState("cart");
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -85,8 +70,6 @@ export default function LuxuryProfilePage() {
         router.push("/login");
         return;
       }
-
-      console.log("Fetching user data :", token);
 
       try {
         const response = await fetch("http://127.0.0.1:8000/api/user", {
@@ -100,19 +83,22 @@ export default function LuxuryProfilePage() {
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
+          setFormData(prev => ({
+            ...prev,
+            id: userData.id,
+            name: userData.name,
+            username: userData.username,
+            email: userData.email
+          }));
           localStorage.setItem("user_data", JSON.stringify(userData));
         } else if (response.status === 401) {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("user_data");
-          router.push("/login");
+          handleLogout();
         }
       } catch (error) {
-        console.error("Gagal mengambil data identitas:", error);
         const savedUser = localStorage.getItem("user_data");
         if (savedUser) setUser(JSON.parse(savedUser));
       }
     };
-
     fetchUserData();
   }, [router]);
 
@@ -123,24 +109,30 @@ export default function LuxuryProfilePage() {
     router.refresh();
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setFormData(prev => ({ ...prev, current_password: '', new_password: '', new_password_confirmation: '', image: null }));
+    setImagePreview(null);
+    setStatusMessage({ type: null, text: "" });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setStatusMessage({ type: null, text: "" });
-
     const token = localStorage.getItem("access_token");
-
-    // Gunakan FormData untuk mendukung upload file
-    // Di dalam handleSubmit (Next.js)
     const data = new FormData();
-    data.append('_method', 'PUT'); // Laravel akan membaca ini sebagai PUT
+    data.append('_method', 'PUT');
     data.append('name', formData.name);
     data.append('username', formData.username);
-
-    if (formData.image) {
-      data.append('image', formData.image); // File dikirim di sini
-    }
-
+    if (formData.image) data.append('image', formData.image);
     if (formData.current_password) {
       data.append('current_password', formData.current_password);
       data.append('new_password', formData.new_password);
@@ -149,12 +141,8 @@ export default function LuxuryProfilePage() {
 
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/users/${formData.id}`, {
-        method: "POST", // Browser mengirim sebagai POST agar file terbaca
-        headers: {
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
-          // JANGAN isi Content-Type manual
-        },
+        method: "POST",
+        headers: { "Accept": "application/json", "Authorization": `Bearer ${token}` },
         body: data,
       });
 
@@ -163,297 +151,133 @@ export default function LuxuryProfilePage() {
         setUser(updatedUser.data || updatedUser);
         localStorage.setItem("user_data", JSON.stringify(updatedUser.data || updatedUser));
         setStatusMessage({ type: 'success', text: "Identity successfully refined." });
-
-        setTimeout(() => {
-          setIsModalOpen(false);
-          setStatusMessage({ type: null, text: "" });
-          setImagePreview(null);
-        }, 2000);
+        setTimeout(closeModal, 2000);
       } else {
         const errorData = await response.json();
         setStatusMessage({ type: 'error', text: errorData.message || "Failed to update profile." });
       }
     } catch (error) {
-      setStatusMessage({ type: 'error', text: "Connection to server failed." });
+      setStatusMessage({ type: 'error', text: "Connection failed." });
     } finally {
       setLoading(false);
     }
   };
 
-  if (!mounted || !user) return null;
+  if (!mounted || !user) return (
+    <div className="min-h-screen bg-[#FBFBF9] flex items-center justify-center">
+      <motion.div 
+        animate={{ opacity: [0.3, 1, 0.3] }} 
+        transition={{ duration: 2, repeat: Infinity }}
+        className="text-[10px] uppercase tracking-[0.5em] text-stone-400 font-bold"
+      >
+        Loading Profile...
+      </motion.div>
+    </div>
+  );
 
   return (
-    <div className={`${fontCaption.variable} ${fontJudul.variable} min-h-screen bg-[#FBFBF9] font-sans text-stone-900 selection:bg-[#0081D1]/20`}>
+    <div className={`${fontCaption.variable} ${fontJudul.variable} min-h-screen bg-[#FBFBF9] font-sans text-stone-900 selection:bg-amber-200/50 antialiased`}>
 
-      {/* MODAL MODIFY IDENTITY */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !loading && setIsModalOpen(false)} // Cegah tutup saat loading
-              className="absolute inset-0 bg-stone-900/40 backdrop-blur-md"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative bg-white w-full max-w-xl rounded-[3rem] p-12 shadow-2xl overflow-hidden"
-            >
-              <div className="relative z-10 space-y-8">
-                <div className="space-y-2">
-                  <h3 className={`${fontJudul.className} text-2xl uppercase tracking-tighter`}>
-                    Refine Identity
-                  </h3>
-                  <p className="text-[10px] text-stone-400 uppercase tracking-widest">Update your digital presence</p>
-                </div>
-
-                {/* Pesan Sukses / Error yang elegan menggantikan Alert */}
-                {statusMessage.text && (
-                  <div className={`p-4 rounded-2xl text-xs font-medium ${statusMessage.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                    {statusMessage.text}
-                  </div>
-                )}
-
-                {/* MODAL CONTENT - Bagian Form */}
-                <form className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar" onSubmit={handleSubmit}>
-
-                  {/* Letakkan ini di dalam <form> sebelum bagian Basic Info */}
-                  <div className="flex flex-col items-center space-y-4 pb-4">
-                    <div className="relative group">
-                      <div className="w-24 h-24 bg-stone-100 rounded-[2rem] overflow-hidden border-2 border-dashed border-stone-200 flex items-center justify-center transition-all group-hover:border-[#0081D1]">
-                        {user.image != 'default-avatar.png' ? (
-                          <img
-                            src={imagePreview || `http://127.0.0.1:8000/storage/profiles/${user.image}`}
-                            className="w-full h-full object-cover"
-                            alt="Preview"
-                          />
-                        ) : (
-                          <span className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">No Image</span>
-                        )}
-                      </div>
-                      <label className="absolute inset-0 cursor-pointer flex items-center justify-center bg-stone-900/40 opacity-0 group-hover:opacity-100 rounded-[2rem] transition-opacity">
-                        <span className="text-[9px] text-white font-black uppercase tracking-widest">Change</span>
-                        <input type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
-                      </label>
-                    </div>
-                    <p className="text-[9px] text-stone-300 uppercase tracking-widest font-bold">Portrait Silhouette</p>
-                  </div>
-
-                  {/* SECTION: IDENTITY */}
-                  <div className="space-y-4">
-                    <p className="text-[10px] font-black text-[#0081D1] uppercase tracking-[0.2em]">Basic Info</p>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Full Name</label>
-                        <input
-                          type="text"
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="w-full bg-stone-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-[#0081D1]/20 outline-none transition-all"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Username</label>
-                        <input
-                          type="text"
-                          value={formData.username}
-                          onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                          className="w-full bg-stone-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-[#0081D1]/20 outline-none transition-all"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <hr className="border-stone-100" />
-
-                  {/* SECTION: SECURITY */}
-                  <div className="space-y-4 pt-2">
-                    <p className="text-[10px] font-black text-[#0081D1] uppercase tracking-[0.2em]">Security (Leave blank to keep current)</p>
-
-                    <div className="space-y-2">
-                      <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Current Password</label>
-                      <input
-                        type="password"
-                        placeholder="••••••••"
-                        value={formData.current_password}
-                        onChange={(e) => setFormData({ ...formData, current_password: e.target.value })}
-                        className="w-full bg-stone-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-[#0081D1]/20 outline-none transition-all"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">New Password</label>
-                        <input
-                          type="password"
-                          placeholder="New secret"
-                          value={formData.new_password}
-                          onChange={(e) => setFormData({ ...formData, new_password: e.target.value })}
-                          className="w-full bg-stone-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-[#0081D1]/20 outline-none transition-all"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Confirm New</label>
-                        <input
-                          type="password"
-                          placeholder="Repeat secret"
-                          value={formData.new_password_confirmation}
-                          onChange={(e) => setFormData({ ...formData, new_password_confirmation: e.target.value })}
-                          className="w-full bg-stone-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-[#0081D1]/20 outline-none transition-all"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Tombol Simpan (Tetap sama seperti kode sebelumnya) */}
-                  <div className="pt-4 flex gap-4">
-                    <button type="button" onClick={closeModal} className="...">Cancel</button>
-                    <button type="submit" className="...">Save Refinements</button>
-                  </div>
-                </form>
-              </div>
-
-              {/* Decorative Background Element */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#0081D1]/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* AMBIENT BACKGROUND */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-[#0081D1]/5 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-amber-200/10 rounded-full blur-[100px]"></div>
-      </div>
-
-      {/* MINIMALIST NAV */}
-      {/* MINIMALIST NAV */}
-      <nav className="fixed w-full z-50 bg-[#0081D1] backdrop-blur-xl border-b border-blue-800/20 px-8 h-20 flex items-center justify-between">
-        <Link href="/" className="group flex items-center space-x-3">
-          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center transition-transform group-hover:rotate-12">
-            <span className="text-[#0081D1] text-[10px] font-black italic">E</span>
-          </div>
-          <Image
-            src="/img/Logo Evomi.png"
-            alt="Evomi"
-            width={80}
-            height={30}
-            // Tambahkan invert & brightness agar logo hitam menjadi putih
-            className="brightness-0 invert"
-          />
+      {/* NAVBAR */}
+      <nav className="fixed w-full z-[100] bg-stone-900/80 backdrop-blur-xl border-b border-white/5 shadow-sm px-8 h-20 flex items-center justify-between">
+        <Link href="/" className="hover:opacity-70 transition-opacity">
+          <Image src="/img/Logo Evomi.png" alt="Evomi" width={80} height={30} className="brightness-0 invert" />
         </Link>
         <div className="flex items-center space-x-8">
-          <button
-            onClick={handleLogout}
-            // Mengubah warna teks logout menjadi putih agar kontras dengan bg biru
-            className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 hover:text-white transition-colors"
-          >
-            Logout Account
+          <button onClick={handleLogout} className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 hover:text-amber-200 transition-colors">
+            Sign Out
           </button>
         </div>
       </nav>
 
-      <main className="relative pt-32 pb-20 px-8 max-w-7xl mx-auto grid md:grid-cols-12 gap-16">
-        {/* LEFT: IDENTITY SECTION */}
-        <div className="md:col-span-4 space-y-12">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+      {/* AMBIENT BACKGROUND */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} transition={{ duration: 2 }}
+          className="absolute top-20 left-10 w-[30rem] h-[30rem] bg-stone-200/40 rounded-full blur-[100px]"
+        ></motion.div>
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} transition={{ duration: 2, delay: 0.5 }}
+          className="absolute bottom-20 right-10 w-[30rem] h-[30rem] bg-amber-100/30 rounded-full blur-[100px]"
+        ></motion.div>
+      </div>
 
-            <div className="relative inline-block">
-              <div className="w-32 h-40 bg-stone-200 rounded-[2.5rem] overflow-hidden relative">
-                {user.image != 'default-avatar.png' ? (
-                  <Image
-                    src={`http://127.0.0.1:8000/storage/profiles/${user.image}`}
-                    alt="Profile Picture"
-                    fill
-                    className="object-cover object-center"
-                  />
+      <main className="relative pt-36 pb-20 px-6 md:px-12 max-w-7xl mx-auto grid md:grid-cols-12 gap-12 lg:gap-20">
+
+        {/* LEFT: IDENTITY SIDEBAR */}
+        <div className="md:col-span-4">
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+            className="space-y-10 sticky top-36"
+          >
+            <motion.div variants={fadeInUp} className="relative group w-32 h-40">
+              <div className="w-full h-full bg-stone-100 rounded-[2.5rem] overflow-hidden border border-stone-200 shadow-sm transition-transform duration-700 group-hover:scale-[1.02]">
+                {user.image && user.image !== 'default-avatar.png' ? (
+                  <Image src={`http://127.0.0.1:8000/storage/profiles/${user.image}`} alt="Profile" fill className="object-cover" unoptimized />
                 ) : (
-                  <div className="absolute inset-0 bg-gradient-to-tr from-stone-900 to-stone-700 flex items-center justify-center">
-                    <span className="text-5xl text-white uppercase">{user.name.charAt(0)}</span>
+                  <div className="absolute inset-0 bg-stone-800 flex items-center justify-center text-3xl text-white uppercase font-light">
+                    {user.name.charAt(0)}
                   </div>
                 )}
               </div>
-            </div>
+            </motion.div>
 
-            <div className="space-y-1">
-              <h2 className={`${fontJudul.className} text-2xl uppercase tracking-tighter text-stone-900 leading-tight`}>
-                {user.name}
-              </h2>
-              <p className="text-stone-400 font-light lowercase">
-                @{user.username}
-              </p>
-            </div>
+            <motion.div variants={fadeInUp} className="space-y-2">
+              <h2 className={`${fontJudul.className} text-3xl uppercase tracking-tighter text-stone-900`}>{user.name}</h2>
+              <p className="text-stone-400 text-xs tracking-widest uppercase font-medium">@{user.username}</p>
+            </motion.div>
 
-            <div className="pt-8 space-y-2">
-              <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">Curated By</p>
-              <p className="text-sm font-medium italic text-stone-600">"Scent is the most intense form of memory."</p>
-            </div>
+            <motion.div variants={fadeInUp} className="h-[1px] bg-stone-200 w-12"></motion.div>
 
+            <motion.div variants={fadeInUp} className="flex flex-col space-y-5">
+              {[
+                { id: "cart", label: "Shopping Bag" },
+                { id: "identity", label: "Account Details" }
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`text-left text-[10px] uppercase tracking-[0.3em] font-bold transition-all duration-500 ${activeTab === item.id ? "text-stone-900 translate-x-2" : "text-stone-300 hover:text-stone-500"
+                    }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </motion.div>
           </motion.div>
-
-          {/* DASHBOARD NAV */}
-          <div className="flex flex-col space-y-4 pt-10 border-t border-stone-200/50">
-            {["cart", "identity"].map((item) => (
-              <button
-                key={item}
-                onClick={() => setActiveTab(item)}
-                className={`text-left text-[11px] uppercase tracking-[0.3em] font-bold transition-all ${activeTab === item ? "text-[#0081D1] pl-4 border-l-2 border-[#0081D1]" : "text-stone-300 hover:text-stone-500"}`}
-              >
-                {item === "cart" && "Shopping Bag"}
-                {item === "identity" && "Identity Details"}
-              </button>
-            ))}
-          </div>
         </div>
 
-        {/* RIGHT: CONTENT SECTION */}
+        {/* RIGHT: CONTENT PANEL */}
         <div className="md:col-span-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.5, ease: "circOut" }}
-              className="bg-white rounded-[3rem] p-12 shadow-sm border border-stone-100 min-h-[500px]"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
+              className="bg-white rounded-[2.5rem] p-8 md:p-14 shadow-[0_10px_40px_rgba(0,0,0,0.02)] border border-stone-100 min-h-[550px]"
             >
-              {activeTab === "cart" && (
-                <div className="space-y-10 flex flex-col h-full">
-                  <div className="lg:col-span-2">
-                    <ShoppingBag />
-                  </div>
+              {activeTab === "cart" ? (
+                <div className="space-y-8">
+                  <h3 className={`${fontJudul.className} text-xl uppercase tracking-widest text-stone-800 border-b border-stone-50 pb-6`}>Current Bag</h3>
+                  <ShoppingBag />
                 </div>
-              )}
-
-              {activeTab === "identity" && (
+              ) : (
                 <div className="space-y-12">
-                  <h3 className={`${fontJudul.className} text-2xl uppercase`}>Identity Details</h3>
+                  <h3 className={`${fontJudul.className} text-xl uppercase tracking-widest text-stone-800`}>Identity Details</h3>
                   <div className="grid md:grid-cols-2 gap-12">
                     <DetailItem label="Full Name" value={user.name} />
-                    <DetailItem label="Unique Identifier" value={`@${user.username}`} />
-                    <DetailItem label="Digital Post" value={user.email} />
-                    <DetailItem label="Member Status" value="Evomi Collector" />
+                    <DetailItem label="Email Address" value={user.email} />
+                    <DetailItem label="Username" value={`@${user.username}`} />
+                    <DetailItem label="Tier Status" value="Evomi Collector" />
                   </div>
-                  <div className="pt-10">
+                  <div className="pt-8">
                     <button
-                      onClick={() => {
-                        setFormData({
-                          id: user.id,
-                          name: user.name,
-                          username: user.username,
-                          email: user.email,
-                          current_password: '', // Tambahan
-                          new_password: '',     // Tambahan
-                          new_password_confirmation: '', // Tambahan (Laravel biasanya butuh _confirmation)
-                          image: null, // Tambahan
-                        });
-                        setIsModalOpen(true);
-                      }}
-                      className="bg-stone-900 text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#0081D1] transition-all shadow-xl shadow-stone-200"
+                      onClick={() => setIsModalOpen(true)}
+                      className="bg-stone-900 text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-stone-800 hover:-translate-y-1 transition-all shadow-lg shadow-stone-200"
                     >
                       Modify Identity
                     </button>
@@ -464,6 +288,84 @@ export default function LuxuryProfilePage() {
           </AnimatePresence>
         </div>
       </main>
+
+      {/* MODAL */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              onClick={closeModal} 
+              className="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" 
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.9, y: 20 }} 
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative bg-white w-full max-w-xl rounded-[2.5rem] p-10 md:p-14 shadow-2xl overflow-hidden border border-stone-100"
+            >
+              <div className="space-y-8">
+                <div>
+                  <h3 className={`${fontJudul.className} text-2xl uppercase tracking-tighter mb-1`}>Refine Identity</h3>
+                  <p className="text-[9px] text-stone-400 uppercase tracking-widest">Digital Presence Maintenance</p>
+                </div>
+
+                {statusMessage.text && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className={`p-4 rounded-xl text-[10px] font-bold uppercase tracking-widest ${statusMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}
+                  >
+                    {statusMessage.text}
+                  </motion.div>
+                )}
+
+                <form className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar" onSubmit={handleSubmit}>
+                  <div className="flex flex-col items-center space-y-4 pb-4">
+                    <div className="relative group w-24 h-24">
+                      <div className="w-full h-full bg-stone-50 rounded-[1.5rem] overflow-hidden border-2 border-dashed border-stone-200 flex items-center justify-center transition-all group-hover:border-stone-400">
+                        {(imagePreview || (user.image && user.image !== 'default-avatar.png')) ? (
+                          <img src={imagePreview || `http://127.0.0.1:8000/storage/profiles/${user.image}`} className="w-full h-full object-cover" alt="Preview" />
+                        ) : (
+                          <span className="text-[8px] text-stone-300 font-bold uppercase tracking-widest">No Portrait</span>
+                        )}
+                      </div>
+                      <label className="absolute inset-0 cursor-pointer flex items-center justify-center bg-stone-900/40 opacity-0 group-hover:opacity-100 rounded-[1.5rem] transition-all">
+                        <span className="text-[8px] text-white font-black uppercase tracking-widest">Change</span>
+                        <input type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <InputGroup label="Full Name" value={formData.name} onChange={(v: string) => setFormData({ ...formData, name: v })} />
+                    <InputGroup label="Username" value={formData.username} onChange={(v: string) => setFormData({ ...formData, username: v })} />
+                  </div>
+
+                  <div className="space-y-4 pt-4 border-t border-stone-100">
+                    <p className="text-[9px] font-black text-stone-400 uppercase tracking-widest">Security Update</p>
+                    <InputGroup label="Current Password" type="password" value={formData.current_password} onChange={(v: string) => setFormData({ ...formData, current_password: v })} placeholder="••••••••" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <InputGroup label="New Password" type="password" value={formData.new_password} onChange={(v: string) => setFormData({ ...formData, new_password: v })} placeholder="Secret" />
+                      <InputGroup label="Confirm New" type="password" value={formData.new_password_confirmation} onChange={(v: string) => setFormData({ ...formData, new_password_confirmation: v })} placeholder="Repeat" />
+                    </div>
+                  </div>
+
+                  <div className="pt-6 flex gap-3">
+                    <button type="button" onClick={closeModal} className="flex-1 px-6 py-4 rounded-xl text-[9px] uppercase tracking-widest font-bold text-stone-400 hover:bg-stone-50 transition-all">Cancel</button>
+                    <button type="submit" disabled={loading} className="flex-[2] bg-stone-900 text-white px-6 py-4 rounded-xl text-[9px] uppercase tracking-widest font-bold hover:bg-stone-800 transition-all disabled:opacity-50">
+                      {loading ? "Refining..." : "Save Refinements"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -471,12 +373,23 @@ export default function LuxuryProfilePage() {
 function DetailItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-2">
-      <label className="text-[9px] uppercase tracking-[0.4em] font-bold text-stone-300">
-        {label}
-      </label>
-      <p className="text-lg font-light text-stone-800 border-b border-stone-50 pb-2">
-        {value}
-      </p>
+      <label className="text-[9px] uppercase tracking-[0.3em] font-bold text-stone-300">{label}</label>
+      <p className="text-base font-light text-stone-800 border-b border-stone-50 pb-2">{value}</p>
+    </div>
+  );
+}
+
+function InputGroup({ label, value, onChange, type = "text", placeholder = "" }: any) {
+  return (
+    <div className="space-y-2">
+      <label className="text-[8px] uppercase tracking-[0.3em] font-bold text-stone-400 ml-1">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full bg-stone-50 border-none rounded-xl px-5 py-3.5 text-xs focus:ring-1 focus:ring-stone-200 outline-none transition-all placeholder:text-stone-300"
+      />
     </div>
   );
 }

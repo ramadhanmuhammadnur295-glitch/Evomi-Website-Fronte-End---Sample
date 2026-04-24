@@ -4,6 +4,27 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import localFont from "next/font/local";
+import { motion, Variants } from "framer-motion";
+
+// --- Animasi Variants ---
+const fadeInUp: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }
+  }
+};
+
+const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    }
+  }
+};
 
 // --- Font Configuration ---
 const fontJudul = localFont({
@@ -18,70 +39,65 @@ const fontCaption = localFont({
   display: "swap",
 });
 
-// Komponen Card yang disesuaikan dengan field Database/API
+// Komponen Card dengan Motion
 const ProductCard = ({ parfum }: { parfum: any }) => {
   return (
-    // 1. Mengubah rounded-2xl menjadi rounded-sm atau rounded-none untuk kesan lebih kotak
-    // 2. Mengubah shadow menjadi lebih tipis atau flat border
-    <div className="group flex flex-col bg-white border border-stone-200 rounded-sm hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
-
-      {/* Image Area */}
-      <div className="relative w-full h-[300px] bg-stone-100">
+    <motion.div
+      variants={fadeInUp}
+      className="group flex flex-col h-full"
+    >
+      <div className="relative aspect-[4/5] overflow-hidden bg-stone-50 mb-5 rounded-2xl border border-stone-100 shadow-sm group-hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-all duration-500">
         <Image
           src={parfum.image_url || "/img/placeholder.jpg"}
           alt={parfum.nama}
           fill
           unoptimized
-          className="object-cover"
+          className="object-cover transition-transform duration-1000 group-hover:scale-105"
         />
-        {/* Badge tetap bisa dipertahankan dengan sudut tajam */}
-        <div className="absolute top-2 left-2">
-          <span className="bg-white text-stone-900 text-[8px] uppercase tracking-widest px-2 py-1 font-bold border border-stone-900">
+
+        <div className="absolute top-4 left-4 z-20">
+          <span className="bg-white/95 backdrop-blur-sm text-stone-900 text-[9px] uppercase tracking-[0.2em] px-3 py-1.5 font-bold rounded-full shadow-sm">
             {parfum.ukuran || "50ML"}
           </span>
         </div>
+
+        <Link href={`/produk/${parfum.id}`} className="absolute inset-0 z-10 opacity-0 md:group-hover:opacity-100 bg-stone-900/10 backdrop-blur-[2px] transition-all duration-500 flex items-end p-4">
+          <div className="w-full bg-white/95 backdrop-blur-md py-3.5 text-[10px] uppercase font-bold tracking-widest text-center text-stone-800 translate-y-4 group-hover:translate-y-0 transition-all duration-500 rounded-xl shadow-lg hover:bg-stone-900 hover:text-white">
+            View Details
+          </div>
+        </Link>
       </div>
 
-      {/* Content Area */}
-      <div className="p-4 flex flex-col flex-grow text-left">
-        <h3 className={`${fontJudul.className} text-sm text-stone-900 mb-1 tracking-wider`}>
+      <div className="text-center space-y-2 px-2 flex-grow flex flex-col justify-end">
+        <span className="text-[8px] md:text-[10px] text-stone-400 uppercase tracking-[0.2em] font-medium">Unisex Collection</span>
+        <h3 className={`${fontJudul.className} text-base md:text-xl text-stone-800 uppercase leading-snug line-clamp-1 group-hover:text-amber-800 transition-colors`}>
           {parfum.nama}
         </h3>
-        <p className="text-[10px] text-stone-500 italic mb-4 line-clamp-1">
+        <p className="text-[10px] text-stone-500 italic line-clamp-1 px-4">
           {parfum.deskripsi}
         </p>
-
-        <div className="mt-auto pt-4 border-t border-stone-100 flex items-center justify-between">
-          <p className="text-[11px] font-bold text-stone-900">
-            IDR {Number(parfum.harga_retail).toLocaleString("id-ID")}
-          </p>
-          <Link
-            href={`/produk/${parfum.id}`}
-            className="text-[9px] uppercase tracking-widest font-bold underline underline-offset-4 hover:text-stone-500"
-          >
-            View
-          </Link>
-        </div>
+        <p className="text-stone-600 font-medium text-[11px] md:text-sm tracking-wide pt-2">
+          Rp {Number(parfum.harga_retail).toLocaleString("id-ID")}
+        </p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const fetchProducts = async () => {
       try {
         const response = await fetch("http://localhost:8000/api/products", {
           headers: { Accept: "application/json" },
         });
         const result = await response.json();
-
         setProducts(result.data || result || []);
-        // const data = await response.json();
-        // setProducts(data.data || data);
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
@@ -91,129 +107,123 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
+  if (!mounted) return null;
+
   return (
-    <div
-      className={`${fontJudul.variable} ${fontCaption.variable} font-body bg-[#FDFCFB] selection:bg-amber-100`}
-    >
+    <div className={`${fontJudul.variable} ${fontCaption.variable} font-body min-h-screen bg-[#FBFBF9] text-stone-900 selection:bg-amber-200 selection:text-stone-900 antialiased`}>
+
       {/* NAVBAR */}
-      <nav className="fixed w-full z-900 bg-[#0081D1] backdrop-blur-xl border-b border-blue-800/20">
-        <div className="max-w-7xl mx-auto px-8 h-20 flex items-center justify-between">
+      <nav className="fixed w-full z-[100] bg-stone-900/80 backdrop-blur-xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.05)] transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
           <Link href="/" className="hover:opacity-70 transition-opacity">
             <Image
               src="/img/Logo Evomi.png"
               alt="Evomi"
-              width={110}
-              height={40}
-              // Tambahkan 'invert' agar logo yang aslinya hitam/gelap berubah jadi putih
-              className="brightness-0 invert"
+              width={90}
+              height={36}
+              className="brightness-0 invert drop-shadow-sm"
             />
           </Link>
-          <div className="hidden md:flex space-x-10 text-[10px] uppercase tracking-[0.3em] font-bold text-white/70">
-            <Link href="/" className="hover:text-white transition-colors">
-              Home
-            </Link>
-            <Link href="/produk" className="text-white">
-              Collections
-            </Link>
-            <Link
-              href="#footer"
-              className="hover:text-white transition-colors"
-            >
-              Contact
-            </Link>
+          <div className={`hidden md:flex space-x-10 ${fontJudul.className} text-[13px] tracking-[0.2em] uppercase text-white/90`}>
+            <Link href="/" className="hover:text-amber-200 transition-colors duration-300">Home</Link>
+            <Link href="/produk" className="text-amber-200">Collections</Link>
+            <Link href="#footer" className="hover:text-amber-200 transition-colors duration-300">Contact</Link>
           </div>
         </div>
       </nav>
 
-      {/* HERO / HEADER SECTION */}
-      <section className="pt-44 pb-20 px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="inline-block text-[10px] uppercase tracking-[0.5em] text-amber-700 mb-6 font-bold">
-            The Art of Fragrance
-          </span>
-          <h1
-            className={`${fontJudul.className} text-5xl md:text-7xl text-stone-900 mb-8 leading-tight`}
-          >
+      {/* HERO SECTION */}
+      <div className="absolute top-0 left-0 w-full h-96 overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute top-20 left-10 w-[30rem] h-[30rem] bg-stone-200/50 rounded-full blur-[100px] opacity-40"></div>
+      </div>
+
+      <section className="pt-40 pb-16 px-6 relative z-10">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="max-w-4xl mx-auto text-center"
+        >
+          <motion.div variants={fadeInUp} className="flex items-center justify-center space-x-4 mb-6">
+            <div className="w-8 md:w-12 h-[1px] bg-stone-300"></div>
+            <span className="inline-block text-[10px] uppercase tracking-[0.5em] text-stone-400 font-bold">
+              The Art of Fragrance
+            </span>
+            <div className="w-8 md:w-12 h-[1px] bg-stone-300"></div>
+          </motion.div>
+
+          <motion.h1 variants={fadeInUp} className={`${fontJudul.className} text-5xl md:text-7xl text-stone-900 mb-6 leading-tight uppercase tracking-tight`}>
             Our Collections
-          </h1>
-          <p className="text-stone-500 max-w-xl mx-auto leading-relaxed text-sm md:text-base font-light">
+          </motion.h1>
+          <motion.p variants={fadeInUp} className="text-stone-500 max-w-xl mx-auto leading-relaxed text-sm md:text-base font-light italic">
             Dikurasi dengan bahan-bahan organik terbaik untuk menciptakan jejak
-            aroma yang tak terlupakan. Temukan identitas Anda melalui koleksi
-            kami.
-          </p>
-        </div>
+            aroma yang tak terlupakan. Temukan identitas Anda melalui koleksi kami.
+          </motion.p>
+        </motion.div>
       </section>
 
-      {/* PRODUCT GRID */}
       {/* PRODUCT GRID */}
       <section className="pb-32 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
           {loading ? (
-            /* Skeleton Loading: Dibuat 2 kolom di mobile, 4 di desktop */
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
               {[1, 2, 3, 4].map((n) => (
-                <div
-                  key={n}
-                  className="h-[300px] md:h-[500px] bg-stone-100 animate-pulse rounded-lg"
-                ></div>
+                <div key={n} className="flex flex-col space-y-4">
+                  <div className="aspect-[4/5] bg-stone-200/50 animate-pulse rounded-2xl"></div>
+                  <div className="h-4 bg-stone-200/50 animate-pulse rounded mx-4"></div>
+                  <div className="h-3 bg-stone-200/50 animate-pulse rounded mx-8"></div>
+                </div>
               ))}
             </div>
           ) : (
-            /* Product List: Menggunakan CSS Grid untuk konsistensi 2 kolom */
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-12">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.05 }}
+              variants={staggerContainer}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10 md:row-gap-16"
+            >
               {products.map((parfum: any) => (
                 <ProductCard key={parfum.id} parfum={parfum} />
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer id="footer" className="bg-stone-900 text-stone-400 py-24 px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-20">
-          <div className="space-y-8">
-            <Image
-              src="/img/Logo Evomi.png"
-              alt="Evomi"
-              width={120}
-              height={40}
-              className="invert brightness-0"
-            />
-            <p className="italic text-sm leading-relaxed">
-              &quot;Redefining Presence through Scent.&quot; Identitas yang
-              tidak terlihat namun paling berkesan.
+      <motion.footer
+        id="footer"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1 }}
+        className="bg-white pt-20 pb-10 px-6 md:px-8 border-t border-stone-100"
+      >
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16 mb-16">
+          <div className="space-y-6">
+            <Image src="/img/Logo Evomi.png" alt="Evomi" width={100} height={40} className="brightness-0" />
+            <p className="max-w-sm text-stone-500 text-sm font-light leading-relaxed italic">
+              "Redefining Presence through Scent." <br /> Identitas yang tidak terlihat namun paling berkesan.
             </p>
           </div>
           <div className="space-y-6">
-            <h4 className="text-white text-xs uppercase tracking-[0.2em] font-bold">
-              Location
-            </h4>
-            <p className="text-sm">
-              Jakarta, Indonesia
-              <br />
-              Sudirman Central Business District
-            </p>
+            <h4 className="font-bold text-[11px] uppercase tracking-widest text-stone-800">Location</h4>
+            <p className="text-stone-500 text-sm font-light leading-relaxed">Jakarta, Indonesia<br />Sudirman Central Business District</p>
           </div>
           <div className="space-y-6">
-            <h4 className="text-white text-xs uppercase tracking-[0.2em] font-bold">
-              Connect
-            </h4>
-            <div className="flex flex-col gap-4 text-sm">
-              <a href="#" className="hover:text-white transition-colors">
-                Instagram
-              </a>
-              <a href="#" className="hover:text-white transition-colors">
-                TikTok
-              </a>
+            <h4 className="font-bold text-[11px] uppercase tracking-widest text-stone-800">Connect</h4>
+            <div className="flex flex-col gap-3 text-sm font-light text-stone-500">
+              <a href="#" className="hover:text-stone-900 transition-colors">Instagram</a>
+              <a href="#" className="hover:text-stone-900 transition-colors">TikTok</a>
             </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 text-[9px] uppercase tracking-widest flex justify-between">
-          <p>© {new Date().getFullYear()} EVOMI FRAGRANCE.</p>
+        <div className="max-w-7xl mx-auto pt-8 border-t border-stone-100 text-[10px] text-stone-400 uppercase tracking-[0.2em] flex flex-col md:flex-row justify-between items-center gap-4">
+          <p>© {new Date().getFullYear()} EVOMI FRAGRANCE HOUSE.</p>
           <p>Handcrafted in Indonesia</p>
         </div>
-      </footer>
+      </motion.footer>
     </div>
   );
 }

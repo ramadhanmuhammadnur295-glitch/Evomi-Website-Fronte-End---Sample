@@ -1,28 +1,44 @@
 "use client";
 
-// Halaman landing page.tsx untuk Evomi, dengan desain yang dioptimalkan untuk mobile dan desktop, serta fitur user authentication dan dynamic product fetching.
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import localFont from "next/font/local";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
-// Definisikan font lokal untuk judul dan caption
+// --- Animasi Variants ---
+const fadeInUp: Variants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] } 
+  }
+};
+
+const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+    }
+  }
+};
+
 const fontJudul = localFont({
   src: "./fonts/8 Heavy.ttf",
   variable: "--font-brand",
   display: "swap",
 });
 
-// Font untuk caption dan teks pendukung, menggunakan Nohemi Regular yang lebih ringan dan mudah dibaca untuk teks yang lebih kecil
 const fontCaption = localFont({
   src: "./fonts/Nohemi-Regular.otf",
   variable: "--font-body",
   display: "swap",
 });
 
-// Komponen utama untuk halaman landing Evomi
 export default function EvomiLandingPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ email: string; name: string; username: string; image: string; } | null>(null);
@@ -49,16 +65,12 @@ export default function EvomiLandingPage() {
     fetchProducts();
   }, []);
 
-  // Fungsi untuk menangani logout, menghapus token dan data user, serta menyegarkan halaman
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("access_token");
       await fetch("http://localhost:8000/api/logout", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
+        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       });
     } catch (err) {
       console.error("Logout error", err);
@@ -66,356 +78,266 @@ export default function EvomiLandingPage() {
       localStorage.removeItem("access_token");
       localStorage.removeItem("user_data");
       setUser(null);
-      setIsMenuOpen(false); // Tutup menu saat logout
+      setIsMenuOpen(false);
       router.refresh();
     }
-
-    setIsMobileMenuOpen(false); // Tutup menu mobile saat logout
+    setIsMobileMenuOpen(false);
   };
 
   if (!mounted) return null;
 
-  // Ambil 4 produk pertama untuk ditampilkan di halaman utama
   const topFourProducts = products.slice(0, 4);
 
-  const fadeUp = {
-    hidden: { opacity: 0, y: 40 },
-    show: { opacity: 1, y: 0 }
-  };
-
-  const fadeIn = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1 }
-  };
-
-  // Render halaman dengan struktur yang dioptimalkan untuk mobile dan desktop, termasuk navbar, hero section, about section, product grid, stats, testimonial, dan footer.
   return (
-    <div className={`${fontCaption.variable} ${fontJudul.variable} selection:bg-amber-100`}>
+    <div className={`${fontCaption.variable} ${fontJudul.variable} selection:bg-amber-200 selection:text-stone-900`}>
       <div className="min-h-screen bg-[#FBFBF9] text-stone-900 font-sans antialiased">
 
-        {/* NAVBAR - Fixed Height and Fluid Spacing */}
-        <nav className="fixed w-full z-[100] bg-[#0081D1] backdrop-blur-xl border-b border-white/10">
+        {/* NAVBAR */}
+        <nav className="fixed w-full z-[100] bg-stone-900/80 backdrop-blur-xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.05)] transition-all duration-300">
           <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
-
-            {/* KIRI - LOGO */}
             <div className="flex-1 md:w-1/3 flex justify-start">
               <Link href="/" className="hover:opacity-70 transition-opacity">
-                <Image
-                  src="/img/Logo Evomi.png"
-                  alt="Evomi Logo"
-                  width={90}
-                  height={36}
-                  className="brightness-0 invert"
-                />
+                <Image src="/img/Logo Evomi.png" alt="Evomi Logo" width={90} height={36} className="brightness-0 invert drop-shadow-sm" />
               </Link>
             </div>
-
-            {/* TENGAH - MENU UTAMA (Hidden on Mobile) */}
-            <div className={`hidden md:flex w-1/3 justify-center items-center space-x-10 ${fontJudul.className} text-[13px] tracking-[0.2em] uppercase text-white`}>
-              <a href="#about" className="hover:text-white/70 transition-colors">About</a>
-              <a href="#product" className="hover:text-white/70 transition-colors">Collection</a>
-              <Link href="/produk" className="hover:text-white/70 transition-colors">Shop</Link>
+            <div className={`hidden md:flex w-1/3 justify-center items-center space-x-10 ${fontJudul.className} text-[13px] tracking-[0.2em] uppercase text-white/90`}>
+              <a href="#about" className="hover:text-amber-200 transition-colors duration-300">About</a>
+              <a href="#product" className="hover:text-amber-200 transition-colors duration-300">Collection</a>
+              <Link href="/produk" className="hover:text-amber-200 transition-colors duration-300">Shop</Link>
             </div>
-
-            {/* KANAN - USER & HAMBURGER */}
             <div className="flex-1 md:w-1/3 flex justify-end items-center space-x-4">
-
-              {/* Desktop User Menu (Hidden on Mobile) */}
-              {/* NAVBAR ACTIONS */}
               <div className="flex items-center space-x-6 md:space-x-8">
                 {user ? (
-                  // Bagian User yang sudah Login (tetap seperti kode kamu sebelumnya)
                   <div className="relative">
-                    <button
-                      onClick={() => setIsMenuOpen(!isMenuOpen)}
-                      className="flex items-center space-x-3 border border-stone-200 rounded-full p-1 pr-4 bg-stone-100 hover:bg-stone-50 transition-all"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-[#0081D1] text-white flex items-center justify-center text-[10px] font-bold uppercase overflow-hidden">
-                        {user.image != 'default-avatar.png' ? (
+                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="flex items-center space-x-3 border border-stone-600/50 rounded-full p-1 pr-4 bg-stone-800/50 hover:bg-stone-700/50 transition-all duration-300 backdrop-blur-sm">
+                      <div className="w-8 h-8 rounded-full bg-stone-200 text-stone-900 flex items-center justify-center text-[10px] font-bold uppercase overflow-hidden shadow-sm">
+                        {user.image !== 'default-avatar.png' ? (
                           <img src={`http://127.0.0.1:8000/storage/profiles/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
-                        ) : (
-                          user.name.charAt(0)
-                        )}
+                        ) : ( user.name.charAt(0) )}
                       </div>
-                      <span className="hidden md:block text-[10px] font-bold uppercase tracking-widest text-stone-700">{user.username}</span>
+                      <span className="hidden md:block text-[10px] font-bold uppercase tracking-widest text-stone-200">{user.username}</span>
                     </button>
-
                     {isMenuOpen && (
-                      <div className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-stone-100 py-2 z-50 overflow-hidden font-sans">
-                        <Link href="/profile" className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-600 hover:bg-stone-50 transition-colors">Profile</Link>
-                        <Link href="/orders" className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-600 hover:bg-stone-50 transition-colors">Orders</Link>
-                        <hr className="border-stone-50 my-1" />
+                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="absolute right-0 mt-3 w-48 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-stone-100 py-2 z-50 overflow-hidden font-sans">
+                        <Link href="/profile" className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors">Profile</Link>
+                        <Link href="/orders" className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors">Orders</Link>
+                        <hr className="border-stone-100 my-1" />
                         <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-50 transition-colors">Logout</button>
-                      </div>
+                      </motion.div>
                     )}
                   </div>
                 ) : (
-                  // Tampilan LOGIN & REGISTER (Teks Putih + Gaya Menu Tengah)
                   <div className="flex items-center space-x-6">
-                    <Link
-                      href="/login"
-                      className="relative text-[10px] font-bold uppercase tracking-[0.2em] text-white hover:opacity-70 transition-all duration-300 group"
-                    >
-                      Login
-                      <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
-                    </Link>
-
-                    <Link
-                      href="/register"
-                      className="relative text-[10px] font-bold uppercase tracking-[0.2em] text-white hover:opacity-70 transition-all duration-300 group"
-                    >
-                      Register
-                      <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
-                    </Link>
+                    <Link href="/login" className="relative text-[10px] font-bold uppercase tracking-[0.2em] text-white/90 hover:text-white transition-all duration-300 group">Login <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-amber-200 transition-all duration-300 group-hover:w-full"></span></Link>
+                    <Link href="/register" className="relative text-[10px] font-bold uppercase tracking-[0.2em] text-white/90 hover:text-white transition-all duration-300 group">Register <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-amber-200 transition-all duration-300 group-hover:w-full"></span></Link>
                   </div>
                 )}
               </div>
-
-              {/* HAMBURGER BUTTON (Mobile Only) */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 text-white focus:outline-none"
-              >
+              <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden p-2 text-white/90 hover:text-white focus:outline-none transition-colors">
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {isMobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" />
-                  )}
+                  {isMobileMenuOpen ? ( <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /> ) : ( <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" /> )}
                 </svg>
               </button>
             </div>
           </div>
-
-          {/* MOBILE MENU PANEL */}
-          <div className={`md:hidden absolute top-20 left-0 w-full bg-[#0081D1] border-b border-white/10 transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? 'max-h-[100vh] opacity-100' : 'max-h-0 opacity-0'}`}>
-            <div className="px-8 py-10 flex flex-col space-y-8 bg-gradient-to-b from-[#0081D1] to-[#006bb0]">
-
-              {/* Profile Section on Mobile Menu */}
-              {user && (
-                <div className="flex items-center space-x-4 p-4 bg-white/10 rounded-2xl border border-white/10">
-                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/20 shrink-0">
-                    {user.image != 'default-avatar.png' ? (
-                      <img src={`http://127.0.0.1:8000/storage/profiles/${user.image}`} alt="test" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-white text-[#0081D1] text-xl font-bold">{user.name.charAt(0)}</div>
-                    )}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-white font-bold text-lg leading-tight">{user.name}</span>
-                    <span className="text-white/60 text-sm italic">@{user.username}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Navigation Links */}
-              <div className={`${fontJudul.className} flex flex-col space-y-5 text-lg tracking-[0.2em] uppercase text-white`}>
-                {/* Menu Utama - Diperkecil dari text-2xl ke text-lg */}
-                <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/60 transition-colors">About</a>
-                <a href="#product" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/60 transition-colors">Collection</a>
-                <Link href="/produk" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/60 transition-colors">Shop</Link>
-
-                {user ? (
-                  <>
-                    <div className="h-[1px] bg-white/10 w-full my-1"></div>
-                    {/* Menu User - Diperkecil dari text-lg ke text-sm */}
-                    <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-sm opacity-70 font-sans tracking-widest">My Profile</Link>
-                    <button onClick={handleLogout} className="text-sm text-red-300/80 text-left font-sans tracking-widest">Logout</button>
-                  </>
-                ) : (
-                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="bg-white text-[#0081D1] text-center py-3 rounded-xl font-bold text-[10px] tracking-widest mt-2">Login / Register</Link>
-                )}
-              </div>
-            </div>
-          </div>
         </nav>
 
-        {/* HERO SECTION - Adjusted Typography for Mobile */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-white to-blue-50 opacity-50" />
-        <div className="absolute top-20 left-10 w-40 h-40 bg-blue-200 rounded-full blur-3xl opacity-30">
-
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-amber-200 rounded-full blur-3xl opacity-30"></div>
-        </div>
-
-        <section className="relative min-h-screen flex flex-col items-center justify-center bg-white px-6 overflow-hidden">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="relative z-10 text-center space-y-6 md:space-y-8 max-w-4xl pt-20"
+        {/* HERO SECTION */}
+        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden pt-20">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#FBFBF9] via-stone-50 to-[#F5F5F0] opacity-80" />
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+            className="relative z-10 text-center space-y-6 md:space-y-8 max-w-4xl"
           >
-            <p className="text-stone-400 tracking-[0.5em] uppercase text-xs">
-              The Artisan Fragrance House
-            </p>
-
-            <motion.h1
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.6 }}
-              className={`${fontJudul.className} text-6xl md:text-[120px] uppercase`}
-            >
-              EVOMI
-            </motion.h1>
-
-            <p className="text-stone-500 italic max-w-xl mx-auto">
-              Kurasi aroma yang melampaui waktu.
-            </p>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="flex gap-4 justify-center"
-            >
-              <Link href="/produk" className="bg-black text-white px-8 py-3 rounded-full">
-                Explore
+            <motion.p variants={fadeInUp} className="text-stone-400 tracking-[0.5em] uppercase text-xs font-semibold">The Artisan Fragrance House</motion.p>
+            <motion.h1 variants={fadeInUp} className={`${fontJudul.className} text-6xl md:text-[120px] uppercase text-stone-900 drop-shadow-sm`}>EVOMI</motion.h1>
+            <motion.p variants={fadeInUp} className="text-stone-500 italic max-w-xl mx-auto text-sm md:text-base">Kurasi aroma yang melampaui waktu.</motion.p>
+            <motion.div variants={fadeInUp} className="flex justify-center pt-4">
+              <Link href="/produk" className="group relative inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold tracking-widest text-white uppercase bg-stone-900 rounded-full overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-0.5 transition-all duration-300">
+                <span className="relative z-10 group-hover:text-amber-100 transition-colors duration-300">Explore Collection</span>
+                <div className="absolute inset-0 h-full w-full bg-stone-800 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
               </Link>
             </motion.div>
           </motion.div>
         </section>
 
-        {/* ABOUT SECTION - Stacked on Mobile */}
-        <section id="about" className="py-20 md:py-32 px-6 md:px-8 max-w-7xl mx-auto">
-
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-center">
-              <div className="md:col-span-4 text-center md:text-left">
-                <h2 className={`${fontJudul.className} text-3xl md:text-4xl text-stone-900 leading-tight uppercase`}>Crafting <br className="hidden md:block" /> Memories</h2>
+        {/* ABOUT SECTION */}
+        <motion.section 
+          id="about" 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeInUp}
+          className="py-24 md:py-32 px-6 md:px-8 max-w-7xl mx-auto"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16 items-start">
+            <div className="md:col-span-5 text-center md:text-left">
+              <h2 className={`${fontJudul.className} text-4xl md:text-5xl text-stone-900 leading-[1.1] uppercase`}>Crafting <br className="hidden md:block" /> Memories</h2>
+              <div className="w-12 h-[2px] bg-amber-800/30 mt-6 mx-auto md:mx-0"></div>
+            </div>
+            <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-10 md:gap-14 pt-2">
+              <div className="space-y-4 group">
+                <h3 className="font-bold text-stone-800 uppercase tracking-[0.2em] text-[10px] flex items-center gap-3">
+                  <span className="w-4 h-[1px] bg-stone-300 group-hover:bg-amber-800 group-hover:w-8 transition-all duration-300"></span>
+                  Pionir Wewangian
+                </h3>
+                <p className="text-stone-500 text-sm leading-relaxed font-light">Evomi memadukan botani langka dengan teknik ekstraksi modern untuk menghasilkan karakter aroma unik yang mendalam.</p>
               </div>
-              <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12">
-                <div className="space-y-3">
-                  <h3 className="font-bold text-amber-900 uppercase tracking-widest text-[10px]">Pionir Wewangian</h3>
-                  <p className="text-stone-600 text-sm md:text-base leading-relaxed font-light">Evomi memadukan botani langka dengan teknik ekstraksi modern untuk karakter aroma unik.</p>
-                </div>
-                <div className="space-y-3">
-                  <h3 className="font-bold text-amber-900 uppercase tracking-widest text-[10px]">Eksklusivitas</h3>
-                  <p className="text-stone-600 text-sm md:text-base leading-relaxed font-light">Setiap batch diproduksi terbatas untuk menjamin kualitas material organik tetap terjaga.</p>
-                </div>
+              <div className="space-y-4 group">
+                <h3 className="font-bold text-stone-800 uppercase tracking-[0.2em] text-[10px] flex items-center gap-3">
+                  <span className="w-4 h-[1px] bg-stone-300 group-hover:bg-amber-800 group-hover:w-8 transition-all duration-300"></span>
+                  Eksklusivitas
+                </h3>
+                <p className="text-stone-500 text-sm leading-relaxed font-light">Setiap batch diproduksi dalam jumlah terbatas untuk menjamin kualitas dan kemurnian material organik tetap terjaga sempurna.</p>
               </div>
             </div>
-          </motion.div>
+          </div>
+        </motion.section>
 
-
-        </section>
-
-        {/* PRODUCT GRID - Optimized Columns */}
-        <section id="product" className="py-12 md:py-32 px-4 md:px-8 bg-white border-y border-stone-100">
+        {/* PRODUCT GRID */}
+        <section id="product" className="py-20 md:py-32 px-4 md:px-8 bg-white border-y border-stone-100 shadow-[0_0_50px_rgba(0,0,0,0.02)]">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-10 md:mb-20 space-y-3">
-              <h2 className={`${fontJudul.className} text-3xl md:text-6xl uppercase tracking-tighter text-stone-800`}>Signature Essence</h2>
-              <div className="flex items-center justify-center space-x-3">
-                <div className="w-6 md:w-8 h-[1px] bg-stone-200"></div>
-                <p className="text-stone-400 tracking-[0.2em] uppercase text-[8px] md:text-xs">Featured Collection</p>
-                <div className="w-6 md:w-8 h-[1px] bg-stone-200"></div>
+            <motion.div 
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeInUp}
+              className="text-center mb-16 md:mb-24 space-y-4"
+            >
+              <h2 className={`${fontJudul.className} text-3xl md:text-5xl uppercase tracking-tight text-stone-800`}>Signature Essence</h2>
+              <div className="flex items-center justify-center space-x-4">
+                <div className="w-8 md:w-12 h-[1px] bg-stone-200"></div>
+                <p className="text-stone-400 tracking-[0.25em] uppercase text-[9px] md:text-xs font-semibold">Featured Collection</p>
+                <div className="w-8 md:w-12 h-[1px] bg-stone-200"></div>
               </div>
-            </div>
+            </motion.div>
 
-            {/* GRID: Menggunakan 2 kolom di mobile (grid-cols-2) */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-10">
+            <motion.div 
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.1 }}
+              variants={staggerContainer}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8"
+            >
               {topFourProducts.map((parfum) => (
-                <div key={parfum.id} className="group">
-                  <div className="group relative">
-                    <div className="relative aspect-[4/5] overflow-hidden bg-stone-100 mb-3 rounded-2xl border border-stone-50 transition-all duration-500 hover:shadow-sm">
-                      <Image
-                        src={parfum.image_url || "/img/placeholder.jpg"}
-                        alt={parfum.nama}
-                        fill
-                        unoptimized
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      {/* Overlay Lihat Detail: Disembunyikan di mobile agar tidak mengganggu tap, muncul di desktop */}
-                      <Link href={`/produk/${parfum.id}`} className="absolute inset-0 z-10 opacity-0 md:group-hover:opacity-100 bg-black/5 transition-opacity flex items-end p-2 md:p-4">
-                        <div className="w-full bg-white/90 backdrop-blur py-2 md:py-3 text-[8px] md:text-[9px] uppercase font-bold tracking-widest text-center translate-y-2 group-hover:translate-y-0 transition-transform rounded-lg">
-                          Lihat Detail
-                        </div>
-                      </Link>
-                    </div>
-
-                    {/* overlay smooth */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition duration-500 rounded-2xl" />
+                <motion.div key={parfum.id} variants={fadeInUp} className="group flex flex-col h-full">
+                  <div className="relative aspect-[4/5] overflow-hidden bg-stone-50 mb-5 rounded-2xl border border-stone-100 shadow-sm group-hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-all duration-500">
+                    <Image src={parfum.image_url || "/img/placeholder.jpg"} alt={parfum.nama} fill unoptimized className="object-cover transition-transform duration-1000 group-hover:scale-105" />
+                    <Link href={`/produk/${parfum.id}`} className="absolute inset-0 z-10 opacity-0 md:group-hover:opacity-100 bg-stone-900/10 backdrop-blur-[2px] transition-all duration-500 flex items-end p-4">
+                      <div className="w-full bg-white/95 backdrop-blur-md py-3.5 text-[10px] uppercase font-bold tracking-widest text-center text-stone-800 translate-y-4 group-hover:translate-y-0 transition-all duration-500 rounded-xl shadow-lg hover:bg-stone-900 hover:text-white">Discover</div>
+                    </Link>
                   </div>
-
-                  <div className="text-center space-y-1 px-1">
-                    <span className="text-[7px] md:text-[9px] text-stone-400 uppercase tracking-widest">Unisex • {parfum.ukuran}</span>
-                    <h3 className={`${fontJudul.className} text-sm md:text-xl text-stone-800 uppercase leading-tight line-clamp-1`}>
-                      {parfum.nama}
-                    </h3>
-                    <p className="text-stone-900 font-semibold text-[10px] md:text-sm">
-                      Rp {Number(parfum.harga_retail).toLocaleString("id-ID")}
-                    </p>
+                  <div className="text-center space-y-2 px-2 flex-grow flex flex-col justify-end">
+                    <span className="text-[8px] md:text-[10px] text-stone-400 uppercase tracking-[0.2em] font-medium">Unisex • {parfum.ukuran}</span>
+                    <h3 className={`${fontJudul.className} text-base md:text-xl text-stone-800 uppercase leading-snug line-clamp-1 group-hover:text-amber-800 transition-colors`}>{parfum.nama}</h3>
+                    <p className="text-stone-600 font-medium text-[11px] md:text-sm tracking-wide">Rp {Number(parfum.harga_retail).toLocaleString("id-ID")}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mt-16 text-center">
+              <Link href="/produk" className="inline-block border-b border-stone-300 pb-1 text-xs uppercase tracking-widest font-bold text-stone-500 hover:text-stone-900 hover:border-stone-900 transition-all">View All Collection</Link>
+            </motion.div>
           </div>
         </section>
 
-        {/* STATS SECTION - 2 columns on mobile */}
-        <section className="py-16 md:py-32 bg-stone-50 px-6 text-center">
-          <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+        {/* STATS SECTION */}
+        <section className="py-20 md:py-28 bg-[#FBFBF9] px-6 text-center">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+            className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-12"
+          >
             {[
               { title: "12H+", desc: "Projection" },
               { title: "Artisan", desc: "Batch" },
               { title: "Recycled", desc: "Glass" },
               { title: "Organic", desc: "Essence" },
             ].map((item, i) => (
-              <div key={i}>
-                <div className={`${fontJudul.className} text-2xl md:text-3xl mb-1 text-stone-300 hover:text-amber-800 transition-colors`}>{item.title}</div>
-                <p className="text-[9px] uppercase tracking-[0.2em] text-stone-500">{item.desc}</p>
-              </div>
+              <motion.div key={i} variants={fadeInUp} className="group">
+                <div className={`${fontJudul.className} text-3xl md:text-4xl mb-2 text-stone-300 group-hover:text-stone-800 transition-colors duration-500`}>{item.title}</div>
+                <p className="text-[10px] uppercase tracking-[0.25em] text-stone-400 font-medium">{item.desc}</p>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </section>
 
-        {/* TESTIMONIAL - Stacked for readability */}
-        <section className="py-20 md:py-32 bg-stone-900 text-white px-6">
-          <div className="max-w-5xl mx-auto text-center space-y-12 md:space-y-16">
-            <h2 className={`${fontJudul.className} text-2xl md:text-5xl italic leading-tight text-stone-200`}>"The scent of a woman, <br /> The presence of a soul."</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
+        {/* TESTIMONIAL SECTION */}
+        <section className="py-24 md:py-32 bg-stone-950 text-white px-6 relative overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-full bg-stone-800/20 blur-[120px] rounded-full pointer-events-none"></div>
+          <div className="max-w-6xl mx-auto text-center space-y-16 md:space-y-24 relative z-10">
+            <motion.h2 initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 1 }} className={`${fontJudul.className} text-3xl md:text-5xl italic leading-tight text-stone-100 font-light`}>
+              "The scent of a woman, <br /> The presence of a soul."
+            </motion.h2>
+
+            <motion.div 
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={staggerContainer}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 text-left"
+            >
               {[
-                { name: "Clara S.", text: "Peaceful Calm adalah aroma paling segar yang pernah saya miliki." },
-                { name: "Dimas R.", text: "Rabel Brave sangat memikat perhatian di malam hari." },
-                { name: "Sarah W.", text: "Packaging Evomi sangat mewah, benar-benar brand berkelas." },
+                { name: "Clara S.", text: "Peaceful Calm adalah aroma paling segar yang pernah saya miliki. Menyatu sempurna dengan kulit." },
+                { name: "Dimas R.", text: "Rabel Brave sangat memikat perhatian di malam hari. Projection-nya luar biasa tahan lama." },
+                { name: "Sarah W.", text: "Packaging Evomi sangat mewah, benar-benar brand berkelas internasional dari lokal." },
               ].map((t, i) => (
-                <div key={i} className="space-y-4">
-                  <p className="text-stone-400 text-sm md:text-base font-light italic leading-relaxed">"{t.text}"</p>
-                  <div className="text-[9px] uppercase tracking-[0.3em] font-bold text-amber-500">— {t.name}</div>
-                </div>
+                <motion.div key={i} variants={fadeInUp} className="bg-white/[0.03] backdrop-blur-md border border-white/10 p-8 rounded-2xl hover:bg-white/[0.06] transition-colors duration-300 flex flex-col justify-between space-y-6">
+                  <p className="text-stone-300 text-sm md:text-base font-light italic leading-relaxed">"{t.text}"</p>
+                  <div className="flex items-center gap-3 pt-4 border-t border-white/5">
+                    <div className="w-8 h-8 rounded-full bg-stone-800 flex items-center justify-center text-[10px] font-bold text-stone-400 uppercase">{t.name.charAt(0)}</div>
+                    <div className="text-[10px] uppercase tracking-[0.2em] font-bold text-stone-100">{t.name}</div>
+                  </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* FOOTER - Stacked for mobile */}
-        <footer className="bg-white pt-16 pb-8 px-6 md:px-8 border-t border-stone-100">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 mb-16">
-            <div className="sm:col-span-2">
-              <h2 className={`${fontJudul.className} text-2xl mb-4 tracking-widest`}>EVOMI</h2>
-              <p className="max-w-xs text-stone-400 text-sm font-light leading-relaxed">Menghadirkan pengalaman sensorik melalui kurasi aroma terbaik.</p>
+        {/* FOOTER */}
+        <motion.footer 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+          className="bg-white pt-20 pb-10 px-6 md:px-8 border-t border-stone-100"
+        >
+          <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-12 mb-16">
+            <div className="md:col-span-5">
+              <h2 className={`${fontJudul.className} text-3xl mb-5 tracking-widest text-stone-900`}>EVOMI</h2>
+              <p className="max-w-sm text-stone-500 text-sm font-light leading-relaxed">Menghadirkan pengalaman sensorik melalui kurasi aroma terbaik. Dedikasi pada seni artisan fragrance.</p>
             </div>
-            <div>
-              <h4 className="font-bold text-[10px] uppercase tracking-widest mb-4">Contact</h4>
-              <ul className="text-stone-500 space-y-2 text-xs">
-                <li>hello@evomi.com</li>
+            <div className="md:col-span-3">
+              <h4 className="font-bold text-[11px] uppercase tracking-widest mb-6 text-stone-800">Contact Us</h4>
+              <ul className="text-stone-500 space-y-3 text-sm font-light">
+                <li className="hover:text-stone-900 transition-colors cursor-pointer">hello@evomi.com</li>
                 <li>Jakarta, Indonesia</li>
               </ul>
             </div>
-            <div>
-              <h4 className="font-bold text-[10px] uppercase tracking-widest mb-4">Newsletter</h4>
-              <div className="flex border-b border-stone-200 pb-2 max-w-xs">
-                <input type="email" placeholder="Email address" className="bg-transparent w-full text-xs outline-none" />
-                <button className="text-[9px] uppercase font-bold">Join</button>
+            <div className="md:col-span-4">
+              <h4 className="font-bold text-[11px] uppercase tracking-widest mb-6 text-stone-800">The Newsletter</h4>
+              <p className="text-stone-400 text-xs mb-4">Dapatkan akses eksklusif ke rilis terbaru kami.</p>
+              <div className="flex border-b border-stone-300 pb-2 focus-within:border-stone-900 transition-colors">
+                <input type="email" placeholder="Your email address" className="bg-transparent w-full text-sm outline-none text-stone-800 placeholder-stone-400" />
+                <button className="text-[10px] uppercase font-bold text-stone-800 hover:text-amber-800 transition-colors tracking-wider">Subscribe</button>
               </div>
             </div>
           </div>
-          <div className="text-center text-[9px] text-stone-300 uppercase tracking-[0.3em] pt-8 border-t border-stone-50">
-            &copy; {new Date().getFullYear()} EVOMI FRAGRANCE HOUSE
+          <div className="flex flex-col md:flex-row justify-between items-center text-center text-[10px] text-stone-400 uppercase tracking-[0.2em] pt-8 border-t border-stone-100 gap-4">
+            <div>&copy; {new Date().getFullYear()} EVOMI FRAGRANCE HOUSE</div>
+            <div className="flex space-x-6">
+              <a href="#" className="hover:text-stone-900 transition-colors">Instagram</a>
+              <a href="#" className="hover:text-stone-900 transition-colors">TikTok</a>
+              <a href="#" className="hover:text-stone-900 transition-colors">Terms</a>
+            </div>
           </div>
-        </footer>
+        </motion.footer>
       </div>
     </div>
   );
