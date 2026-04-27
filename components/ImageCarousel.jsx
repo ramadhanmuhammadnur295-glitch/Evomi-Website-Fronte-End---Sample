@@ -1,123 +1,140 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-// Jika menggunakan icon dari lucide-react atau heroicons, bisa di-import di sini.
-// Untuk contoh ini kita gunakan karakter teks sederhana agar tidak perlu install dependensi.
 
-const carouselImages = [
+const posters = [
   {
     id: 1,
-    src: "/img/poster/Artboard 1.jpeg",
-    alt: "Evomi Collection 1",
+    title: "Every Version of You",
+    subtitle: "Discover Your Infinite Possibilities",
+    image: "http://127.0.0.1:8000/storage/poster/Gemini_Generated_Image_Artboard 1.png", // Ganti dengan path poster Anda
+    color: "bg-stone-100",
   },
   {
     id: 2,
-    src: "/img/poster/Artboard 2.jpeg", // Pastikan file ini ada
-    alt: "Evomi Collection 2",
+    title: "Psychology Recycle Playful",
+    subtitle: "Recycle Your Mind, Play with Your Thoughts",
+    image: "http://127.0.0.1:8000/storage/poster/Gemini_Generated_Image_Artboard 2.png",
+    color: "bg-stone-200",
   },
   {
     id: 3,
-    src: "/img/poster/Artboard 3.jpeg", // Pastikan file ini ada
-    alt: "Evomi Collection 3",
-  },
-  {
-    id: 4,
-    src: "/img/poster/Artboard 4.jpeg", // Pastikan file ini ada
-    alt: "Evomi Collection 4",
-  },
-  {
-    id: 5,
-    src: "/img/poster/Artboard 5.jpeg", // Pastikan file ini ada
-    alt: "Evomi Collection 5",
+    title: "Evomi",
+    subtitle: "The Essence of Elegance",
+    image: "http://127.0.0.1:8000/storage/poster/Gemini_Generated_Image_Artboard 3.png",
+    color: "bg-stone-100",
   },
 ];
 
 export default function ImageCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Auto-play carousel
-  useEffect(() => {
-    const timer = setInterval(() => {
-      nextSlide();
-    }, 5000); // Ganti gambar setiap 5 detik
-    return () => clearInterval(timer);
-  }, [currentIndex]);
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % posters.length);
+  };
 
   const prevSlide = () => {
-    const isFirstSlide = currentIndex === 0;
-    const newIndex = isFirstSlide
-      ? carouselImages.length - 1
-      : currentIndex - 1;
-    setCurrentIndex(newIndex);
+    setCurrentIndex((prev) => (prev - 1 + posters.length) % posters.length);
   };
 
-  const nextSlide = () => {
-    const isLastSlide = currentIndex === carouselImages.length - 1;
-    const newIndex = isLastSlide ? 0 : currentIndex + 1;
-    setCurrentIndex(newIndex);
-  };
-
-  const goToSlide = (slideIndex) => {
-    setCurrentIndex(slideIndex);
-  };
+  useEffect(() => {
+    const timer = setInterval(nextSlide, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <div className="relative w-full h-[500px] md:h-[600px] group overflow-hidden bg-stone-100 rounded-2xl">
-      {/* Image Container */}
-      <div
-        className="w-full h-full flex transition-transform duration-700 ease-out"
-        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-      >
-        {/* carousel images */}
-        {carouselImages.map((image) => (
-          <div key={image.id} className="min-w-full h-full relative">
-            <Image
-              src={image.src}
-              alt={image.alt}
-              fill
-              className="object-contain"
-              priority={image.id === 1}
-            />
-            {/* Optional Overlay */}
-            <div className="absolute inset-0 bg-black/2"></div>
+    <div className="relative w-full h-[400px] md:h-[670px] overflow-hidden rounded-3xl group">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentIndex}
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 1, ease: [0.21, 0.47, 0.32, 0.98] }}
+          className="relative w-full h-full"
+        >
+          {/* Overlay Konten */}
+          <div className="absolute inset-0 z-10 flex flex-col justify-center px-12 md:px-20 bg-gradient-to-r from-black/40 to-transparent text-white">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-[10px] uppercase tracking-[0.4em] font-bold mb-2 text-amber-200"
+            >
+              {posters[currentIndex].subtitle}
+            </motion.p>
+            <motion.h3
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="text-4xl md:text-6xl font-brand uppercase tracking-tighter"
+            >
+              {posters[currentIndex].title}
+            </motion.h3>
           </div>
+
+          <Image
+            src={posters[currentIndex].image}
+            alt={posters[currentIndex].title}
+            fill
+            className="object-cover"
+            priority
+          />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Navigasi Bullets */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3">
+        {posters.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCurrentIndex(idx)}
+            className={`h-1 transition-all duration-500 rounded-full ${
+              idx === currentIndex ? "w-8 bg-white" : "w-2 bg-white/40"
+            }`}
+          />
         ))}
       </div>
 
-      {/* Left Arrow */}
+      {/* Tombol Panah (Opsional) */}
       <button
         onClick={prevSlide}
-        className="hidden group-hover:block absolute top-[50%] -translate-y-[-50%] left-5 text-2xl rounded-full p-2 bg-black/30 text-white cursor-pointer hover:bg-black/50 transition"
-        aria-label="Previous Slide"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 opacity-0 group-hover:opacity-100 transition-opacity text-white/70 hover:text-white"
       >
-        &#10094;
+        <svg
+          className="w-8 h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.5"
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
       </button>
-
-      {/* Right Arrow */}
       <button
         onClick={nextSlide}
-        className="hidden group-hover:block absolute top-[50%] -translate-y-[-50%] right-5 text-2xl rounded-full p-2 bg-black/30 text-white cursor-pointer hover:bg-black/50 transition"
-        aria-label="Next Slide"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 opacity-0 group-hover:opacity-100 transition-opacity text-white/70 hover:text-white"
       >
-        &#10095;
+        <svg
+          className="w-8 h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.5"
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
       </button>
-
-      {/* Dots Indicators */}
-      <div className="absolute bottom-6 flex justify-center w-full gap-2 px-4">
-        {carouselImages.map((_, slideIndex) => (
-          <button
-            key={slideIndex}
-            onClick={() => goToSlide(slideIndex)}
-            className={`transition-all duration-300 w-2.5 h-2.5 rounded-full ${
-              currentIndex === slideIndex
-                ? "bg-white w-8"
-                : "bg-white/50 hover:bg-white/80"
-            }`}
-            aria-label={`Go to slide ${slideIndex + 1}`}
-          ></button>
-        ))}
-      </div>
     </div>
   );
 }

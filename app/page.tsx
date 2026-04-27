@@ -7,13 +7,16 @@ import localFont from "next/font/local";
 import { useRouter } from "next/navigation";
 import { motion, Variants } from "framer-motion";
 
+// 
+import ImageCarousel from "@/components/ImageCarousel";
+
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 40 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] } 
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }
   }
 };
 
@@ -113,7 +116,7 @@ export default function EvomiLandingPage() {
                       <div className="w-8 h-8 rounded-full bg-stone-200 text-stone-900 flex items-center justify-center text-[10px] font-bold uppercase overflow-hidden shadow-sm">
                         {user.image !== 'default-avatar.png' ? (
                           <img src={`http://127.0.0.1:8000/storage/profiles/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
-                        ) : ( user.name.charAt(0) )}
+                        ) : (user.name.charAt(0))}
                       </div>
                       <span className="hidden md:block text-[10px] font-bold uppercase tracking-widest text-stone-200">{user.username}</span>
                     </button>
@@ -135,7 +138,7 @@ export default function EvomiLandingPage() {
               </div>
               <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden p-2 text-white/90 hover:text-white focus:outline-none transition-colors">
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {isMobileMenuOpen ? ( <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /> ) : ( <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" /> )}
+                  {isMobileMenuOpen ? (<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />) : (<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" />)}
                 </svg>
               </button>
             </div>
@@ -145,7 +148,7 @@ export default function EvomiLandingPage() {
         {/* HERO SECTION */}
         <section className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden pt-20">
           <div className="absolute inset-0 bg-gradient-to-b from-[#FBFBF9] via-stone-50 to-[#F5F5F0] opacity-80" />
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -165,8 +168,8 @@ export default function EvomiLandingPage() {
         </section>
 
         {/* ABOUT SECTION */}
-        <motion.section 
-          id="about" 
+        <motion.section
+          id="about"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
@@ -197,10 +200,34 @@ export default function EvomiLandingPage() {
           </div>
         </motion.section>
 
+        {/* CAROUSEL POSTER */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeInUp}
+          className="py-10 md:py-20 px-6 md:px-16"
+        >
+          <div className="max-w-7xl mx-auto">
+            {/* <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+              <div className="space-y-2">
+                <p className="text-stone-400 tracking-[0.3em] uppercase text-[10px] font-bold">Limited Edition</p>
+                <h2 className={`${fontJudul.className} text-3xl md:text-5xl uppercase text-stone-900`}>
+                  Exclusive <br className="hidden md:block" /> Highlights
+                </h2>
+              </div>
+              <div className="hidden md:block w-24 h-[1px] bg-stone-200 mb-4"></div>
+            </div> */}
+
+            {/* Image Carouse Component */}
+            <ImageCarousel />
+          </div>
+        </motion.section>
+
         {/* PRODUCT GRID */}
         <section id="product" className="py-20 md:py-32 px-4 md:px-8 bg-white border-y border-stone-100 shadow-[0_0_50px_rgba(0,0,0,0.02)]">
           <div className="max-w-7xl mx-auto">
-            <motion.div 
+            <motion.div
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
@@ -215,7 +242,7 @@ export default function EvomiLandingPage() {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.1 }}
@@ -247,7 +274,7 @@ export default function EvomiLandingPage() {
 
         {/* STATS SECTION */}
         <section className="py-20 md:py-28 bg-[#FBFBF9] px-6 text-center">
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -276,7 +303,7 @@ export default function EvomiLandingPage() {
               "The scent of a woman, <br /> The presence of a soul."
             </motion.h2>
 
-            <motion.div 
+            <motion.div
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
@@ -301,7 +328,7 @@ export default function EvomiLandingPage() {
         </section>
 
         {/* FOOTER */}
-        <motion.footer 
+        <motion.footer
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
