@@ -102,6 +102,7 @@ export default function CheckoutPage() {
         fetchData();
     }, []);
 
+    // handle checkout ada ongkos kirim
     const handleCheckout = async () => {
         const token = localStorage.getItem("access_token");
         if (!token) return alert("Silakan login terlebih dahulu");
@@ -109,8 +110,8 @@ export default function CheckoutPage() {
 
         setIsSubmitting(true);
         const orderData = {
-            total_harga: subtotal + 12000,
-            ongkos_kirim: 12000,
+            total_harga: subtotal + 100,
+            ongkos_kirim: 100,
             alamat_pengiriman: shippingAddress,
             catatan_pengiriman: catatan,
             kurir: "Reguler (COD)",
@@ -143,7 +144,7 @@ export default function CheckoutPage() {
     };
 
     const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const shipping = 12000;
+    const shipping = 100; //<<== ongkos kirim
     const total = subtotal + shipping;
 
     if (loading) return (

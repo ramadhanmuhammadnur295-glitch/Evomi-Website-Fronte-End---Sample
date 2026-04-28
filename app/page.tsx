@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+// React & Next
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import localFont from "next/font/local";
 import { useRouter } from "next/navigation";
-import { motion, Variants } from "framer-motion";
+import { motion, Variants, useScroll, useTransform } from "framer-motion";
 
-// 
 import ImageCarousel from "@/components/ImageCarousel";
 
 // --- Animasi Variants ---
@@ -50,6 +50,26 @@ export default function EvomiLandingPage() {
   const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // --- Parallax Hooks ---
+  const heroRef = useRef(null);
+  const { scrollYProgress: heroScrollY } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  // Teks turun lebih lambat dari scroll (efek tertinggal)
+  const heroTextY = useTransform(heroScrollY, [0, 1], ["0%", "60%"]);
+  // Background turun sedikit agar terlihat berdimensi
+  const heroBgY = useTransform(heroScrollY, [0, 1], ["0%", "20%"]);
+
+  const testimonialRef = useRef(null);
+  const { scrollYProgress: testimonialScrollY } = useScroll({
+    target: testimonialRef,
+    offset: ["start end", "end start"],
+  });
+  // Cahaya blur bergerak naik turun saat scroll
+  const testimonialGlowY = useTransform(testimonialScrollY, [0, 1], ["-40%", "40%"]);
+  // ----------------------
+
   useEffect(() => {
     setMounted(true);
     const token = localStorage.getItem("access_token");
@@ -87,12 +107,12 @@ export default function EvomiLandingPage() {
     setIsMobileMenuOpen(false);
   };
 
-  if (!mounted) return null;
+  // if (!mounted) return null;
 
   const topFourProducts = products.slice(0, 4);
 
   return (
-    <div className={`${fontCaption.variable} ${fontJudul.variable} selection:bg-amber-200 selection:text-stone-900`}>
+    <div style={{ opacity: mounted ? 1 : 0 }} className={`${fontCaption.variable} ${fontJudul.variable} selection:bg-amber-200 selection:text-stone-900 transition-opacity duration-500`}>
       <div className="min-h-screen bg-[#FBFBF9] text-stone-900 font-sans antialiased">
 
         {/* NAVBAR */}
@@ -145,10 +165,14 @@ export default function EvomiLandingPage() {
           </div>
         </nav>
 
-        {/* HERO SECTION */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden pt-20">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#FBFBF9] via-stone-50 to-[#F5F5F0] opacity-80" />
+        {/* HERO SECTION WITH PARALLAX */}
+        <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden pt-20">
+          <motion.div 
+            style={{ y: heroBgY }}
+            className="absolute inset-0 bg-gradient-to-b from-[#FBFBF9] via-stone-50 to-[#F5F5F0] opacity-80 scale-125 origin-top" 
+          />
           <motion.div
+            style={{ y: heroTextY }}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -174,7 +198,7 @@ export default function EvomiLandingPage() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeInUp}
-          className="py-24 md:py-32 px-6 md:px-8 max-w-7xl mx-auto"
+          className="relative py-24 md:py-32 px-6 md:px-8 max-w-7xl mx-auto z-20 bg-[#FBFBF9]"
         >
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16 items-start">
             <div className="md:col-span-5 text-center md:text-left">
@@ -206,26 +230,15 @@ export default function EvomiLandingPage() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
           variants={fadeInUp}
-          className="py-10 md:py-20 px-6 md:px-16"
+          className="relative py-10 md:py-20 px-6 md:px-16 z-20 bg-[#FBFBF9]"
         >
           <div className="max-w-7xl mx-auto">
-            {/* <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
-              <div className="space-y-2">
-                <p className="text-stone-400 tracking-[0.3em] uppercase text-[10px] font-bold">Limited Edition</p>
-                <h2 className={`${fontJudul.className} text-3xl md:text-5xl uppercase text-stone-900`}>
-                  Exclusive <br className="hidden md:block" /> Highlights
-                </h2>
-              </div>
-              <div className="hidden md:block w-24 h-[1px] bg-stone-200 mb-4"></div>
-            </div> */}
-
-            {/* Image Carouse Component */}
             <ImageCarousel />
           </div>
         </motion.section>
 
         {/* PRODUCT GRID */}
-        <section id="product" className="py-20 md:py-32 px-4 md:px-8 bg-white border-y border-stone-100 shadow-[0_0_50px_rgba(0,0,0,0.02)]">
+        <section id="product" className="relative py-20 md:py-32 px-4 md:px-8 bg-white border-y border-stone-100 shadow-[0_0_50px_rgba(0,0,0,0.02)] z-20">
           <div className="max-w-7xl mx-auto">
             <motion.div
               initial="hidden"
@@ -273,7 +286,7 @@ export default function EvomiLandingPage() {
         </section>
 
         {/* STATS SECTION */}
-        <section className="py-20 md:py-28 bg-[#FBFBF9] px-6 text-center">
+        <section className="relative py-20 md:py-28 bg-[#FBFBF9] px-6 text-center z-20">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -295,9 +308,12 @@ export default function EvomiLandingPage() {
           </motion.div>
         </section>
 
-        {/* TESTIMONIAL SECTION */}
-        <section className="py-24 md:py-32 bg-stone-950 text-white px-6 relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-full bg-stone-800/20 blur-[120px] rounded-full pointer-events-none"></div>
+        {/* TESTIMONIAL SECTION WITH PARALLAX */}
+        <section ref={testimonialRef} className="py-24 md:py-32 bg-stone-950 text-white px-6 relative overflow-hidden z-20">
+          <motion.div 
+            style={{ y: testimonialGlowY }}
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-full bg-stone-800/30 blur-[120px] rounded-full pointer-events-none"
+          />
           <div className="max-w-6xl mx-auto text-center space-y-16 md:space-y-24 relative z-10">
             <motion.h2 initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 1 }} className={`${fontJudul.className} text-3xl md:text-5xl italic leading-tight text-stone-100 font-light`}>
               "The scent of a woman, <br /> The presence of a soul."
@@ -333,7 +349,7 @@ export default function EvomiLandingPage() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1 }}
-          className="bg-white pt-20 pb-10 px-6 md:px-8 border-t border-stone-100"
+          className="relative z-20 bg-white pt-20 pb-10 px-6 md:px-8 border-t border-stone-100"
         >
           <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-12 mb-16">
             <div className="md:col-span-5">
