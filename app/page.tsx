@@ -10,6 +10,10 @@ import { motion, Variants, useScroll, useTransform } from "framer-motion";
 
 import ImageCarousel from "@/components/ImageCarousel";
 
+// ... import lainnya
+import QuizModal from "@/components/QuizModal";
+
+
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -49,6 +53,7 @@ export default function EvomiLandingPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
 
   // --- Parallax Hooks ---
   const heroRef = useRef(null);
@@ -113,7 +118,14 @@ export default function EvomiLandingPage() {
 
   return (
     <div style={{ opacity: mounted ? 1 : 0 }} className={`${fontCaption.variable} ${fontJudul.variable} selection:bg-amber-200 selection:text-stone-900 transition-opacity duration-500`}>
+
+
+      {/* Komponen Modal */}
+      <QuizModal isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
+
       <div className="min-h-screen bg-[#FBFBF9] text-stone-900 font-sans antialiased">
+
+
 
         {/* NAVBAR */}
         <nav className="fixed w-full z-[100] bg-stone-900/80 backdrop-blur-xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.05)] transition-all duration-300">
@@ -127,6 +139,7 @@ export default function EvomiLandingPage() {
               <a href="#about" className="hover:text-amber-200 transition-colors duration-300">About</a>
               <a href="#product" className="hover:text-amber-200 transition-colors duration-300">Collection</a>
               <Link href="/produk" className="hover:text-amber-200 transition-colors duration-300">Shop</Link>
+              <Link href="" onClick={() => setIsQuizOpen(true)} className="hover:text-amber-200 transition-colors duration-300">Quiz</Link>
             </div>
             <div className="flex-1 md:w-1/3 flex justify-end items-center space-x-4">
               <div className="flex items-center space-x-6 md:space-x-8">
@@ -167,9 +180,9 @@ export default function EvomiLandingPage() {
 
         {/* HERO SECTION WITH PARALLAX */}
         <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden pt-20">
-          <motion.div 
+          <motion.div
             style={{ y: heroBgY }}
-            className="absolute inset-0 bg-gradient-to-b from-[#FBFBF9] via-stone-50 to-[#F5F5F0] opacity-80 scale-125 origin-top" 
+            className="absolute inset-0 bg-gradient-to-b from-[#FBFBF9] via-stone-50 to-[#F5F5F0] opacity-80 scale-125 origin-top"
           />
           <motion.div
             style={{ y: heroTextY }}
@@ -225,7 +238,7 @@ export default function EvomiLandingPage() {
         </motion.section>
 
         {/* CAROUSEL POSTER */}
-        <motion.section
+        {/* <motion.section
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
@@ -235,7 +248,7 @@ export default function EvomiLandingPage() {
           <div className="max-w-7xl mx-auto">
             <ImageCarousel />
           </div>
-        </motion.section>
+        </motion.section> */}
 
         {/* PRODUCT GRID */}
         <section id="product" className="relative py-20 md:py-32 px-4 md:px-8 bg-white border-y border-stone-100 shadow-[0_0_50px_rgba(0,0,0,0.02)] z-20">
@@ -310,7 +323,7 @@ export default function EvomiLandingPage() {
 
         {/* TESTIMONIAL SECTION WITH PARALLAX */}
         <section ref={testimonialRef} className="py-24 md:py-32 bg-stone-950 text-white px-6 relative overflow-hidden z-20">
-          <motion.div 
+          <motion.div
             style={{ y: testimonialGlowY }}
             className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-full bg-stone-800/30 blur-[120px] rounded-full pointer-events-none"
           />
