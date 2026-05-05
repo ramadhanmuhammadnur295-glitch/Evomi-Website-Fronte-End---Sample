@@ -111,7 +111,7 @@ export default function EvomiLandingPage() {
     // Fetch products
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/products", { headers: { Accept: "application/json" } });
+        const response = await fetch("https://ramadhan.alwaysdata.net/api/products", { headers: { Accept: "application/json" } });
         const result = await response.json();
         setProducts(result.data ? result.data : result);
       } catch (error) { console.error(error); }
@@ -123,7 +123,7 @@ export default function EvomiLandingPage() {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      await fetch("http://localhost:8000/api/logout", {
+      await fetch("https://ramadhan.alwaysdata.net/api/logout", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       });
@@ -218,7 +218,6 @@ export default function EvomiLandingPage() {
 
       <div className="min-h-screen bg-[#FBFBF9] text-stone-900 font-sans antialiased">
 
-        {/* NAVBAR */}
         {/* NAVBAR */}
         <nav className="fixed w-full z-[100] bg-[#0071bc]/95 backdrop-blur-xl border-b border-white/10 shadow-lg transition-all duration-300">
           <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">

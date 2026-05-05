@@ -28,7 +28,7 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('admin_access_token');
-      const response = await fetch('https://ramadhan.alwaysdata.net/api/admin/dashboard-stats/', {
+      const response = await fetch('https://ramadhan.alwaysdata.net/api/admin/dashboard-stats', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
