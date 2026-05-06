@@ -8,6 +8,9 @@ import localFont from "next/font/local";
 import AddToCartButton from "@/components/AddToCartButton";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -53,7 +56,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const getDetail = async () => {
       try {
         const resolvedParams = await params;
-        const response = await fetch(`https://ramadhan.alwaysdata.net/api/products/${resolvedParams.id}`, {
+        const response = await fetch(BASE_URL + `/api/products/${resolvedParams.id}`, {
           headers: { Accept: "application/json" },
         });
         if (!response.ok) { setError(true); return; }

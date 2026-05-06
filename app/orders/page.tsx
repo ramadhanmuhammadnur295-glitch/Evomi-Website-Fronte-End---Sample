@@ -8,6 +8,9 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ChevronRight, Package, Calendar, Tag } from "lucide-react";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // Tambahkan ini di atas komponen OrderHistoryPage
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -62,7 +65,7 @@ export default function OrderHistoryPage() {
 
         const fetchOrders = async () => {
             try {
-                const response = await fetch("https://ramadhan.alwaysdata.net/api/orders", {
+                const response = await fetch(BASE_URL + "/api/orders", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         Accept: "application/json",

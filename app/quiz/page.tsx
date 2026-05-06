@@ -2,6 +2,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // TODO: Add discount logic here
 const quizData = [
     { question: "Parfum manakah yang paling cocok untuk acara formal?", options: ["Purpose Prestige", "Peaceful Calm"], answer: "Purpose Prestige" },

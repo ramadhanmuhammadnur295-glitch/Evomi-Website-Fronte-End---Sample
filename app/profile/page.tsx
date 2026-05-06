@@ -8,6 +8,9 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import ShoppingBag from "@/components/ShoppingBag";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -78,7 +81,7 @@ export default function LuxuryProfilePage() {
 
       try {
         // TODO: Add discount logic here
-        const response = await fetch("https://ramadhan.alwaysdata.net/api/user", {
+        const response = await fetch(BASE_URL + "/api/user", {
           method: "GET",
           headers: {
             "Accept": "application/json",
@@ -147,7 +150,7 @@ export default function LuxuryProfilePage() {
     }
 
     try {
-      const response = await fetch(`https://ramadhan.alwaysdata.net/api/users/${formData.id}`, {
+      const response = await fetch(BASE_URL + `/api/users/${formData.id}`, {
         method: "POST",
         headers: { "Accept": "application/json", "Authorization": `Bearer ${token}` },
         body: data,

@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 interface ChatModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -27,7 +30,7 @@ export default function ChatModal({ isOpen, onClose }: ChatModalProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const ADMIN_ID = 1;
-  const API_BASE_URL = "https://ramadhan.alwaysdata.net/api";
+  const API_BASE_URL = BASE_URL + "/api";
 
   // 2. Ambil ID User hanya di sisi Client (Hydration Safe)
   useEffect(() => {

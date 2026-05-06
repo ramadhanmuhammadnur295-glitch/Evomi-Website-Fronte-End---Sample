@@ -6,6 +6,9 @@ import Link from "next/link";
 import localFont from "next/font/local";
 import { motion, Variants } from "framer-motion";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -96,7 +99,7 @@ export default function ProductsPage() {  // TODO: Add discount logic here
     setMounted(true); // Prevent hydration mismatch
     const fetchProducts = async () => { // TODO: Add discount logic here
       try {
-        const response = await fetch("https://ramadhan.alwaysdata.net/api/products", {
+        const response = await fetch(BASE_URL + "/api/products", {
           headers: { Accept: "application/json" },
         });
         const result = await response.json();

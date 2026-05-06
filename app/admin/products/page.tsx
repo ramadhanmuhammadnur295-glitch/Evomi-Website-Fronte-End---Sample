@@ -2,6 +2,9 @@
 
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // Interface berdasarkan struktur database products.sql
 interface Product {
     id: string;
@@ -54,7 +57,7 @@ export default function ProductsMenu() {
         deskripsi: ""
     });
 
-    const API_URL = "https://ramadhan.alwaysdata.net/api/products";
+    const API_URL = BASE_URL + "/api/products";
 
     useEffect(() => {
         fetchProducts();

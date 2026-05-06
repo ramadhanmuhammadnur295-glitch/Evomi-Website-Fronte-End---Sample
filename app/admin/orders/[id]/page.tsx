@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // Component
 export default function AdminOrderDetail() {
   const params = useParams();
@@ -28,7 +31,7 @@ export default function AdminOrderDetail() {
       const token = localStorage.getItem("admin_access_token");
 
       // Gunakan params.id langsung
-      const response = await fetch(`https://ramadhan.alwaysdata.net/api/admin/orders/${params.id}`, {
+      const response = await fetch(BASE_URL + `/api/admin/orders/${params.id}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -63,7 +66,7 @@ export default function AdminOrderDetail() {
   const handleStatusChange = async (newStatus: string) => {
     const token = localStorage.getItem('admin_access_token');
     try {
-      const response = await fetch(`https://ramadhan.alwaysdata.net/api/admin/orders/${order.id}`, {
+      const response = await fetch(BASE_URL + `/api/admin/orders/${order.id}`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',

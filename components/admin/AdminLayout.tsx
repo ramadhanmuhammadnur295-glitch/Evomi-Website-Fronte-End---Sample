@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation";
 import { LogOut, Menu, X, User, Bell } from "lucide-react";
 import Link from "next/link";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // TODO: Add discount logic here
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -21,7 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         // Ambil data admin untuk ditampilkan di Navbar
         const fetchAdminMe = async () => {
             try {
-                const res = await fetch("https://ramadhan.alwaysdata.net/api/admin/me", {
+                const res = await fetch(BASE_URL + "/api/admin/me", {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
@@ -43,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const handleLogout = async () => {
         const token = localStorage.getItem('admin_token');
         try {
-            await fetch('https://ramadhan.alwaysdata.net/api/admin/logout', {
+            await fetch(BASE_URL + '/api/admin/logout', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',

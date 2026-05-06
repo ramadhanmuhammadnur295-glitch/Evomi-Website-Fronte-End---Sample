@@ -5,34 +5,37 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
+// String global url
+import { BASE_URL} from "@/src/config/strings";
+
 // TODO: Add discount logic here
 const posters = [
   {
     id: 1,
     title: "Purpose Prestige",
     subtitle: "Prestige, Elegant",
-    image: "https://ramadhan.alwaysdata.net/storage/new products/gemini - purpose prestige.png", // Ganti dengan path poster Anda
+    image: BASE_URL + "/storage/new products/gemini - purpose prestige.png", // Ganti dengan path poster Anda
     color: "bg-stone-100",
   },
   {
     id: 2,
     title: "Peaceful Calm",
     subtitle: "Calm, Peaceful",
-    image: "https://ramadhan.alwaysdata.net/storage/new products/gemini - peaceful calm.png",
+    image: BASE_URL + "/storage/new products/gemini - peaceful calm.png",
     color: "bg-stone-200",
   },
   {
     id: 3,
     title: "Sweet Shy",
     subtitle: "Shy, Sweet",
-    image: "https://ramadhan.alwaysdata.net/storage/new products/gemini - sweet shy.png",
+    image: BASE_URL + "/storage/new products/gemini - sweet shy.png",
     color: "bg-stone-100",
   },
   {
     id: 4,
     title: "Rabel Brave",
     subtitle: "Be Brave, Be You",
-    image: "https://ramadhan.alwaysdata.net/storage/new products/gemini - rabel brave.png",
+    image: BASE_URL + "/storage/new products/gemini - rabel brave.png",
     color: "bg-stone-100",
   },
 ];

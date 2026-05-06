@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Lock, Mail, Loader2, ShieldCheck } from "lucide-react";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 export default function AdminLogin() {
     // State manajemen menggunakan logika dari source asli
     const [email, setEmail] = useState("");
@@ -20,7 +23,7 @@ export default function AdminLogin() {
 
         try {
             // Menggunakan endpoint API dan metode POST sesuai referensi
-            const res = await fetch("https://ramadhan.alwaysdata.net/api/admin/login", {
+            const res = await fetch(BASE_URL + "/api/admin/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -53,7 +56,7 @@ export default function AdminLogin() {
                 <div className="absolute -bottom-[10%] -left-[5%] w-[30%] h-[30%] bg-slate-100 rounded-full blur-[100px]" />
             </div>
 
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="w-full max-w-md z-10 px-6"
@@ -113,7 +116,7 @@ export default function AdminLogin() {
                         </div>
 
                         {/* Submit Button */}
-                        <button 
+                        <button
                             disabled={isLoading}
                             className="w-full bg-slate-900 hover:bg-black disabled:bg-slate-400 text-white py-3.5 rounded-xl text-sm font-bold transition-all mt-8 flex items-center justify-center gap-2 shadow-lg shadow-slate-200"
                         >

@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User, Mail, Lock, ShieldCheck, Save, Camera, LogOut } from "lucide-react";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // render page
 export default function UserProfilePage() {
   const [formData, setFormData] = useState({
@@ -28,7 +31,7 @@ export default function UserProfilePage() {
   const fetchUserData = async () => { // fetch user data
     const token = localStorage.getItem("admin_access_token");
     try {
-      const res = await fetch("https://ramadhan.alwaysdata.net/api/admin/me", {
+      const res = await fetch(BASE_URL + "/api/admin/me", {
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: "application/json"
@@ -89,7 +92,7 @@ export default function UserProfilePage() {
     }
 
     try {
-      const res = await fetch(`https://ramadhan.alwaysdata.net/api/admin/users/${formData.id}`, {
+      const res = await fetch(BASE_URL + `/api/admin/users/${formData.id}`, {
         method: "POST", // Berubah jadi POST agar multipart/form-data terbaca
         headers: {
           "Accept": "application/json",
@@ -122,7 +125,7 @@ export default function UserProfilePage() {
   const handleLogout = async () => { // handle logout
     const token = localStorage.getItem('admin_access_token'); // get token
     try {
-      await fetch('https://ramadhan.alwaysdata.net/api/admin/logout', { // logout
+      await fetch(BASE_URL + '/api/admin/logout', { // logout
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -169,7 +172,7 @@ export default function UserProfilePage() {
                     {/* Logika untuk menampilkan Image Preview vs DB Image vs Inisial */}
                     {formData.image_url != 'default-avatar.png' ? (
                       <img
-                        src={imagePreview || `https://ramadhan.alwaysdata.net/storage/profiles/${formData.image_url}`}
+                        src={imagePreview || BASE_URL + `/storage/profiles/${formData.image_url}`}
                         alt="Profile"
                         className="h-full w-full object-cover rounded-full"
                       />

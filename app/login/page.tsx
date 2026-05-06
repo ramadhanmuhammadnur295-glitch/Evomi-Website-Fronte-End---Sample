@@ -6,6 +6,9 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Lock, User, Loader2, ArrowLeft } from "lucide-react";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 export default function LoginPage() {
   // Menggunakan state dan logika dari source asli
   const [formData, setFormData] = useState({ login: "", password: "" }); 
@@ -20,7 +23,7 @@ export default function LoginPage() {
 
     try {
       // Menggunakan endpoint dan metode POST sesuai referensi
-      const response = await fetch("https://ramadhan.alwaysdata.net/api/login", {
+      const response = await fetch(BASE_URL + "/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

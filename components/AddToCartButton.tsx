@@ -4,6 +4,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // TODO: Add discount logic here
 interface CartProps {
   productId: string;
@@ -41,7 +44,7 @@ export default function AddToCartButton({
 
     try {
       // Memanggil API Laravel untuk update field 'cart' di DB
-      const response = await fetch(`https://ramadhan.alwaysdata.net/api/cart/add`, {
+      const response = await fetch(BASE_URL + `/api/cart/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -4,6 +4,9 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // Definisikan tipe data sesuai dengan yang kita simpan di JSON Laravel
 interface CartItem {
   product_id: string;
@@ -31,7 +34,7 @@ export default function ShoppingBag() {
     }
 
     try {
-      const response = await fetch(`https://ramadhan.alwaysdata.net/api/cart`, {
+      const response = await fetch(BASE_URL + `/api/cart`, {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -66,7 +69,7 @@ export default function ShoppingBag() {
     );
 
     try {
-      await fetch(`https://ramadhan.alwaysdata.net/api/cart/${productId}`, {
+      await fetch(BASE_URL + `/api/cart/${productId}`, {
         method: "DELETE",
         headers: {
           Accept: "application/json",

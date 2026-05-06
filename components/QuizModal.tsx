@@ -3,6 +3,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
+// String global url
+import { BASE_URL_LOCAL, BASE_URL_ONLINE, STRING_API } from "@/src/config/strings";
+
 // Data kuis berbasis 4 opsi pilihan
 const quizData = [
   {

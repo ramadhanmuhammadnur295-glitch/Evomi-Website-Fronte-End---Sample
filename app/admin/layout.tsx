@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation"; // Import useRouter dari next/navig
 import { LogOut, Menu } from "lucide-react"; // Pastikan lucide-react terinstall
 import Sidebar from "@/components/admin/Sidebar"; // Sesuaikan path jika berbeda
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // AdminLayout adalah komponen layout untuk halaman admin
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -22,7 +25,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         // 2. Fetch Data Admin
         const fetchAdminMe = async () => {
             try {
-                const res = await fetch("https://ramadhan.alwaysdata.net/api/admin/me", {
+                const res = await fetch(BASE_URL + "/api/admin/me", {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
@@ -45,7 +48,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const handleLogout = async () => {
         const token = localStorage.getItem('admin_access_token');
         try {
-            await fetch('https://ramadhan.alwaysdata.net/api/admin/logout', {
+            await fetch(BASE_URL + '/api/admin/logout', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',

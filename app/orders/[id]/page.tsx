@@ -8,6 +8,9 @@ import localFont from "next/font/local";
 import { ArrowLeft, Package, Truck, MessageSquare, ShieldCheck, X, QrCode, Banknote, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // --- Font Configuration ---
 const fontJudul = localFont({
     src: "../../fonts/8 Heavy.ttf",
@@ -48,7 +51,7 @@ export default function OrderDetailPage() {
         // Fungsi untuk mengambil detail order
         const fetchOrderDetail = async () => {
             try {
-                const response = await fetch(`https://ramadhan.alwaysdata.net/api/orders/${params.id}`, {
+                const response = await fetch(BASE_URL + `/api/orders/${params.id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         Accept: "application/json",
@@ -79,7 +82,7 @@ export default function OrderDetailPage() {
                     const orderId = qrisData.order_id;
 
                     // Gunakan backend Anda sebagai proxy untuk menghindari CORS
-                    const response = await fetch(`https://ramadhan.alwaysdata.net/api/midtrans/status/${orderId}`, {
+                    const response = await fetch(BASE_URL + `/api/midtrans/status/${orderId}`, {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem("access_token")}`,
                             'Accept': 'application/json'
@@ -111,7 +114,7 @@ export default function OrderDetailPage() {
     // Fungsi helper untuk update backend
     const updatePaymentStatusToSuccess = async () => {
         const token = localStorage.getItem("access_token");
-        await fetch(`https://ramadhan.alwaysdata.net/api/orders/${params.id}`, {
+        await fetch(BASE_URL + `/api/orders/${params.id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -129,7 +132,7 @@ export default function OrderDetailPage() {
 
         setIsPaying(true);
         try {
-            const response = await fetch(`https://ramadhan.alwaysdata.net/api/orders/${params.id}`, {
+            const response = await fetch(BASE_URL + `/api/orders/${params.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

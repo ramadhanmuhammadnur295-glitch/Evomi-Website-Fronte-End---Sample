@@ -7,6 +7,9 @@ import localFont from "next/font/local";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // --- Animasi Variants ---
 const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -80,10 +83,10 @@ export default function CheckoutPage() {
         }
 
         try {
-            const cartRes = await fetch(`https://ramadhan.alwaysdata.net/api/cart`, {
+            const cartRes = await fetch(BASE_URL + `/api/cart`, {
                 headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
             });
-            const userRes = await fetch(`https://ramadhan.alwaysdata.net/api/user`, {
+            const userRes = await fetch(BASE_URL + `/api/user`, {
                 headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
             });
 
@@ -106,7 +109,7 @@ export default function CheckoutPage() {
 
     // Effect untuk mengambil data saat component dimount
     useEffect(() => {
-        fetchData();    
+        fetchData();
     }, []);
 
     // handle checkout ada ongkos kirim
@@ -127,7 +130,7 @@ export default function CheckoutPage() {
         };
 
         try {
-            const response = await fetch(`https://ramadhan.alwaysdata.net/api/orders/checkout`, { // Endpoint untuk checkout
+            const response = await fetch(BASE_URL + `/api/orders/checkout`, { // Endpoint untuk checkout
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

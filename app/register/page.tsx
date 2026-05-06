@@ -6,6 +6,9 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Lock, User, Mail, AtSign, Loader2, ArrowLeft } from "lucide-react";
 
+// String global url
+import { BASE_URL} from "@/src/config/strings";
+
 export default function RegisterPage() {
   const router = useRouter();
 
@@ -27,7 +30,7 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const response = await fetch("https://ramadhan.alwaysdata.net/api/register", {
+      const response = await fetch(BASE_URL + "/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,7 +50,7 @@ export default function RegisterPage() {
       localStorage.setItem("user_data", JSON.stringify(data.user));
 
       router.push("/");
-      
+
       // Refresh untuk memperbarui state auth di komponen lain
       setTimeout(() => {
         router.refresh();
@@ -78,7 +81,7 @@ export default function RegisterPage() {
         </span>
       </Link>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-lg z-10"
@@ -221,7 +224,7 @@ export default function RegisterPage() {
             </p>
           </div>
         </div>
-        
+
         <p className="text-center mt-8 text-[9px] text-slate-400 font-medium uppercase tracking-[0.3em]">
           Official Evomi Registration Portal
         </p>

@@ -15,6 +15,7 @@ import { useState, useEffect, useRef } from "react";
 // Tambahkan import ChatModal di bagian atas
 import ChatModal from "@/components/ChatModal";
 import { motion, Variants, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { BASE_URL } from "@/src/config/strings";
 
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
@@ -111,7 +112,7 @@ export default function EvomiLandingPage() {
     // Fetch products
     const fetchProducts = async () => {
       try {
-        const response = await fetch("https://ramadhan.alwaysdata.net/api/products", { headers: { Accept: "application/json" } });
+        const response = await fetch(BASE_URL + "/api/products", { headers: { Accept: "application/json" } });
         const result = await response.json();
         setProducts(result.data ? result.data : result);
       } catch (error) { console.error(error); }
@@ -123,7 +124,7 @@ export default function EvomiLandingPage() {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      await fetch("https://ramadhan.alwaysdata.net/api/logout", {
+      await fetch(BASE_URL + "/api/logout", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       });
@@ -235,6 +236,8 @@ export default function EvomiLandingPage() {
               <a href="#product" className="hover:text-blue-200 transition-colors">Collection</a>
               <Link href="/produk" className="hover:text-blue-200 transition-colors">Shop</Link>
               <button onClick={() => setIsQuizOpen(true)} className="hover:text-blue-200 transition-colors uppercase">Quiz</button>
+              {/* Tambahkan baris ini */}
+              <Link href="/artikel" className="hover:text-blue-200 transition-colors">Artikel</Link>
             </div>
 
             {/* Right Actions (Desktop & Trigger Mobile) */}
@@ -246,7 +249,7 @@ export default function EvomiLandingPage() {
                     <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="flex items-center space-x-3 border border-white/30 rounded-full p-1 pr-4 bg-white/10 hover:bg-white/20 transition-all backdrop-blur-sm">
                       <div className="w-8 h-8 rounded-full bg-white text-[#0071bc] flex items-center justify-center text-[10px] font-bold uppercase overflow-hidden">
                         {user.image !== 'default-avatar.png' ? (
-                          <img src={`https://ramadhan.alwaysdata.net/storage/profiles/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
+                          <img src={BASE_URL + `/storage/profiles/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
                         ) : (user.name.charAt(0))}
                       </div>
                       <span className="text-[10px] font-bold uppercase tracking-widest text-white">{user.username}</span>
@@ -308,6 +311,12 @@ export default function EvomiLandingPage() {
                         Quiz
                       </button>
                     </motion.div>
+                    {/* Tambahkan baris ini */}
+                    <motion.div variants={itemVars}>
+                      <Link href="/artikel" onClick={() => setIsMobileMenuOpen(false)} className={`${fontJudul.className} text-2xl tracking-[0.2em] text-white uppercase`}>
+                        Artikel
+                      </Link>
+                    </motion.div>
                   </div>
 
                   {/* User Section for Mobile */}
@@ -317,7 +326,7 @@ export default function EvomiLandingPage() {
                         <div className="flex items-center space-x-4">
                           <div className="w-10 h-10 rounded-full bg-white text-[#0071bc] flex items-center justify-center font-bold">
                             {user.image !== 'default-avatar.png' ? (
-                              <img src={`https://ramadhan.alwaysdata.net/storage/profiles/${user.image}`} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                              <img src={BASE_URL + `/storage/profiles/${user.image}`} alt="Profile" className="w-full h-full object-cover rounded-full" />
                             ) : (user.name.charAt(0))}
                           </div>
                           <span className="text-white font-bold tracking-widest uppercase">{user.username}</span>
@@ -521,7 +530,6 @@ export default function EvomiLandingPage() {
             ))}
           </motion.div>
         </section>
-
 
         {/* TESTIMONIAL SECTION WITH PARALLAX */}
         <section

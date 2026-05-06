@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from "react";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 export default function AdminChatDashboard() {
     const [users, setUsers] = useState<any[]>([]);
     const [selectedUser, setSelectedUser] = useState<any>(null);
     const [messages, setMessages] = useState<any[]>([]);
     const [input, setInput] = useState("");
 
-    const API_URL = "https://ramadhan.alwaysdata.net/api";
+    const API_URL = BASE_URL + "/api";
 
     // 1. Ambil daftar user yang melakukan chat
     useEffect(() => {

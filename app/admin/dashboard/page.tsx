@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 // Tambahkan ChevronLeft dan ChevronRight untuk navigasi
 import { User, Mail, Lock, ShieldCheck, Save, Camera, LogOut, ChevronRight, ChevronLeft, Trash2 } from "lucide-react";
 
+// String global url
+import { BASE_URL } from "@/src/config/strings";
+
 // Admin Dashboard Page
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
@@ -28,7 +31,7 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('admin_access_token');
-      const response = await fetch('https://ramadhan.alwaysdata.net/api/admin/dashboard-stats', { // fix bugs origin cors block dengan menghilangkan slash / pada akhir url
+      const response = await fetch(BASE_URL + '/api/admin/dashboard-stats', { // fix bugs origin cors block dengan menghilangkan slash / pada akhir url
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -72,7 +75,7 @@ export default function AdminDashboard() {
   const handleStatusChange = async (orderId: any, newStatus: string) => {
     const token = localStorage.getItem('admin_access_token');
     try {
-      const response = await fetch(`https://ramadhan.alwaysdata.net/api/admin/orders/${orderId}`, {
+      const response = await fetch(BASE_URL + `/api/admin/orders/${orderId}`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -95,7 +98,7 @@ export default function AdminDashboard() {
   const handleDeleteOrder = async (orderId: any) => {
     const token = localStorage.getItem('admin_access_token');
     try {
-      const response = await fetch(`https://ramadhan.alwaysdata.net/api/admin/orders/${orderId}`, {
+      const response = await fetch(BASE_URL + `/api/admin/orders/${orderId}`, {
         method: 'DELETE',
         headers: {
           'Accept': 'application/json',
@@ -205,7 +208,7 @@ export default function AdminDashboard() {
                         value={order.status_pembayaran || 'pending'}
                         onChange={(e) => handleStatusChange(order.id, e.target.value)}
                         className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase border-none outline-none cursor-pointer ${order.status_pembayaran === 'success' ? 'bg-green-100 text-green-700' :
-                            (order.status_pembayaran === 'failed' || order.status_pembayaran === 'expired' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700')
+                          (order.status_pembayaran === 'failed' || order.status_pembayaran === 'expired' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700')
                           }`}
                       >
                         <option value="pending">Pending</option>
