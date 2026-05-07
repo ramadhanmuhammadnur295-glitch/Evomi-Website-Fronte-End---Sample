@@ -61,38 +61,12 @@ const fontCaption = localFont({
     display: "swap",
 });
 
-// --- Data Dummy Artikel ---
-const dummyArticles = [
-    {
-        id: 1,
-        title: "Seni Memilih Parfum Sesuai Kepribadian",
-        excerpt: "Bagaimana aroma dapat mencerminkan jati diri Anda yang sebenarnya melalui setiap semprotan.",
-        date: "12 Oct 2024",
-        category: "GUIDE",
-        image: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&q=80&w=800",
-    },
-    {
-        id: 2,
-        title: "Rahasia Aroma Tahan Lama Hingga 12 Jam",
-        excerpt: "Tips dan trik penggunaan parfum artisan agar tetap segar sepanjang hari meskipun beraktivitas padat.",
-        date: "05 Nov 2024",
-        category: "TIPS",
-        image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&q=80&w=800",
-    },
-    {
-        id: 3,
-        title: "Eksplorasi Botani: Kekuatan Oud & Vanilla",
-        excerpt: "Mengenal lebih dalam bahan organik langka yang kami gunakan dalam setiap botol koleksi Evomi.",
-        date: "20 Jan 2025",
-        category: "INGREDIENTS",
-        image: "https://images.unsplash.com/photo-1615484477778-ca3b77940c25?auto=format&fit=crop&q=80&w=800",
-    },
-];
 
 export default function ArtikelPage() {
     const router = useRouter();
     const [articles, setArticles] = useState<any[]>([]); // Ganti dummyArticles[cite: 4]
     const [isLoading, setIsLoading] = useState(true);
+
     // States untuk Navbar & Global
     const [mounted, setMounted] = useState(false);
     const [user, setUser] = useState<{ email: string; name: string; username: string; image: string; } | null>(null);
@@ -100,6 +74,23 @@ export default function ArtikelPage() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isQuizOpen, setIsQuizOpen] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const articlesPerPage = 6;
+
+    // Hitung total page
+    const totalPages = Math.ceil(articles.length / articlesPerPage);
+
+    // Data artikel per page
+    const indexOfLastArticle = currentPage * articlesPerPage;
+    const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
+    const currentArticles = articles.slice(indexOfFirstArticle, indexOfLastArticle);
+
+    // Function pindah page
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
 
     // Inisialisasi User
     useEffect(() => {
@@ -129,6 +120,24 @@ export default function ArtikelPage() {
 
         fetchArticles();
     }, []);
+
+    // --- HELPER FUNCTION: Membersihkan HTML dari React Quill ---
+    const getExcerpt = (htmlContent: string, maxLength: number = 120) => {
+        if (!htmlContent) return "";
+
+        // 1. Menghapus semua tag HTML
+        // 2. Mengganti &nbsp; dengan spasi biasa
+        // 3. Mengganti spasi ganda hasil pembersihan tag
+        const plainText = htmlContent
+            .replace(/<[^>]*>?/gm, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        return plainText.length > maxLength
+            ? plainText.substring(0, maxLength) + "..."
+            : plainText;
+    };
 
     // Handle logout
     const handleLogout = async () => {
@@ -297,36 +306,45 @@ export default function ArtikelPage() {
                 {isLoading ? (
                     <div className="text-center py-20 text-stone-400 uppercase tracking-widest text-xs">Memuat Cerita...</div>
                 ) : (
-                    <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                        {articles.map((article) => (
-                            <motion.article key={article.id} variants={fadeInUp} className="group cursor-pointer">
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                        {currentArticles.map((article) => (
+                            <motion.article key={article.id} className="group cursor-pointer">
+
+                                {/* Gunakan slug untuk Link jika tersedia, fallback ke ID */}
                                 <Link href={`/artikel/${article.id}`} className="block">
-                                    <div className="relative aspect-[16/10] overflow-hidden rounded-2xl mb-6 bg-stone-100 shadow-sm">
-                                        {/* Gunakan image_url dari database atau placeholder jika kosong */}
+                                    <div className="relative aspect-[16/10] overflow-hidden rounded-2xl mb-6 bg-stone-100 shadow-sm border border-stone-100">
                                         <Image
                                             src={article.image_url || "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&q=80&w=800"}
                                             alt={article.title}
                                             fill
                                             className="object-cover transition-transform duration-1000 group-hover:scale-110"
                                         />
-                                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm">
-                                            <span className="text-[9px] font-bold tracking-widest text-stone-800 uppercase">{article.slug}</span>
-                                        </div>
+                                        {article.slug && (
+                                            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm">
+                                                <span className="text-[9px] font-bold tracking-widest text-stone-800 uppercase">{article.slug}</span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="space-y-3">
-                                        <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
-                                            {new Date(article.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                        </p>
-                                        <h3 className={`${fontJudul.className} text-xl md:text-2xl text-stone-800 uppercase leading-snug group-hover:text-amber-800 transition-colors`}>
+                                        <div className="flex justify-between items-center">
+                                            <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+                                                {new Date(article.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                            </p>
+                                            <span className="text-[9px] text-amber-800/60 font-bold uppercase tracking-tighter italic">{article.author || 'Evomi Editorial'}</span>
+                                        </div>
+
+                                        <h3 className="text-xl md:text-2xl text-stone-800 uppercase leading-snug group-hover:text-amber-800 transition-colors font-bold tracking-tight">
                                             {article.title}
                                         </h3>
-                                        <p className="text-stone-500 text-sm leading-relaxed font-light line-clamp-2">
-                                            {/* Menampilkan potongan konten sebagai excerpt */}
-                                            {article.content.replace(/<[^>]*>?/gm, '').substring(0, 100)}...
+
+                                        {/* DESKRIPSI: Sudah dibersihkan dari HTML Quill */}
+                                        <p className="text-stone-500 text-sm leading-relaxed font-light line-clamp-3">
+                                            {getExcerpt(article.content)}
                                         </p>
+
                                         <div className="pt-4">
-                                            <p className="inline-block text-[10px] uppercase tracking-widest font-bold text-stone-800 border-b border-stone-200 pb-1 hover:border-stone-900 transition-all">
+                                            <p className="inline-block text-[10px] uppercase tracking-widest font-bold text-stone-800 border-b border-stone-200 pb-1 group-hover:border-stone-900 transition-all">
                                                 Read Story
                                             </p>
                                         </div>
@@ -337,6 +355,60 @@ export default function ArtikelPage() {
                     </motion.div>
                 )}
             </section>
+
+            {/* Pagination */}
+            {/* PAGINATION CONTROLS */}
+            {totalPages > 1 && (
+                <div className="flex flex-col items-center mt-20 pb-32 space-y-6">
+                    {/* Garis Dekoratif Kecil */}
+                    <div className="h-[1px] w-24 bg-stone-200"></div>
+
+                    <div className="flex items-center space-x-2">
+                        {/* Prev Button */}
+                        <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="p-3 text-stone-400 hover:text-stone-900 disabled:opacity-20 transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+
+                        {/* Number Buttons */}
+                        <div className="flex space-x-1">
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+                                <button
+                                    key={num}
+                                    onClick={() => handlePageChange(num)}
+                                    className={`w-10 h-10 rounded-full text-[10px] font-bold tracking-widest transition-all duration-300 ${currentPage === num
+                                            ? "bg-stone-900 text-white shadow-lg"
+                                            : "bg-transparent text-stone-400 hover:bg-stone-100 hover:text-stone-900"
+                                        }`}
+                                >
+                                    {String(num).padStart(2, '0')}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Next Button */}
+                        <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="p-3 text-stone-400 hover:text-stone-900 disabled:opacity-20 transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {/* Page Indicator */}
+                    <p className="text-[9px] uppercase tracking-[0.3em] text-stone-400 font-bold">
+                        Journal Page {currentPage} of {totalPages}
+                    </p>
+                </div>
+            )}
 
             {/* --- FOOTER SAMA DENGAN LANDING PAGE --- */}
             <motion.footer initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1 }} className="relative z-20 bg-white pt-20 pb-10 px-6 md:px-8 border-t border-stone-100">

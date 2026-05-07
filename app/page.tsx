@@ -54,6 +54,7 @@ const fontCaption = localFont({
 
 // Component utama
 export default function EvomiLandingPage() {
+
   const router = useRouter();
   const [user, setUser] = useState<{ email: string; name: string; username: string; image: string; } | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -61,6 +62,7 @@ export default function EvomiLandingPage() {
   const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isQuizOpen, setIsQuizOpen] = useState(false);
+
   // Di dalam component EvomiLandingPage(), tambahkan state ini di bawah state isQuizOpen:
   const [isChatOpen, setIsChatOpen] = useState(false);
 
@@ -70,8 +72,10 @@ export default function EvomiLandingPage() {
     target: heroRef,
     offset: ["start start", "end start"],
   });
+
   // Teks turun lebih lambat dari scroll (efek tertinggal)
   const heroTextY = useTransform(heroScrollY, [0, 1], ["0%", "60%"]);
+
   // Background turun sedikit agar terlihat berdimensi
   const heroBgY = useTransform(heroScrollY, [0, 1], ["0%", "20%"]);
 
@@ -80,6 +84,7 @@ export default function EvomiLandingPage() {
     target: testimonialRef,
     offset: ["start end", "end start"],
   });
+
   // Cahaya blur bergerak naik turun saat scroll
   const testimonialGlowY = useTransform(testimonialScrollY, [0, 1], ["-40%", "40%"]);
   // ----------------------
@@ -152,6 +157,7 @@ export default function EvomiLandingPage() {
     </div>
   );
 
+  // 
   const mobileMenuVars: Variants = {
     hidden: { opacity: 0, height: 0 },
     visible: {
@@ -224,19 +230,18 @@ export default function EvomiLandingPage() {
           <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
 
             {/* Logo Section */}
-            <div className="flex-1 md:w-1/3 flex justify-start">
+            <div className="flex-1 md:w-1/2 flex justify-start">
               <Link href="/" className="hover:opacity-70 transition-opacity">
                 <Image src="/img/Logo Evomi.png" alt="Evomi Logo" width={90} height={36} className="brightness-0 invert drop-shadow-sm" />
               </Link>
             </div>
 
             {/* Desktop Menu Section */}
-            <div className={`hidden md:flex w-1/3 justify-center items-center space-x-10 ${fontJudul.className} text-[13px] tracking-[0.2em] uppercase text-white`}>
+            <div className={`hidden md:flex w-1/2 justify-center items-center space-x-10 ${fontJudul.className} text-[13px] tracking-[0.2em] uppercase text-white`}>
               <a href="#about" className="hover:text-blue-200 transition-colors">About</a>
               <a href="#product" className="hover:text-blue-200 transition-colors">Collection</a>
               <Link href="/produk" className="hover:text-blue-200 transition-colors">Shop</Link>
               <button onClick={() => setIsQuizOpen(true)} className="hover:text-blue-200 transition-colors uppercase">Quiz</button>
-              {/* Tambahkan baris ini */}
               <Link href="/artikel" className="hover:text-blue-200 transition-colors">Artikel</Link>
             </div>
 

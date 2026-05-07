@@ -3,16 +3,24 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { BASE_URL } from "@/src/config/strings";
 
+import dynamic from 'next/dynamic';
+import 'react-quill-new/dist/quill.snow.css'; // Ganti path css-nya
+
+// Render ReactQuill secara dinamis menggunakan package baru
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
+
 // Interface berdasarkan kebutuhan artikel Evomi
 interface Article {
     id: string;
     title: string;
+    slug: string; // Tambahan slug
     content: string;
     author?: string;
     image_url?: string;
     created_at: string;
 }
 
+// Artikel Menu Page
 export default function ArticlesMenu() {
     const [articles, setArticles] = useState<Article[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -23,11 +31,12 @@ export default function ArticlesMenu() {
     const [successModal, setSuccessModal] = useState({
         isOpen: false,
         message: "",
-        type: "" // 'create', 'update', atau 'delete'
+        type: ""
     });
 
     const [formData, setFormData] = useState({
         title: "",
+        slug: "", // Tambahan state slug
         author: "Evomi Editorial",
         content: ""
     });
@@ -42,7 +51,6 @@ export default function ArticlesMenu() {
         try {
             const res = await fetch(API_URL);
             const data = await res.json();
-            // Sesuaikan jika API Laravel Anda membungkus data dalam properti 'data'
             setArticles(data.success ? data.data : data);
         } catch (error) {
             console.error("Fetch error:", error);
@@ -63,12 +71,28 @@ export default function ArticlesMenu() {
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) setImageFile(e.target.files[0]);
+    // Handler khusus untuk React Quill (mengembalikan string HTML, bukan event)
+    const handleContentChange = (content: string) => {
+        setFormData({ ...formData, content });
+    };
+
+    // Opsional: Generate slug otomatis dari title saat mengetik
+    const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const title = e.target.value;
+        const autoSlug = title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)+/g, '');
+
+        setFormData({
+            ...formData,
+            title: title,
+            slug: editingId ? formData.slug : autoSlug // Hanya auto-fill jika artikel baru
+        });
     };
 
     const openCreateModal = () => {
-        setFormData({ title: "", author: "Evomi Editorial", content: "" });
+        setFormData({ title: "", slug: "", author: "Evomi Editorial", content: "" });
         setImageFile(null);
         setEditingId(null);
         setIsModalOpen(true);
@@ -77,6 +101,7 @@ export default function ArticlesMenu() {
     const openEditModal = (article: Article) => {
         setFormData({
             title: article.title,
+            slug: article.slug || "",
             author: article.author || "Evomi Editorial",
             content: article.content
         });
@@ -89,6 +114,7 @@ export default function ArticlesMenu() {
         e.preventDefault();
         const data = new FormData();
         data.append("title", formData.title);
+        data.append("slug", formData.slug); // Kirim slug ke backend
         data.append("author", formData.author);
         data.append("content", formData.content);
 
@@ -96,7 +122,6 @@ export default function ArticlesMenu() {
             data.append("image", imageFile);
         }
 
-        // 🔥 PENTING: Tambahkan method spoofing jika sedang mengedit
         if (editingId) {
             data.append("_method", "PUT");
         }
@@ -105,9 +130,8 @@ export default function ArticlesMenu() {
 
         try {
             const res = await fetch(url, {
-                method: "POST", // Tetap gunakan POST untuk mendukung upload file
+                method: "POST",
                 body: data,
-                // Jangan tambahkan header 'Content-Type', biarkan browser yang mengaturnya secara otomatis
             });
 
             if (res.ok) {
@@ -123,6 +147,7 @@ export default function ArticlesMenu() {
         }
     };
 
+    // Handle delete fungsi
     const handleDelete = async (id: string) => {
         if (!confirm(`Hapus artikel ini?`)) return;
         try {
@@ -134,6 +159,21 @@ export default function ArticlesMenu() {
         } catch (error) {
             console.error("Delete error:", error);
         }
+    };
+
+    // Konfigurasi Toolbar untuk React Quill
+    const quillModules = {
+        toolbar: [
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['link'],
+            ['clean']
+        ],
+    };
+
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) setImageFile(e.target.files[0]);
     };
 
     return (
@@ -198,7 +238,7 @@ export default function ArticlesMenu() {
                                                 </div>
                                                 <div className="overflow-hidden">
                                                     <div className="text-sm font-bold text-gray-900 truncate max-w-[200px] md:max-w-xs">{article.title}</div>
-                                                    <div className="text-[10px] text-gray-400 font-mono">ID: {article.id}</div>
+                                                    <div className="text-[10px] text-gray-400 font-mono">/{article.slug}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -225,21 +265,27 @@ export default function ArticlesMenu() {
                     </div>
                 </div>
 
-                {/* Modal CRUD */}
+                {/* Modal CRUD - Diperbesar menjadi max-w-4xl */}
                 {isModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
-                        <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-gray-100 overflow-hidden">
-                            <form onSubmit={handleSubmit}>
-                                <div className="px-8 py-6 border-b border-gray-50 flex justify-between items-center">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4 overflow-y-auto">
+                        <div className="bg-white rounded-3xl w-full max-w-4xl shadow-2xl border border-gray-100 overflow-hidden my-8">
+                            <form onSubmit={handleSubmit} className="flex flex-col max-h-[90vh]">
+                                <div className="px-8 py-6 border-b border-gray-50 flex justify-between items-center bg-white sticky top-0 z-10">
                                     <h2 className="text-xl font-bold">{editingId ? 'Edit Artikel' : 'Tulis Cerita Baru'}</h2>
                                     <button type="button" onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-black">✕</button>
                                 </div>
 
-                                <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-4">
+                                {/* Layout Grid 1/3 (Meta) dan 2/3 (Editor) */}
+                                <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-8 overflow-y-auto">
+                                    {/* Bagian Kiri: Meta Data */}
+                                    <div className="space-y-4 md:col-span-1">
                                         <div>
                                             <label className="block text-[10px] font-bold uppercase text-gray-400 mb-1">Judul Artikel</label>
-                                            <input name="title" value={formData.title} onChange={handleInputChange} className="w-full px-4 py-2 bg-gray-50 border rounded-xl text-sm outline-none focus:border-black" placeholder="Masukan judul..." required />
+                                            <input name="title" value={formData.title} onChange={handleTitleChange} className="w-full px-4 py-2 bg-gray-50 border rounded-xl text-sm outline-none focus:border-black" placeholder="Masukan judul..." required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold uppercase text-gray-400 mb-1">Slug (URL)</label>
+                                            <input name="slug" value={formData.slug} onChange={handleInputChange} className="w-full px-4 py-2 bg-gray-50 border rounded-xl text-sm outline-none focus:border-black font-mono text-gray-600" placeholder="contoh-judul-artikel" required />
                                         </div>
                                         <div>
                                             <label className="block text-[10px] font-bold uppercase text-gray-400 mb-1">Penulis</label>
@@ -247,19 +293,33 @@ export default function ArticlesMenu() {
                                         </div>
                                         <div>
                                             <label className="block text-[10px] font-bold uppercase text-gray-400 mb-1">Cover Image</label>
-                                            <input type="file" onChange={handleFileChange} className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800" />
+                                            <input type="file" onChange={handleFileChange} className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800 w-full" />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-[10px] font-bold uppercase text-gray-400 mb-1">Konten Artikel</label>
-                                            <textarea name="content" value={formData.content} onChange={handleInputChange} rows={8} className="w-full px-4 py-2 bg-gray-50 border rounded-xl text-sm outline-none focus:border-black resize-none" placeholder="Tulis cerita di sini..." required />
+                                    {/* Bagian Kanan: Rich Text Editor */}
+                                    <div className="space-y-2 md:col-span-2 flex flex-col">
+                                        <label className="block text-[10px] font-bold uppercase text-gray-400 mb-1">Konten Artikel</label>
+                                        <div className="flex-1 bg-white border rounded-xl overflow-hidden focus-within:border-black transition-colors">
+                                            <ReactQuill
+                                                theme="snow"
+                                                value={formData.content}
+                                                onChange={handleContentChange}
+                                                modules={quillModules}
+                                                className="h-[300px] border-none"
+                                                placeholder="Tulis cerita jurnal di sini..."
+                                            />
                                         </div>
+                                        {/* CSS Fix untuk Quill agar border terlihat clean seperti desain SaaS */}
+                                        <style jsx global>{`
+                                            .ql-toolbar.ql-snow { border: none; border-bottom: 1px solid #f3f4f6; padding: 12px; background: #f9fafb; }
+                                            .ql-container.ql-snow { border: none; }
+                                            .ql-editor { min-height: 250px; font-size: 14px; }
+                                        `}</style>
                                     </div>
                                 </div>
 
-                                <div className="px-8 py-6 bg-gray-50 flex justify-end gap-3">
+                                <div className="px-8 py-6 bg-gray-50 flex justify-end gap-3 sticky bottom-0 z-10 border-t border-gray-100">
                                     <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2 text-sm font-bold text-gray-400 hover:text-gray-600">Batal</button>
                                     <button type="submit" className="px-8 py-2 bg-black text-white rounded-xl text-sm font-bold hover:shadow-lg transition-all">
                                         {editingId ? 'Update Jurnal' : 'Publish Sekarang'}

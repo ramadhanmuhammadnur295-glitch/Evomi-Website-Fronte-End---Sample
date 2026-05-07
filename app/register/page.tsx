@@ -64,6 +64,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4 py-12">
+      
       {/* Dekorasi Background */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-5%] right-[-5%] w-[35%] h-[35%] bg-slate-100 rounded-full blur-[100px]" />
@@ -87,6 +88,7 @@ export default function RegisterPage() {
         className="w-full max-w-lg z-10"
       >
         <div className="bg-white border border-slate-200 p-10 shadow-[0_8px_40px_rgba(0,0,0,0.03)] rounded-[2.5rem]">
+          
           {/* Header Konten */}
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900 leading-tight">
@@ -105,6 +107,7 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              
               {/* Full Name */}
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1">

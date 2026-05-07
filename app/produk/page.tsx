@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import localFont from "next/font/local";
-import { motion, Variants } from "framer-motion";
+import { motion, Variants, AnimatePresence } from "framer-motion";
 
 // String global url
 import { BASE_URL } from "@/src/config/strings";
@@ -19,7 +19,8 @@ const fadeInUp: Variants = {
   }
 };
 
-const staggerContainer: Variants = {  // Variants untuk stagger animation
+// 
+const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -36,7 +37,7 @@ const fontJudul = localFont({
   display: "swap",
 });
 
-const fontCaption = localFont({ // Variants untuk font caption
+const fontCaption = localFont({
   src: "./../fonts/Nohemi-Regular.otf",
   variable: "--font-body",
   display: "swap",
@@ -64,7 +65,6 @@ const ProductCard = ({ parfum }: { parfum: any }) => {
           </span>
         </div>
 
-        {/* Link to Product Detail */}
         <Link href={`/produk/${parfum.id}`} className="absolute inset-0 z-10 opacity-0 md:group-hover:opacity-100 bg-stone-900/10 backdrop-blur-[2px] transition-all duration-500 flex items-end p-4">
           <div className="w-full bg-white/95 backdrop-blur-md py-3.5 text-[10px] uppercase font-bold tracking-widest text-center text-stone-800 translate-y-4 group-hover:translate-y-0 transition-all duration-500 rounded-xl shadow-lg hover:bg-stone-900 hover:text-white">
             View Details
@@ -81,7 +81,6 @@ const ProductCard = ({ parfum }: { parfum: any }) => {
           {parfum.deskripsi}
         </p>
         <p className="text-stone-700 font-medium text-[11px] md:text-sm tracking-wide pt-2">
-          {/* TODO: Add discount logic here */}
           Rp {Number(parfum.harga_retail).toLocaleString("id-ID")}
         </p>
       </div>
@@ -89,15 +88,19 @@ const ProductCard = ({ parfum }: { parfum: any }) => {
   );
 };
 
-export default function ProductsPage() {  // TODO: Add discount logic here
+export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
-  // TODO: Add discount logic here
+  // --- Pagination State ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 4; // Menampilkan 4 produk per halaman
+
+  // useEffect
   useEffect(() => {
-    setMounted(true); // Prevent hydration mismatch
-    const fetchProducts = async () => { // TODO: Add discount logic here
+    setMounted(true);
+    const fetchProducts = async () => {
       try {
         const response = await fetch(BASE_URL + "/api/products", {
           headers: { Accept: "application/json" },
@@ -112,6 +115,24 @@ export default function ProductsPage() {  // TODO: Add discount logic here
     };
     fetchProducts();
   }, []);
+
+  // --- Logika Pagination ---
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(products.length / productsPerPage);
+
+  const paginate = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    // Smooth scroll ke atas section produk
+    const productSection = document.getElementById('collection-grid');
+    if (productSection) {
+      window.scrollTo({
+        top: productSection.offsetTop - 150,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   if (!mounted) return null;
 
@@ -138,11 +159,6 @@ export default function ProductsPage() {  // TODO: Add discount logic here
         </div>
       </nav>
 
-      {/* HERO SECTION */}
-      <div className="absolute top-0 left-0 w-full h-96 overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute top-20 left-10 w-[30rem] h-[30rem] bg-stone-200/50 rounded-full blur-[100px] opacity-40"></div>
-      </div>
-
       <section className="pt-40 pb-16 px-6 relative z-10">
         <motion.div
           initial="hidden"
@@ -168,8 +184,8 @@ export default function ProductsPage() {  // TODO: Add discount logic here
         </motion.div>
       </section>
 
-      {/* PRODUCT GRID */}
-      <section className="pb-32 px-4 md:px-8">
+      {/* PRODUCT GRID SECTION */}
+      <section id="collection-grid" className="pb-32 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
@@ -182,17 +198,66 @@ export default function ProductsPage() {  // TODO: Add discount logic here
               ))}
             </div>
           ) : (
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.05 }}
-              variants={staggerContainer}
-              className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10 md:row-gap-16"
-            >
-              {products.map((parfum: any) => (
-                <ProductCard key={parfum.id} parfum={parfum} />
-              ))}
-            </motion.div>
+            <>
+              <motion.div
+                key={currentPage} // Menambahkan key agar animasi trigger ulang saat ganti halaman
+                initial="hidden"
+                animate="visible"
+                variants={staggerContainer}
+                className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10 md:row-gap-16"
+              >
+                {currentProducts.map((parfum: any) => (
+                  <ProductCard key={parfum.id} parfum={parfum} />
+                ))}
+              </motion.div>
+
+              {/* PAGINATION CONTROLS */}
+              {totalPages > 1 && (
+                <div className="flex flex-col items-center mt-24 space-y-6">
+                  <div className="h-[1px] w-24 bg-stone-200"></div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="p-3 text-stone-400 hover:text-stone-900 disabled:opacity-20 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+
+                    <div className="flex space-x-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+                        <button
+                          key={num}
+                          onClick={() => paginate(num)}
+                          className={`w-10 h-10 rounded-full text-[10px] font-bold tracking-widest transition-all duration-300 ${
+                            currentPage === num
+                              ? "bg-stone-900 text-white shadow-lg"
+                              : "bg-transparent text-stone-400 hover:bg-stone-100 hover:text-stone-900"
+                          }`}
+                        >
+                          {String(num).padStart(2, '0')}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="p-3 text-stone-400 hover:text-stone-900 disabled:opacity-20 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-[9px] uppercase tracking-[0.3em] text-stone-400">
+                    Page {currentPage} of {totalPages}
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
@@ -226,7 +291,6 @@ export default function ProductsPage() {  // TODO: Add discount logic here
           </div>
         </div>
 
-        {/* TODO: Add discount logic here */}
         <div className="max-w-7xl mx-auto pt-8 border-t border-stone-100 text-[10px] text-stone-400 uppercase tracking-[0.2em] flex flex-col md:flex-row justify-between items-center gap-4">
           <p>© {new Date().getFullYear()} EVOMI FRAGRANCE HOUSE.</p>
           <p>Handcrafted in Indonesia</p>

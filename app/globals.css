@@ -1,8 +1,8 @@
 @import "tailwindcss";
 /* globals.css */
-@import 'swiper/css';
-@import 'swiper/css/pagination';
-@import 'swiper/css/navigation';
+@import "swiper/css";
+@import "swiper/css/pagination";
+@import "swiper/css/navigation";
 
 :root {
   --background: #ffffff;
@@ -45,12 +45,12 @@ body {
 
 /* Menghilangkan scrollbar untuk class .scrollbar-hide */
 .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 @layer utilities {
@@ -58,7 +58,82 @@ body {
     display: none;
   }
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
+}
+
+.article-content {
+  white-space: normal;
+}
+
+/* FIX ENTER / PARAGRAPH REACT QUILL */
+.article-content p {
+  display: block;
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  line-height: 1.9;
+}
+
+.article-content br {
+  display: block;
+  content: "";
+  margin-top: 0.5rem;
+}
+
+/* FIX BULLET LIST */
+.article-content ul {
+  list-style-type: disc;
+  padding-left: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.article-content ol {
+  list-style-type: decimal;
+  padding-left: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.article-content li {
+  display: list-item;
+  margin-bottom: 0.5rem;
+  line-height: 1.8;
+}
+
+.article-content li p {
+  margin-bottom: 0.5rem;
+}
+
+.article-content img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.article-content iframe {
+  width: 100%;
+  min-height: 400px;
+  border-radius: 24px;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.article-content pre {
+  overflow-x: auto;
+  border-radius: 20px;
+  padding: 1rem;
+}
+
+.article-content blockquote p {
+  margin: 0;
+}
+
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
