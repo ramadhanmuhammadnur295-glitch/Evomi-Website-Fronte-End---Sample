@@ -7,7 +7,7 @@ import localFont from "next/font/local";
 import { motion, Variants, AnimatePresence } from "framer-motion";
 
 // String global url
-import { BASE_URL } from "@/src/config/strings";
+import { BASE_URL, HARGA_EVOMI, HARGA_ONGKIR } from "@/src/config/strings";
 
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
