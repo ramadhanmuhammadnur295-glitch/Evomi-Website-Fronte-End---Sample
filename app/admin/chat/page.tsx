@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { BASE_URL } from "@/src/config/strings";
 
 export default function AdminChatDashboard() {
+
     const [users, setUsers] = useState<any[]>([]);
     const [selectedUser, setSelectedUser] = useState<any>(null);
     const [messages, setMessages] = useState<any[]>([]);
@@ -71,7 +72,6 @@ export default function AdminChatDashboard() {
     return (
         <div className="flex h-screen bg-stone-100 font-sans">
             {/* Sidebar: Daftar User */}
-            {/* Sidebar: Daftar User */}
             <div className="w-1/3 bg-white border-r border-stone-200 overflow-y-auto flex flex-col">
                 {/* Header Sidebar */}
                 <div className="p-6 border-b border-stone-100 bg-white sticky top-0 z-10">
@@ -111,8 +111,12 @@ export default function AdminChatDashboard() {
                                         <p className="text-xs font-bold text-stone-800 uppercase tracking-wider truncate">
                                             {u.name}
                                         </p>
-                                        {/* Dot Indikator Pesan Baru (Opsional) */}
-                                        <span className="w-1.5 h-1.5 rounded-full bg-stone-300"></span>
+                                        <div className="relative flex items-center">
+                                            {u.is_online == 1 && (
+                                                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
+                                            )}
+                                            <span className={`relative inline-flex w-1.5 h-1.5 rounded-full ${u.is_online ? 'bg-emerald-500' : 'bg-stone-300'}`}></span>
+                                        </div>
                                     </div>
                                     <p className="text-[11px] text-stone-400 truncate tracking-tight">
                                         @{u.username}
@@ -129,7 +133,6 @@ export default function AdminChatDashboard() {
             </div>
 
             {/* Main Chat: Balas Pesan */}
-            {/* Main Chat: Balas Pesan */}
             <div className="flex-1 flex flex-col bg-[#FBFBF9]">
                 {selectedUser ? (
                     <>
@@ -145,7 +148,6 @@ export default function AdminChatDashboard() {
                             </div>
                         </div>
 
-                        {/* Area Pesan */}
                         {/* Area Pesan */}
                         <div className="flex-1 p-6 overflow-y-auto flex flex-col gap-8 bg-[#FBFBF9]">
                             {messages.map((m, i) => {
@@ -166,7 +168,7 @@ export default function AdminChatDashboard() {
 
                                         {/* Bubble Chat */}
                                         <div className={`relative max-w-[70%] px-5 py-3.5 rounded-2xl text-[13px] leading-relaxed
-                    ${isIncoming
+                                            ${isIncoming
                                                 ? 'bg-white text-stone-800 rounded-tl-none border border-stone-200 shadow-sm'
                                                 : 'bg-stone-900 text-stone-50 rounded-tr-none shadow-md'
                                             }`}
