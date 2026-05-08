@@ -56,7 +56,9 @@ const fontCaption = localFont({
 export default function EvomiLandingPage() {
 
   const router = useRouter();
-  const [user, setUser] = useState<{ email: string; name: string; username: string; image: string; } | null>(null);
+  const [user, setUser] = useState<{
+    id: any; email: string; name: string; username: string; image: string; 
+} | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
   const [mounted, setMounted] = useState(false);
@@ -124,6 +126,58 @@ export default function EvomiLandingPage() {
     };
     fetchProducts();
   }, []);
+
+  // Tambahkan di dalam komponen EvomiLandingPage()
+  useEffect(() => {
+    if (!user) return;
+
+    // 1. Set status ONLINE saat masuk halaman
+    const setStatus = async (status: number) => {
+      try {
+        await fetch(`${BASE_URL}/api/user/status`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+          },
+          body: JSON.stringify({ is_online: status })
+        });
+      } catch (err) {
+        console.error("Gagal update status:", err);
+      }
+    };
+
+    setStatus(1); // Set Online
+
+    // 2. Set status OFFLINE saat browser ditutup
+    const handleVisibilityChange = () => {
+      // navigator.sendBeacon tetap berjalan meskipun tab sudah tertutup
+      if (document.visibilityState === 'hidden') {
+        const url = `${BASE_URL}/api/user/status-beacon`;
+        const data = JSON.stringify({
+          user_id: user.id, // Pastikan user object punya ID
+          is_online: 0
+        });
+        const blob = new Blob([data], { type: 'application/json' });
+        navigator.sendBeacon(url, blob);
+      }
+    };
+
+    // Kita gunakan beforeunload untuk browser close
+    const handleUnload = () => {
+      const url = `${BASE_URL}/api/user/status-beacon`;
+      const data = JSON.stringify({ user_id: user.id, is_online: 0 });
+      const blob = new Blob([data], { type: 'application/json' });
+      navigator.sendBeacon(url, blob);
+    };
+
+    window.addEventListener('beforeunload', handleUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+    };
+  }, [user]);
+
 
   // Handle logout
   const handleLogout = async () => {
@@ -371,7 +425,7 @@ export default function EvomiLandingPage() {
                 <p className="text-stone-400 tracking-[0.5em] uppercase text-xl font-semibold">
                   {heroSlides[currentSlide].tagline}
                 </p>
-                <h1 className={`${fontJudul.className} text-6xl md:text-[160px] uppercase text-stone-900 drop-shadow-sm`}>
+                <h1 className={`${fontJudul.className} text-4xl md:text-[130px] uppercase text-stone-900 drop-shadow-sm`}>
                   {heroSlides[currentSlide].title}
                 </h1>
                 <p className="text-stone-500 italic max-w-xl mx-auto text-xl md:text-base">

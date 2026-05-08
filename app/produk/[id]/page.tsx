@@ -188,9 +188,54 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </motion.div>
 
             <motion.div variants={fadeInUp} className="space-y-8 mb-12">
-              <p className="text-stone-600 text-sm leading-relaxed italic font-light border-l-2 border-stone-200 pl-6">
-                "{produk.deskripsi}"
-              </p>
+              {/* Rich Text Description Container */}
+              <div
+                className="
+                  prose prose-stone max-w-none
+                  
+                  prose-headings:font-bold
+                  prose-headings:text-stone-900
+                  prose-headings:tracking-tight
+                  prose-h1:text-2xl
+                  prose-h2:text-xl
+                  prose-h3:text-lg
+                  
+                  prose-p:text-stone-600
+                  prose-p:text-sm
+                  prose-p:leading-relaxed
+                  prose-p:font-light
+                  prose-p:mb-4
+                  prose-p:text-justify
+                  
+                  prose-strong:text-stone-900
+                  prose-strong:font-semibold
+                  
+                  prose-a:text-[#0071bc]
+                  prose-a:no-underline
+                  hover:prose-a:underline
+                  
+                  prose-ul:list-disc
+                  prose-ol:list-decimal
+                  prose-li:marker:text-stone-400
+                  prose-li:text-stone-600
+                  prose-li:text-sm
+                  
+                  prose-blockquote:border-l-2
+                  prose-blockquote:border-stone-200
+                  prose-blockquote:bg-transparent
+                  prose-blockquote:pl-6
+                  prose-blockquote:py-1
+                  prose-blockquote:text-stone-600
+                  prose-blockquote:italic
+                  prose-blockquote:font-light
+
+                  break-words
+                  overflow-hidden
+                "
+                dangerouslySetInnerHTML={{ __html: produk.deskripsi || "" }}
+              />
+
+              {/* Vibe Tags Container */}
               <div className="flex flex-wrap gap-2">
                 {produk.vibe?.split(',').map((v: string, index: number) => (
                   <motion.span
