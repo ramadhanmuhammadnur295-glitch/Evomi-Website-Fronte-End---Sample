@@ -8,7 +8,7 @@ import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // String global url
-import { BASE_URL } from "@/src/config/strings";
+import { BASE_URL, HARGA_ONGKIR } from "@/src/config/strings";
 
 // --- Animasi Variants ---
 const fadeInUp = {
@@ -121,8 +121,8 @@ export default function CheckoutPage() {
         // Set state untuk menampilkan loading
         setIsSubmitting(true);
         const orderData = {
-            total_harga: subtotal + 100,
-            ongkos_kirim: 100,
+            total_harga: subtotal + HARGA_ONGKIR,
+            ongkos_kirim: HARGA_ONGKIR,
             alamat_pengiriman: shippingAddress,
             catatan_pengiriman: catatan,
             kurir: "Reguler (COD)",
@@ -155,7 +155,7 @@ export default function CheckoutPage() {
     };
 
     const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const shipping = 100; //<<== ongkos kirim
+    const shipping = HARGA_ONGKIR;
     const total = subtotal + shipping;
 
     if (loading) return (

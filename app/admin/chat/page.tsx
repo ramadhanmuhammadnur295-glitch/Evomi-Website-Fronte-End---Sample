@@ -7,12 +7,13 @@ import { BASE_URL } from "@/src/config/strings";
 
 export default function AdminChatDashboard() {
 
-    const [users, setUsers] = useState<any[]>([]);
-    const [selectedUser, setSelectedUser] = useState<any>(null);
-    const [messages, setMessages] = useState<any[]>([]);
-    const [input, setInput] = useState("");
+    // State untuk menyimpan daftar user, pesan, dan input balasan
+    const [users, setUsers] = useState<any[]>([]);  // Daftar user yang melakukan chat
+    const [selectedUser, setSelectedUser] = useState<any>(null);    // User yang sedang dipilih untuk melihat chat
+    const [messages, setMessages] = useState<any[]>([]);    // Riwayat chat dengan user yang dipilih
+    const [input, setInput] = useState("");     // Input untuk balasan admin
 
-    const API_URL = BASE_URL + "/api";
+    const API_URL = BASE_URL + "/api";  // Ganti dengan URL API kamu
 
     // 1. Ambil daftar user yang melakukan chat
     useEffect(() => {
@@ -62,6 +63,7 @@ export default function AdminChatDashboard() {
             })
         });
 
+        // Setelah mengirim pesan, ambil kembali riwayat chat untuk memperbarui tampilan
         const result = await res.json();
         if (result.success) {
             setMessages([...messages, result.data]);

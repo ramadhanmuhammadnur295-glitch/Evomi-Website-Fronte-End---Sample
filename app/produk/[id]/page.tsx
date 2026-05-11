@@ -21,7 +21,7 @@ const fadeInUp: Variants = {
   }
 };
 
-// 
+// Stagger container untuk animasi anak-anak
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {

@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
 import localFont from "next/font/local";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
 import { ChevronRight, Package, Calendar, Tag } from "lucide-react";
 
 // String global url
@@ -52,6 +52,7 @@ export default function OrderHistoryPage() {
     const [loading, setLoading] = useState(true);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+    // useEffect untuk cek autentikasi dan fetch data pesanan
     useEffect(() => {
         const token = localStorage.getItem("access_token");
         const savedUser = localStorage.getItem("user_data");
@@ -83,12 +84,14 @@ export default function OrderHistoryPage() {
         fetchOrders();
     }, [router]);
 
+    // Fungsi untuk logout
     const handleLogout = () => {
         localStorage.removeItem("access_token");
         localStorage.removeItem("user_data");
         router.push("/");
     };
 
+    // Fungsi untuk menentukan style berdasarkan status pembayaran
     const getStatusStyle = (status: string) => {
         switch (status.toLowerCase()) {
             case "success": return "bg-emerald-50 text-emerald-700 border-emerald-100";
@@ -144,6 +147,7 @@ export default function OrderHistoryPage() {
                 <div className="absolute bottom-10 right-[-5%] w-[30rem] h-[30rem] bg-amber-100/30 rounded-full blur-[100px]"></div>
             </div>
 
+            {/* MAIN CONTENT */}
             <main className="pt-40 pb-24 px-6 max-w-5xl mx-auto">
                 {/* HEADER */}
                 <header className="mb-16">
@@ -244,7 +248,8 @@ export default function OrderHistoryPage() {
                     </div>
                 )}
             </main>
-
+            
+            {/* Footer */}
             <footer className="py-12 text-center">
                 <p className="text-[9px] text-stone-300 uppercase tracking-[0.4em] font-bold">Evomi Fragrance House • Jakarta</p>
             </footer>

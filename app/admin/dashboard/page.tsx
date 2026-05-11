@@ -96,22 +96,22 @@ export default function AdminDashboard() {
 
   // Handle delete order
   const handleDeleteOrder = async (orderId: any) => {
-    const token = localStorage.getItem('admin_access_token');
+    const token = localStorage.getItem('admin_access_token');   // Ambil token dari localStorage
     try {
-      const response = await fetch(BASE_URL + `/api/admin/orders/${orderId}`, {
-        method: 'DELETE',
+      const response = await fetch(BASE_URL + `/api/admin/orders/${orderId}`, {   // Ganti dengan URL API yang sesuai
+        method: 'DELETE',   // Gunakan metode DELETE untuk menghapus data
         headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',   // Pastikan API menerima JSON
+          'Authorization': `Bearer ${token}`,   // Sertakan token untuk otentikasi
         },
       });
 
       if (response.ok) {
-        showModal("Pesanan Dihapus", `Data pesanan #${orderId} telah dihapus.`, "success");
-        await fetchData();
+        showModal("Pesanan Dihapus", `Data pesanan #${orderId} telah dihapus.`, "success");   // Tampilkan modal sukses
+        await fetchData();    // Refresh data setelah penghapusan
       }
     } catch (error) {
-      showModal("Error", "Gagal menghapus data.", "error");
+      showModal("Error", "Gagal menghapus data.", "error");   // Tampilkan modal error jika terjadi masalah saat menghapus data
     }
   };
 

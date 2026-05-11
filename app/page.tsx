@@ -1,21 +1,21 @@
 "use client";
 
 // React & Next
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import localFont from "next/font/local";
 import { useRouter } from "next/navigation";
 import { SocialIcon } from 'react-social-icons'
 
 // ... import lainnya
 import QuizModal from "@/components/QuizModal";
-import ImageCarousel from "@/components/ImageCarousel";
-import { useState, useEffect, useRef } from "react";
 
 // Tambahkan import ChatModal di bagian atas
 import ChatModal from "@/components/ChatModal";
-import { motion, Variants, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { BASE_URL } from "@/src/config/strings";
+import { useState, useEffect, useRef } from "react";
+import ImageCarousel from "@/components/ImageCarousel";
+import { motion, Variants, useScroll, useTransform, AnimatePresence } from "framer-motion";
 
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
@@ -81,6 +81,7 @@ export default function EvomiLandingPage() {
   // Background turun sedikit agar terlihat berdimensi
   const heroBgY = useTransform(heroScrollY, [0, 1], ["0%", "20%"]);
 
+  // Testimonial section parallax
   const testimonialRef = useRef(null);
   const { scrollYProgress: testimonialScrollY } = useScroll({
     target: testimonialRef,
@@ -98,8 +99,10 @@ export default function EvomiLandingPage() {
     { tagline: "Unisex & Long Lasting", title: "CRAFTED", desc: "Ketahanan aroma hingga 12 jam lebih." },
   ];
 
+  // State untuk slide hero
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // Effect untuk auto-slide hero
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -172,9 +175,11 @@ export default function EvomiLandingPage() {
       navigator.sendBeacon(url, blob);
     };
 
+    // Event untuk tab visibility change (pindah tab) dan browser close
     window.addEventListener('beforeunload', handleUnload);
 
     return () => {
+      // Pastikan status OFFLINE saat komponen unmount (misal user logout atau pindah halaman)
       window.removeEventListener('beforeunload', handleUnload);
     };
   }, [user]);
@@ -200,6 +205,7 @@ export default function EvomiLandingPage() {
     setIsMobileMenuOpen(false);
   };
 
+  // Component untuk section divider (garis pembatas antar section)
   const SectionDivider = () => (
     <div className="max-w-7xl mx-auto px-6 md:px-8">
       <motion.div
@@ -232,6 +238,7 @@ export default function EvomiLandingPage() {
     }
   };
 
+  // Item Vars untuk menu mobile
   const itemVars: Variants = {
     hidden: { opacity: 0, x: -10 },
     visible: { opacity: 1, x: 0 }
@@ -522,6 +529,8 @@ export default function EvomiLandingPage() {
         {/* PRODUCT GRID */}
         <section id="product" className="relative py-20 md:py-32 px-4 md:px-8 bg-white border-y border-stone-100 shadow-[0_0_50px_rgba(0,0,0,0.02)] z-20">
           <div className="max-w-7xl mx-auto">
+
+            {/* Judul Produk */}
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -537,6 +546,7 @@ export default function EvomiLandingPage() {
               </div>
             </motion.div>
 
+            {/* Product Grid */}
             <motion.div
               initial="hidden"
               whileInView="visible"

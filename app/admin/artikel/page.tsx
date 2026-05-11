@@ -172,6 +172,7 @@ export default function ArticlesMenu() {
         ],
     };
 
+    // Handler untuk perubahan file input, menyimpan file gambar yang dipilih
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) setImageFile(e.target.files[0]);
     };

@@ -7,6 +7,7 @@ import "react-quill-new/dist/quill.snow.css";
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import { BASE_URL } from "@/src/config/strings";
 
+// Definisikan tipe data produk
 interface Product {
     id: string;
     brand_id: number;
@@ -25,6 +26,7 @@ interface Product {
     status_stok?: string;
 }
 
+// Tipe untuk response API (jika diperlukan)
 export default function ProductsMenu() {
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -36,12 +38,14 @@ export default function ProductsMenu() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
+    // --- STATE MODAL SUCCESS ---
     const [successModal, setSuccessModal] = useState({
         isOpen: false,
         message: "",
         type: ""
     });
 
+    // --- STATE FORM DATA ---
     const [formData, setFormData] = useState({
         id: "",
         brand_id: 4,
@@ -59,6 +63,7 @@ export default function ProductsMenu() {
         status_stok: "Available Stock"
     });
 
+    // Opsi konsentrasi tetap sama, bisa dipindah ke luar komponen jika tidak berubah
     const konsentrasiOptions = [
         "Extrait de Parfum (Pure Perfume)",
         "Eau de Parfum (EDP)",

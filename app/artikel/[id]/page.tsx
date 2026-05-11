@@ -21,6 +21,7 @@ const fontJudul = localFont({
   display: "swap",
 });
 
+// Untuk caption, deskripsi, dan body text
 const fontCaption = localFont({
   src: "../../fonts/Nohemi-Regular.otf",
   variable: "--font-body",
@@ -37,7 +38,9 @@ const fadeInUp: Variants = {
   },
 };
 
+// --- Halaman Detail Artikel ---
 export default function ArtikelDetailPage() {
+
   const params = useParams();
   const router = useRouter();
 
@@ -110,9 +113,11 @@ export default function ArtikelDetailPage() {
           navigator.sendBeacon(url, blob);
         };
     
+        // Event untuk tab visibility change (pindah tab) dan browser close
         window.addEventListener('beforeunload', handleUnload);
     
         return () => {
+          // Hapus event listener saat komponen unmount
           window.removeEventListener('beforeunload', handleUnload);
         };
       }, [user]);
@@ -140,6 +145,7 @@ export default function ArtikelDetailPage() {
     setIsMobileMenuOpen(false);
   };
 
+  // Set mounted untuk memastikan komponen hanya dirender di client side, karena kita menggunakan localStorage yang tidak tersedia di server side. Ini mencegah error saat rendering awal di server.
   useEffect(() => {
     setMounted(true);
     const token = localStorage.getItem("access_token");
@@ -153,6 +159,7 @@ export default function ArtikelDetailPage() {
     }
   }, []);
 
+  // Fetch detail artikel berdasarkan slug/ID dari URL
   useEffect(() => {
     const fetchArticleDetail = async () => {
       try {
@@ -191,6 +198,7 @@ export default function ArtikelDetailPage() {
     },
   };
 
+  // Item Vars untuk animasi menu mobile
   const itemVars: Variants = {
     hidden: { opacity: 0, x: -10 },
     visible: { opacity: 1, x: 0 },
@@ -241,7 +249,7 @@ export default function ArtikelDetailPage() {
           <div
             className={`hidden md:flex w-1/3 justify-center items-center space-x-10 ${fontJudul.className} text-[13px] tracking-[0.2em] uppercase text-white`}
           >
-            {/* Pakai /#about agar kembali ke home lalu scroll */}
+            {/* Produk href */}
             <Link
               href="/produk"
               className="hover:text-blue-200 transition-colors"
@@ -259,6 +267,7 @@ export default function ArtikelDetailPage() {
             </Link>
           </div>
 
+          {/* Profile Menu */}
           <div className="flex-1 md:w-1/3 flex justify-end items-center space-x-4">
             <div className="hidden md:flex items-center space-x-6">
               {user ? (

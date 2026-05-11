@@ -21,9 +21,11 @@ export default function RegisterPage() {
     password_confirmation: "",
   });
 
+  // State untuk loading dan error handling
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Handler untuk submit form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

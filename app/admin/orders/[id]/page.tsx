@@ -28,7 +28,7 @@ export default function AdminOrderDetail() {
   const fetchOrderDetail = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("admin_access_token");
+      const token = localStorage.getItem("admin_access_token");   // Ambil token dari localStorage
 
       // Gunakan params.id langsung
       const response = await fetch(BASE_URL + `/api/admin/orders/${params.id}`, {

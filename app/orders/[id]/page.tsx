@@ -42,9 +42,9 @@ export default function OrderDetailPage() {
 
     // useEffect Fungsi Pertama
     useEffect(() => {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem("access_token"); // Cek token, jika tidak ada arahkan ke login
         if (!token) {
-            router.push("/login");
+            router.push("/login");  // Redirect ke halaman login jika token tidak ditemukan
             return;
         }
 

@@ -19,7 +19,7 @@ const fadeInUp: Variants = {
   }
 };
 
-// 
+// Stagger container untuk animasi anak-anaknya
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -37,6 +37,7 @@ const fontJudul = localFont({
   display: "swap",
 });
 
+// Font untuk deskripsi dan teks biasa
 const fontCaption = localFont({
   src: "./../fonts/Nohemi-Regular.otf",
   variable: "--font-body",
@@ -96,6 +97,7 @@ const ProductCard = ({ parfum }: { parfum: any }) => {
   );
 };
 
+// Halaman utama untuk menampilkan produk
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -163,9 +165,11 @@ export default function ProductsPage() {
       navigator.sendBeacon(url, blob);
     };
 
+    // Event untuk tab visibility change (pindah tab) dan browser close
     window.addEventListener('beforeunload', handleUnload);
 
     return () => {
+      // Pastikan status OFFLINE saat komponen unmount (misal user logout atau pindah halaman)
       window.removeEventListener('beforeunload', handleUnload);
     };
   }, [user]);
