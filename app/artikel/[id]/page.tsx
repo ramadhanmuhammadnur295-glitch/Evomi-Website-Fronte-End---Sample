@@ -48,79 +48,79 @@ export default function ArtikelDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [mounted, setMounted] = useState(false);
-  
+
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-   const [user, setUser] = useState<{
-        id: any; email: string; name: string; username: string; image: string;
-      } | null>(null);
-    
-      useEffect(() => {
-        setMounted(true);
-        const token = localStorage.getItem("access_token");
-        const savedUser = localStorage.getItem("user_data");
-        if (token && savedUser) {
-          try { setUser(JSON.parse(savedUser)); } catch (error) { console.error(error); }
-        }
-      }, []);
-    
-      // Tambahkan di dalam komponen EvomiLandingPage()
-      // Status user online / offline, saat user menutup browser
-      useEffect(() => {
-        if (!user) return;
-    
-        // 1. Set status ONLINE saat masuk halaman
-        const setStatus = async (status: number) => {
-          try {
-            await fetch(`${BASE_URL}/api/user/status`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("access_token")}`
-              },
-              body: JSON.stringify({ is_online: status })
-            });
-          } catch (err) {
-            console.error("Gagal update status:", err);
-          }
-        };
-    
-        setStatus(1); // Set Online
-    
-        // 2. Set status OFFLINE saat browser ditutup
-        const handleVisibilityChange = () => {
-          // navigator.sendBeacon tetap berjalan meskipun tab sudah tertutup
-          if (document.visibilityState === 'hidden') {
-            const url = `${BASE_URL}/api/user/status-beacon`;
-            const data = JSON.stringify({
-              user_id: user.id, // Pastikan user object punya ID
-              is_online: 0
-            });
-            const blob = new Blob([data], { type: 'application/json' });
-            navigator.sendBeacon(url, blob);
-          }
-        };
-    
-        // Kita gunakan beforeunload untuk browser close
-        const handleUnload = () => {
-          const url = `${BASE_URL}/api/user/status-beacon`;
-          const data = JSON.stringify({ user_id: user.id, is_online: 0 });
-          const blob = new Blob([data], { type: 'application/json' });
-          navigator.sendBeacon(url, blob);
-        };
-    
-        // Event untuk tab visibility change (pindah tab) dan browser close
-        window.addEventListener('beforeunload', handleUnload);
-    
-        return () => {
-          // Hapus event listener saat komponen unmount
-          window.removeEventListener('beforeunload', handleUnload);
-        };
-      }, [user]);
+  const [user, setUser] = useState<{
+    id: any; email: string; name: string; username: string; image: string;
+  } | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    const token = localStorage.getItem("access_token");
+    const savedUser = localStorage.getItem("user_data");
+    if (token && savedUser) {
+      try { setUser(JSON.parse(savedUser)); } catch (error) { console.error(error); }
+    }
+  }, []);
+
+  // Tambahkan di dalam komponen EvomiLandingPage()
+  // Status user online / offline, saat user menutup browser
+  useEffect(() => {
+    if (!user) return;
+
+    // 1. Set status ONLINE saat masuk halaman
+    const setStatus = async (status: number) => {
+      try {
+        await fetch(`${BASE_URL}/api/user/status`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+          },
+          body: JSON.stringify({ is_online: status })
+        });
+      } catch (err) {
+        console.error("Gagal update status:", err);
+      }
+    };
+
+    setStatus(1); // Set Online
+
+    // 2. Set status OFFLINE saat browser ditutup
+    const handleVisibilityChange = () => {
+      // navigator.sendBeacon tetap berjalan meskipun tab sudah tertutup
+      if (document.visibilityState === 'hidden') {
+        const url = `${BASE_URL}/api/user/status-beacon`;
+        const data = JSON.stringify({
+          user_id: user.id, // Pastikan user object punya ID
+          is_online: 0
+        });
+        const blob = new Blob([data], { type: 'application/json' });
+        navigator.sendBeacon(url, blob);
+      }
+    };
+
+    // Kita gunakan beforeunload untuk browser close
+    const handleUnload = () => {
+      const url = `${BASE_URL}/api/user/status-beacon`;
+      const data = JSON.stringify({ user_id: user.id, is_online: 0 });
+      const blob = new Blob([data], { type: 'application/json' });
+      navigator.sendBeacon(url, blob);
+    };
+
+    // Event untuk tab visibility change (pindah tab) dan browser close
+    window.addEventListener('beforeunload', handleUnload);
+
+    return () => {
+      // Hapus event listener saat komponen unmount
+      window.removeEventListener('beforeunload', handleUnload);
+    };
+  }, [user]);
 
   // Handle logout
   const handleLogout = async () => {
@@ -540,23 +540,20 @@ export default function ArtikelDetailPage() {
                 prose prose-stone prose-lg
                 max-w-none
                 
-                /* --- Fix Teks Terpotong --- */
-                whitespace-pre-wrap 
-                break-normal
-                [word-break:normal]
-                [overflow-wrap:anywhere]
-                hyphens-none
-                /* -------------------------- */
+                /* --- Perbaikan Spasi & Wrapping --- */
+                whitespace-normal 
+                break-words
+                /* ---------------------------------- */
                 
                 prose-headings:font-bold
                 prose-headings:text-stone-900
                 prose-headings:tracking-tight
                 prose-headings:scroll-mt-32
                 
+                /* Mengatur spasi vertikal agar lebih natural */
                 prose-p:text-stone-700
-                prose-p:leading-8
+                prose-p:leading-relaxed
                 prose-p:mb-6
-                /* Hilangkan text-justify agar spasi antar kata tidak dipaksa renggang */
                 prose-p:text-left 
                 
                 prose-strong:text-stone-900
@@ -565,13 +562,12 @@ export default function ArtikelDetailPage() {
                 prose-ul:list-disc
                 prose-ol:list-decimal
                 prose-li:text-stone-700
-                prose-li:leading-8
+                prose-li:leading-relaxed
                 
                 prose-img:rounded-3xl
                 prose-img:shadow-xl
                 prose-img:my-10
                 
-                break-words
                 overflow-hidden
                 "
               dangerouslySetInnerHTML={{ __html: article.content }}

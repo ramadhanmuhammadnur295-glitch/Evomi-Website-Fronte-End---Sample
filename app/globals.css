@@ -4,6 +4,7 @@
 @import "swiper/css/pagination";
 @import "swiper/css/navigation";
 
+/* Root Variables */
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -17,6 +18,8 @@
   border-bottom-left-radius: 0.75rem;
   border-bottom-right-radius: 0.75rem;
 }
+
+/* Toolbar Quill */
 .ql-toolbar {
   border-top-left-radius: 0.75rem;
   border-top-right-radius: 0.75rem;

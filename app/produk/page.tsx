@@ -111,68 +111,81 @@ export default function ProductsPage() {
     id: any; email: string; name: string; username: string; image: string;
   } | null>(null);
 
+  // 1. Inisialisasi: Load User Data & Mounted State
   useEffect(() => {
     setMounted(true);
     const token = localStorage.getItem("access_token");
     const savedUser = localStorage.getItem("user_data");
     if (token && savedUser) {
-      try { setUser(JSON.parse(savedUser)); } catch (error) { console.error(error); }
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        console.error("Gagal parse user data:", error);
+      }
     }
   }, []);
 
-  // Tambahkan di dalam komponen EvomiLandingPage()
-  // Status user online / offline, saat user menutup browser
+  // 2. LOGIKA STATUS: Online / Offline
   useEffect(() => {
     if (!user) return;
 
-    // 1. Set status ONLINE saat masuk halaman
-    const setStatus = async (status: number) => {
+    // Fungsi Set ONLINE (Menggunakan fetch biasa)
+    const setOnlineStatus = async () => {
       try {
+        const token = localStorage.getItem("access_token");
         await fetch(`${BASE_URL}/api/user/status`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+            "Authorization": `Bearer ${token}`
           },
-          body: JSON.stringify({ is_online: status })
+          body: JSON.stringify({ is_online: 1 })
         });
       } catch (err) {
-        console.error("Gagal update status:", err);
+        console.error("Gagal update status online:", err);
       }
     };
 
-    setStatus(1); // Set Online
+    setOnlineStatus();
 
-    // 2. Set status OFFLINE saat browser ditutup
-    const handleVisibilityChange = () => {
-      // navigator.sendBeacon tetap berjalan meskipun tab sudah tertutup
-      if (document.visibilityState === 'hidden') {
-        const url = `${BASE_URL}/api/user/status-beacon`;
-        const data = JSON.stringify({
-          user_id: user.id, // Pastikan user object punya ID
-          is_online: 0
-        });
-        const blob = new Blob([data], { type: 'application/json' });
-        navigator.sendBeacon(url, blob);
-      }
-    };
-
-    // Kita gunakan beforeunload untuk browser close
-    const handleUnload = () => {
+    // Fungsi Set OFFLINE (Menggunakan Beacon API agar tetap terkirim saat browser tutup)
+    const handleOfflineBeacon = () => {
       const url = `${BASE_URL}/api/user/status-beacon`;
-      const data = JSON.stringify({ user_id: user.id, is_online: 0 });
+      const data = JSON.stringify({
+        user_id: user.id,
+        is_online: 0
+      });
       const blob = new Blob([data], { type: 'application/json' });
       navigator.sendBeacon(url, blob);
     };
 
-    // Event untuk tab visibility change (pindah tab) dan browser close
-    window.addEventListener('beforeunload', handleUnload);
+    // Event listener untuk menutup tab/browser
+    window.addEventListener('beforeunload', handleOfflineBeacon);
 
     return () => {
-      // Pastikan status OFFLINE saat komponen unmount (misal user logout atau pindah halaman)
-      window.removeEventListener('beforeunload', handleUnload);
+      // Jalankan offline beacon saat user pindah page (unmount)
+      handleOfflineBeacon();
+      window.removeEventListener('beforeunload', handleOfflineBeacon);
     };
   }, [user]);
+
+  // 3. Fetch Produk Data
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(BASE_URL + "/api/products", {
+          headers: { Accept: "application/json" },
+        });
+        const result = await response.json();
+        setProducts(result.data || result || []);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
 
   // useEffect

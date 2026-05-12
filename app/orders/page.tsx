@@ -52,7 +52,7 @@ export default function OrderHistoryPage() {
     const [loading, setLoading] = useState(true);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // useEffect untuk cek autentikasi dan fetch data pesanan
+    // 1. EFFECT AWAL: Cek Auth & Load User Data
     useEffect(() => {
         const token = localStorage.getItem("access_token");
         const savedUser = localStorage.getItem("user_data");
@@ -84,14 +84,72 @@ export default function OrderHistoryPage() {
         fetchOrders();
     }, [router]);
 
-    // Fungsi untuk logout
-    const handleLogout = () => {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user_data");
-        router.push("/");
+    // 2. TAMBAHKAN INI: Logika Status Online / Offline (Beacon API)
+    useEffect(() => {
+        if (!user) return;
+
+        // Fungsi untuk set Online saat masuk page
+        const setOnlineStatus = async () => {
+            try {
+                await fetch(`${BASE_URL}/api/user/status`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+                    },
+                    body: JSON.stringify({ is_online: 1 })
+                });
+            } catch (err) {
+                console.error("Gagal update status online:", err);
+            }
+        };
+
+        setOnlineStatus();
+
+        // Fungsi Beacon untuk set Offline (saat browser tutup/pindah)
+        const handleOfflineBeacon = () => {
+            const url = `${BASE_URL}/api/user/status-beacon`;
+            const data = JSON.stringify({ 
+                user_id: user.id, 
+                is_online: 0 
+            });
+            const blob = new Blob([data], { type: 'application/json' });
+            navigator.sendBeacon(url, blob);
+        };
+
+        // Event listener browser
+        window.addEventListener('beforeunload', handleOfflineBeacon);
+
+        return () => {
+            // Jalankan saat pindah halaman/unmount
+            handleOfflineBeacon();
+            window.removeEventListener('beforeunload', handleOfflineBeacon);
+        };
+    }, [user]);
+
+    // 3. UPDATE: Fungsi Logout dengan penambahan status offline
+    const handleLogout = async () => {
+        try {
+            // Set offline secara eksplisit saat logout
+            const token = localStorage.getItem("access_token");
+            await fetch(`${BASE_URL}/api/user/status`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ is_online: 0 })
+            });
+        } catch (err) {
+            console.error("Logout status error:", err);
+        } finally {
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("user_data");
+            setUser(null);
+            router.push("/");
+        }
     };
 
-    // Fungsi untuk menentukan style berdasarkan status pembayaran
     const getStatusStyle = (status: string) => {
         switch (status.toLowerCase()) {
             case "success": return "bg-emerald-50 text-emerald-700 border-emerald-100";
@@ -100,7 +158,7 @@ export default function OrderHistoryPage() {
             default: return "bg-stone-50 text-stone-500 border-stone-100";
         }
     };
-
+    
     return (
         <div className={`${fontCaption.variable} ${fontJudul.variable} min-h-screen bg-[#FBFBF9] font-sans antialiased text-stone-900 selection:bg-amber-100`}>
 

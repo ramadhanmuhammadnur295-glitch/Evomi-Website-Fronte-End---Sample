@@ -68,6 +68,49 @@ export default function LuxuryProfilePage() {
   const [mounted, setMounted] = useState(false);  // TODO: Add discount logic here
   const router = useRouter();  // TODO: Add discount logic here
 
+  // 2. TAMBAHKAN: Logika Status Online / Offline
+  useEffect(() => {
+    if (!user) return;
+
+    // Fungsi Set ONLINE
+    const setOnlineStatus = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        await fetch(`${BASE_URL}/api/user/status`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ is_online: 1 })
+        });
+      } catch (err) {
+        console.error("Gagal update status online:", err);
+      }
+    };
+
+    setOnlineStatus();
+
+    // Fungsi Beacon untuk Set OFFLINE
+    const handleOfflineBeacon = () => {
+      const url = `${BASE_URL}/api/user/status-beacon`;
+      const data = JSON.stringify({ 
+        user_id: user.id, 
+        is_online: 0 
+      });
+      const blob = new Blob([data], { type: 'application/json' });
+      navigator.sendBeacon(url, blob);
+    };
+
+    window.addEventListener('beforeunload', handleOfflineBeacon);
+
+    return () => {
+      // Set offline saat pindah halaman
+      handleOfflineBeacon();
+      window.removeEventListener('beforeunload', handleOfflineBeacon);
+    };
+  }, [user]);
+
   useEffect(() => { // TODO: Add discount logic here
     setMounted(true);
 

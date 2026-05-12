@@ -33,12 +33,91 @@ export default function OrderDetailPage() {
     const [loading, setLoading] = useState(true);
     const [isPaying, setIsPaying] = useState(false);
 
-    // State untuk Modal & QRIS
+    // TAMBAHKAN STATE USER
+    const [user, setUser] = useState<any>(null);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<"cash" | "qris" | null>(null);
     const [qrisData, setQrisData] = useState<any>(null);
-
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
+    // 1. UPDATE useEffect Inisialisasi
+    useEffect(() => {
+        const token = localStorage.getItem("access_token");
+        const savedUser = localStorage.getItem("user_data");
+
+        if (!token || !savedUser) {
+            router.push("/login");
+            return;
+        }
+
+        // Set data user ke state
+        setUser(JSON.parse(savedUser));
+
+        const fetchOrderDetail = async () => {
+            try {
+                const response = await fetch(BASE_URL + `/api/orders/${params.id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: "application/json",
+                    },
+                });
+                const result = await response.json();
+                if (result.status === "success") {
+                    setOrder(result.data);
+                }
+            } catch (error) {
+                console.error("Error fetching order detail:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (params.id) fetchOrderDetail();
+    }, [params.id, router]);
+
+    // 2. TAMBAHKAN useEffect Status Online/Offline
+    useEffect(() => {
+        if (!user) return;
+
+        // Fungsi set ONLINE
+        const setStatus = async (status: number) => {
+            try {
+                const token = localStorage.getItem("access_token");
+                await fetch(`${BASE_URL}/api/user/status`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ is_online: status })
+                });
+            } catch (err) {
+                console.error("Gagal update status:", err);
+            }
+        };
+
+        setStatus(1); // Set Online saat masuk
+
+        // Fungsi Beacon untuk OFFLINE (saat tab ditutup)
+        const handleUnload = () => {
+            const url = `${BASE_URL}/api/user/status-beacon`;
+            const data = JSON.stringify({
+                user_id: user.id,
+                is_online: 0
+            });
+            const blob = new Blob([data], { type: 'application/json' });
+            navigator.sendBeacon(url, blob);
+        };
+
+        window.addEventListener('beforeunload', handleUnload);
+
+        return () => {
+            // Set Offline saat pindah halaman (unmount)
+            handleUnload();
+            window.removeEventListener('beforeunload', handleUnload);
+        };
+    }, [user]);
 
     // useEffect Fungsi Pertama
     useEffect(() => {

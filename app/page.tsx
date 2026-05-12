@@ -56,14 +56,16 @@ const fontCaption = localFont({
 export default function EvomiLandingPage() {
 
   const router = useRouter();
+
   const [user, setUser] = useState<{
     id: any; email: string; name: string; username: string; image: string;
-  } | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [products, setProducts] = useState<any[]>([]);
-  const [mounted, setMounted] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isQuizOpen, setIsQuizOpen] = useState(false);
+  } | null>(null);  // State untuk menyimpan data user yang login
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);  // State untuk menu dropdown user
+  const [products, setProducts] = useState<any[]>([]);  // State untuk menyimpan data produk yang di-fetch
+  const [mounted, setMounted] = useState(false);  // State untuk memastikan komponen sudah mount sebelum render (untuk menghindari masalah SSR)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);  // State untuk menu mobile
+  const [isQuizOpen, setIsQuizOpen] = useState(false);  // State untuk membuka/menutup modal quiz
 
   // Di dalam component EvomiLandingPage(), tambahkan state ini di bawah state isQuizOpen:
   const [isChatOpen, setIsChatOpen] = useState(false);

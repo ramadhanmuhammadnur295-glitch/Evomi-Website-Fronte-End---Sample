@@ -9,6 +9,7 @@ import { Lock, User, Mail, AtSign, Loader2, ArrowLeft } from "lucide-react";
 // String global url
 import { BASE_URL} from "@/src/config/strings";
 
+// Halaman Register untuk User Baru
 export default function RegisterPage() {
   const router = useRouter();
 
@@ -32,7 +33,7 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const response = await fetch(BASE_URL + "/api/register", {
+      const response = await fetch(BASE_URL + "/api/register", {  // Endpoint API Laravel untuk register
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,11 +45,13 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Registrasi gagal.");
+        throw new Error(data.message || "Registrasi gagal.");   // Tangani error dari API Laravel, bisa berupa validasi atau error server
       }
 
       // Simpan Token dan Data User sesuai referensi
       localStorage.setItem("access_token", data.access_token);
+
+      // Simpan data user yang login ke localStorage (sesuai struktur data yang dikirim oleh API Laravel)
       localStorage.setItem("user_data", JSON.stringify(data.user));
 
       router.push("/");
