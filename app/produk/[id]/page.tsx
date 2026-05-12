@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import localFont from "next/font/local";
 import AddToCartButton from "@/components/AddToCartButton";
 import { motion, AnimatePresence, Variants } from "framer-motion";
+import WavyNavbarGradient from "@/components/WavyNavbarGradient";
 
 // String global url
 import { BASE_URL } from "@/src/config/strings";
@@ -195,6 +196,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
       {/* NAVBAR */}
       <nav className="sticky top-0 z-50 bg-[#0071bc] backdrop-blur-xl border-b border-white/10 px-6 py-6 flex items-center justify-between lg:px-16 shadow-lg">
+
+        {/* BARU: Memanggil Komponen Wavy Curve */}
+        <WavyNavbarGradient />
         {/* Tombol kembali disesuaikan ke warna putih */}
         <Link href="/produk" className="text-white/70 hover:text-white transition-all hover:-translate-x-1">
           <ArrowLeft size={20} />

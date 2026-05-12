@@ -14,6 +14,8 @@ import QuizModal from "@/components/QuizModal";
 import ChatModal from "@/components/ChatModal";
 import { BASE_URL } from "@/src/config/strings";
 
+import WavyNavbarGradient from "@/components/WavyNavbarGradient";
+
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
     hidden: { opacity: 0, y: 30 },
@@ -256,6 +258,9 @@ export default function ArtikelPage() {
 
             {/* NAVBAR */}
             <nav className="fixed w-full z-[100] bg-[#0071bc]/95 backdrop-blur-xl border-b border-white/10 shadow-lg transition-all duration-300">
+
+                {/* BARU: Memanggil Komponen Wavy Curve */}
+                <WavyNavbarGradient />
                 <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
                     <div className="flex-1 md:w-1/3 flex justify-start">
                         <Link href="/" className="hover:opacity-70 transition-opacity">

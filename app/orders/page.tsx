@@ -7,6 +7,7 @@ import localFont from "next/font/local";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { ChevronRight, Package, Calendar, Tag } from "lucide-react";
+import WavyNavbarGradient from "@/components/WavyNavbarGradient";
 
 // String global url
 import { BASE_URL } from "@/src/config/strings";
@@ -109,9 +110,9 @@ export default function OrderHistoryPage() {
         // Fungsi Beacon untuk set Offline (saat browser tutup/pindah)
         const handleOfflineBeacon = () => {
             const url = `${BASE_URL}/api/user/status-beacon`;
-            const data = JSON.stringify({ 
-                user_id: user.id, 
-                is_online: 0 
+            const data = JSON.stringify({
+                user_id: user.id,
+                is_online: 0
             });
             const blob = new Blob([data], { type: 'application/json' });
             navigator.sendBeacon(url, blob);
@@ -158,12 +159,15 @@ export default function OrderHistoryPage() {
             default: return "bg-stone-50 text-stone-500 border-stone-100";
         }
     };
-    
+
     return (
         <div className={`${fontCaption.variable} ${fontJudul.variable} min-h-screen bg-[#FBFBF9] font-sans antialiased text-stone-900 selection:bg-amber-100`}>
 
             {/* NAVBAR - Premium Dark Glassmorphism */}
             <nav className="fixed w-full z-[100] bg-[#0071bc]/90 backdrop-blur-xl border-b border-white/10 shadow-sm">
+
+                {/* BARU: Memanggil Komponen Wavy Curve */}
+                <WavyNavbarGradient />
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <Link href="/" className="hover:opacity-70 transition-opacity">
                         <Image
@@ -306,7 +310,7 @@ export default function OrderHistoryPage() {
                     </div>
                 )}
             </main>
-            
+
             {/* Footer */}
             <footer className="py-12 text-center">
                 <p className="text-[9px] text-stone-300 uppercase tracking-[0.4em] font-bold">Evomi Fragrance House • Jakarta</p>

@@ -9,6 +9,8 @@ import { motion, Variants, AnimatePresence } from "framer-motion";
 // String global url
 import { BASE_URL, HARGA_EVOMI, HARGA_ONGKIR } from "@/src/config/strings";
 
+import WavyNavbarGradient from "@/components/WavyNavbarGradient";
+
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -232,6 +234,9 @@ export default function ProductsPage() {
 
       {/* NAVBAR */}
       <nav className="fixed w-full z-[100] bg-[#0071bc]/90 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300">
+
+        {/* BARU: Memanggil Komponen Wavy Curve */}
+        <WavyNavbarGradient />
         <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
           <Link href="/" className="hover:opacity-70 transition-opacity">
             <Image

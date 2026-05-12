@@ -8,6 +8,8 @@ import localFont from "next/font/local";
 import { ArrowLeft, Package, Truck, MessageSquare, ShieldCheck, X, QrCode, Banknote, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import WavyNavbarGradient from "@/components/WavyNavbarGradient";
+
 // String global url
 import { BASE_URL } from "@/src/config/strings";
 
@@ -529,6 +531,9 @@ export default function OrderDetailPage() {
 
             {/* NAVBAR - Updated to Evomi Blue */}
             <nav className="fixed w-full z-[100] bg-[#0071bc]/90 backdrop-blur-xl border-b border-white/5 h-20 flex items-center px-8">
+
+                {/* BARU: Memanggil Komponen Wavy Curve */}
+                <WavyNavbarGradient />
                 <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
                     <Link href="/orders" className="flex items-center space-x-3 text-white/60 hover:text-white transition-all group">
                         <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
