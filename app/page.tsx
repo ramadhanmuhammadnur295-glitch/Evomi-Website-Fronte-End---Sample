@@ -16,6 +16,7 @@ import { BASE_URL } from "@/src/config/strings";
 import { useState, useEffect, useRef } from "react";
 import ImageCarousel from "@/components/ImageCarousel";
 import { motion, Variants, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import WavyNavbarGradient from "@/components/WavyNavbarGradient";
 
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
@@ -290,6 +291,9 @@ export default function EvomiLandingPage() {
 
         {/* NAVBAR */}
         <nav className="fixed w-full z-[100] bg-[#0071bc]/95 backdrop-blur-xl border-b border-white/10 shadow-lg transition-all duration-300">
+
+          {/* BARU: Memanggil Komponen Wavy Curve */}
+          <WavyNavbarGradient />
           <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
 
             {/* Logo Section */}
