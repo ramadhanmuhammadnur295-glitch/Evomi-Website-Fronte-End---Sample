@@ -565,7 +565,7 @@ export default function EvomiLandingPage() {
                   <div className="relative aspect-[4/5] overflow-hidden bg-stone-50 mb-5 rounded-2xl border border-stone-100 shadow-sm group-hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-all duration-500">
                     <Image src={parfum.image_url || "/img/placeholder.jpg"} alt={parfum.nama} fill unoptimized className="object-cover transition-transform duration-1000 group-hover:scale-105" />
                     <Link href={`/produk/${parfum.id}`} className="absolute inset-0 z-10 opacity-0 md:group-hover:opacity-100 bg-stone-900/10 backdrop-blur-[2px] transition-all duration-500 flex items-end p-4">
-                      <div className="w-full bg-white/95 backdrop-blur-md py-3.5 text-[10px] uppercase font-bold tracking-widest text-center text-stone-800 translate-y-4 group-hover:translate-y-0 transition-all duration-500 rounded-xl shadow-lg hover:bg-stone-900 hover:text-white">Discover</div>
+                      <div className="w-full bg-white/95 backdrop-blur-md py-3.5 text-[10px] uppercase font-bold tracking-widest text-center text-stone-800 translate-y-4 group-hover:translate-y-0 transition-all duration-500 rounded-xl shadow-lg hover:bg-stone-900 hover:text-white">Lihat Produk</div>
                     </Link>
                   </div>
                   <div className="text-center space-y-2 px-2 flex-grow flex flex-col justify-end">

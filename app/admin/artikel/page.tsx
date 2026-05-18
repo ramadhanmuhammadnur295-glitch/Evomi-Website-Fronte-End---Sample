@@ -13,7 +13,7 @@ const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 interface Article {
     id: string;
     title: string;
-    slug: string; // Tambahan slug
+    slug: string;
     content: string;
     author?: string;
     image_url?: string;
@@ -28,44 +28,46 @@ export default function ArticlesMenu() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
 
+    // --- State untuk Modal Konfirmasi Hapus ---
+    const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; articleId: string | null }>({
+        isOpen: false,
+        articleId: null,
+    });
+
     // --- State untuk Pagination ---
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
-    // Fungsi untuk navigasi halaman berikutnya dan sebelumnya
+    // Fungsi untuk navigasi halaman
     const goToNextPage = () => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
 
-    // Fungsi untuk navigasi ke halaman sebelumnya, dengan pengecekan agar tidak kurang dari 1
     const goToPrevPage = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
     };
 
-    // State untuk mengelola pesan sukses setelah operasi CRUD, dengan tipe untuk membedakan jenis operasi (create, update, delete)
+    // State pesan sukses
     const [successModal, setSuccessModal] = useState({
         isOpen: false,
         message: "",
         type: ""
     });
 
-    // State untuk form data artikel, termasuk field slug yang baru ditambahkan
+    // State untuk form data artikel
     const [formData, setFormData] = useState({
         title: "",
-        slug: "", // Tambahan state slug
+        slug: "",
         author: "Evomi Editorial",
         content: ""
     });
 
-    // URL dasar untuk API artikel, digunakan untuk semua operasi CRUD
     const API_URL = `${BASE_URL}/api/articles`;
 
-    // Fetch artikel saat komponen pertama kali dimuat
     useEffect(() => {
         fetchArticles();
     }, []);
 
-    // Fungsi untuk mengambil data artikel dari backend, dengan penanganan error dan pengaturan state loading
     const fetchArticles = async () => {
         try {
             const res = await fetch(API_URL);
@@ -86,14 +88,12 @@ export default function ArticlesMenu() {
 
     const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-    // Reset ke halaman 1 jika ada penghapusan/penambahan data agar tidak error
     useEffect(() => {
         if (currentPage > totalPages && totalPages > 0) {
             setCurrentPage(totalPages);
         }
     }, [articles, totalPages, currentPage]);
 
-    // Fungsi untuk menampilkan modal sukses dengan pesan yang sesuai, dan otomatis menutup setelah 3 detik
     const showSuccess = (message: string, type: string) => {
         setSuccessModal({ isOpen: true, message, type });
         setTimeout(() => {
@@ -101,33 +101,24 @@ export default function ArticlesMenu() {
         }, 3000);
     };
 
-    // Handler untuk perubahan input pada form, mengupdate state formData sesuai dengan nama field yang diubah
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    // Handler khusus untuk React Quill (mengembalikan string HTML, bukan event)
     const handleContentChange = (content: string) => {
         setFormData({ ...formData, content });
     };
 
-    // Opsional: Generate slug otomatis dari title saat mengetik
     const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const title = e.target.value;
-        const autoSlug = title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)+/g, '');
-
+        // Benar-benar hanya mengubah title, slug tidak akan ikut campur
         setFormData({
             ...formData,
-            title: title,
-            slug: editingId ? formData.slug : autoSlug // Hanya auto-fill jika artikel baru
+            title: title
         });
     };
 
-    // Fungsi untuk membuka modal dengan form kosong untuk membuat artikel baru, dan reset state terkait seperti formData, imageFile, dan editingId
     const openCreateModal = () => {
         setFormData({ title: "", slug: "", author: "Evomi Editorial", content: "" });
         setImageFile(null);
@@ -135,7 +126,6 @@ export default function ArticlesMenu() {
         setIsModalOpen(true);
     };
 
-    // Fungsi untuk membuka modal dengan data artikel yang sudah ada untuk diedit, mengisi formData dengan data artikel yang dipilih, dan reset state terkait seperti imageFile
     const openEditModal = (article: Article) => {
         setFormData({
             title: article.title,
@@ -148,12 +138,11 @@ export default function ArticlesMenu() {
         setIsModalOpen(true);
     };
 
-    // Handler untuk submit form, mengirim data ke backend untuk membuat atau memperbarui artikel, dengan penanganan file gambar jika ada, dan menampilkan pesan sukses setelah operasi berhasil
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         const data = new FormData();
         data.append("title", formData.title);
-        data.append("slug", formData.slug); // Kirim slug ke backend
+        data.append("slug", formData.slug);
         data.append("author", formData.author);
         data.append("content", formData.content);
 
@@ -186,21 +175,29 @@ export default function ArticlesMenu() {
         }
     };
 
-    // Handle delete fungsi
-    const handleDelete = async (id: string) => {
-        if (!confirm(`Hapus artikel ini?`)) return;
+    // --- Fungsi Buka Modal Hapus ---
+    const confirmDelete = (id: string) => {
+        setDeleteModal({ isOpen: true, articleId: id });
+    };
+
+    // --- Fungsi Eksekusi Hapus ---
+    const executeDelete = async () => {
+        if (!deleteModal.articleId) return;
+
         try {
-            const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+            const res = await fetch(`${API_URL}/${deleteModal.articleId}`, { method: "DELETE" });
             if (res.ok) {
                 fetchArticles();
                 showSuccess("Artikel telah dihapus dari database.", "delete");
             }
         } catch (error) {
             console.error("Delete error:", error);
+        } finally {
+            // Tutup modal hapus setelah selesai (berhasil/gagal)
+            setDeleteModal({ isOpen: false, articleId: null });
         }
     };
 
-    // Konfigurasi Toolbar untuk React Quill
     const quillModules = {
         toolbar: [
             [{ 'header': [1, 2, 3, false] }],
@@ -211,7 +208,6 @@ export default function ArticlesMenu() {
         ],
     };
 
-    // Handler untuk perubahan file input, menyimpan file gambar yang dipilih
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) setImageFile(e.target.files[0]);
     };
@@ -237,6 +233,40 @@ export default function ArticlesMenu() {
                     </div>
                 </div>
             )}
+
+            {/* --- CUSTOM DELETE MODAL --- */}
+            {deleteModal.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/20 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl border border-gray-100 overflow-hidden transform scale-100 transition-all">
+                        <div className="p-6 text-center">
+                            <div className="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">Hapus Artikel?</h3>
+                            <p className="text-sm text-gray-500 mb-6">
+                                Ingin Menghapus Artikel Ini, Artikel Akan Terhapus Dari List dan Database.
+                            </p>
+                            <div className="flex gap-3 justify-center">
+                                <button
+                                    onClick={() => setDeleteModal({ isOpen: false, articleId: null })}
+                                    className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 bg-gray-50 hover:bg-gray-100 transition-all w-full"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={executeDelete}
+                                    className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-red-500 hover:bg-red-600 shadow-sm transition-all w-full"
+                                >
+                                    Ya, Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* --------------------------- */}
 
             <div className="max-w-6xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
@@ -273,7 +303,7 @@ export default function ArticlesMenu() {
                                                 </div>
                                                 <div className="overflow-hidden">
                                                     <div className="text-sm font-bold text-gray-900 truncate max-w-[200px] md:max-w-xs">{article.title}</div>
-                                                    <div className="text-[10px] text-gray-400 font-mono">/{article.slug}</div>
+                                                    <div className="text-[10px] text-gray-400 font-mono">{article.slug}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -288,7 +318,9 @@ export default function ArticlesMenu() {
                                         <td className="px-0 py-4 md:px-6 md:py-4 border-t md:border-t-0 mt-2 md:mt-0 pt-4 md:pt-4">
                                             <div className="flex items-center justify-end gap-4 md:gap-3">
                                                 <button onClick={() => openEditModal(article)} className="text-indigo-600 hover:text-indigo-800 text-xs font-bold transition-all">Edit</button>
-                                                <button onClick={() => handleDelete(article.id)} className="text-red-500 hover:text-red-700 text-xs font-bold transition-all">Hapus</button>
+
+                                                {/* Button Hapus kini memanggil confirmDelete, bukan handleDelete */}
+                                                <button onClick={() => confirmDelete(article.id)} className="text-red-500 hover:text-red-700 text-xs font-bold transition-all">Hapus</button>
                                             </div>
                                         </td>
                                     </tr>
