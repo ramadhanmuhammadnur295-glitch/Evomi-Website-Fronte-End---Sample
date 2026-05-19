@@ -1,5 +1,6 @@
 
 import { Geist, Geist_Mono } from "next/font/google";
+import { ToastProvider } from "@/components/Toast";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -55,8 +56,9 @@ export default function RootLayout({
       <body
         suppressHydrationWarning
         className={`${brandFont.variable} ${bodyFont.variable} min-h-full flex flex-col`}
-      >
-        {children}
+      > <ToastProvider>
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );
