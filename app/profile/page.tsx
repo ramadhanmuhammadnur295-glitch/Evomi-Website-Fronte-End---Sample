@@ -1,12 +1,12 @@
 "use client";
 
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import React, { useState, useEffect } from "react";
+import ShoppingBag from "@/components/ShoppingBag";
+import { useRouter } from "next/navigation";
+import localFont from "next/font/local";
 import Image from "next/image";
 import Link from "next/link";
-import localFont from "next/font/local";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence, Variants } from "framer-motion";
-import ShoppingBag from "@/components/ShoppingBag";
 
 // String global url
 import { BASE_URL } from "@/src/config/strings";

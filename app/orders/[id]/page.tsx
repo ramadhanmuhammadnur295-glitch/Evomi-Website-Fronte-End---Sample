@@ -27,6 +27,9 @@ const fontCaption = localFont({
     display: "swap",
 });
 
+// Kredensial Xendit (PERINGATAN: Pindahkan ini ke Backend/API Route untuk production)
+const XENDIT_AUTH = "Basic eG5kX2RldmVsb3BtZW50X3RLblFjYm5aVDVzbEFKYjJqSTVVeUQ3cVQ3VWRZUHE4cUp6MmdFNjFySXo3YUEyZklSTGdiOEJ2TEZsZDo=";
+
 // Component utama
 export default function OrderDetailPage() {
     const params = useParams();
@@ -43,9 +46,8 @@ export default function OrderDetailPage() {
     const [qrisData, setQrisData] = useState<any>(null);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
-    // Tambah di bawah state yang sedia ada// State tambahan jika belum ada
+    // State tambahan jika belum ada
     const [isCodConfirmOpen, setIsCodConfirmOpen] = useState(false);
-
 
     // 1. UPDATE useEffect Inisialisasi
     useEffect(() => {
@@ -86,7 +88,6 @@ export default function OrderDetailPage() {
     useEffect(() => {
         if (!user) return;
 
-        // Fungsi set ONLINE
         const setStatus = async (status: number) => {
             try {
                 const token = localStorage.getItem("access_token");
@@ -105,7 +106,6 @@ export default function OrderDetailPage() {
 
         setStatus(1); // Set Online saat masuk
 
-        // Fungsi Beacon untuk OFFLINE (saat tab ditutup)
         const handleUnload = () => {
             const url = `${BASE_URL}/api/user/status-beacon`;
             const data = JSON.stringify({
@@ -119,44 +119,12 @@ export default function OrderDetailPage() {
         window.addEventListener('beforeunload', handleUnload);
 
         return () => {
-            // Set Offline saat pindah halaman (unmount)
             handleUnload();
             window.removeEventListener('beforeunload', handleUnload);
         };
     }, [user]);
 
-    // useEffect Fungsi Pertama
-    useEffect(() => {
-        const token = localStorage.getItem("access_token"); // Cek token, jika tidak ada arahkan ke login
-        if (!token) {
-            router.push("/login");  // Redirect ke halaman login jika token tidak ditemukan
-            return;
-        }
-
-        // Fungsi untuk mengambil detail order
-        const fetchOrderDetail = async () => {
-            try {
-                const response = await fetch(BASE_URL + `/api/orders/${params.id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        Accept: "application/json",
-                    },
-                });
-                const result = await response.json();
-                if (result.status === "success") {
-                    setOrder(result.data);
-                }
-            } catch (error) {
-                console.error("Error fetching order detail:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (params.id) fetchOrderDetail();  // Memanggil fungsi untuk mengambil detail order
-    }, [params.id, router]);
-
-    // useEffect Fungsi ke 2, Modifikasi useEffect polling status
+    // useEffect Fungsi ke 2, Modifikasi useEffect polling status XENDIT
     useEffect(() => {
         let interval: NodeJS.Timeout;
 
@@ -164,26 +132,27 @@ export default function OrderDetailPage() {
         if (!loading && qrisData && isModalOpen) {
             interval = setInterval(async () => {
                 try {
-                    const orderId = qrisData.order_id;
+                    const qrId = qrisData.id;
 
-                    // Gunakan backend Anda sebagai proxy untuk menghindari CORS
-                    const response = await fetch(BASE_URL + `/api/midtrans/status/${orderId}`, {
+                    const response = await fetch(`https://api.xendit.co/qr_codes/${qrId}`, {
+                        method: 'GET',
                         headers: {
-                            'Authorization': `Bearer ${localStorage.getItem("access_token")}`,
+                            'api-version': '2022-07-31',
+                            'Authorization': XENDIT_AUTH,
                             'Accept': 'application/json'
                         }
                     });
 
                     const result = await response.json();
 
-                    // Cek status dari response Midtrans yang diteruskan backend
-                    if (result.transaction_status === 'settlement' || result.transaction_status === 'capture') {
+                    // Di Xendit, QR Code dinamis biasanya berubah status menjadi INACTIVE, COMPLETED, atau SUCCEEDED setelah dibayar
+                    if (result.status === 'SUCCEEDED' || result.status === 'COMPLETED' || result.status === 'INACTIVE') {
                         setOrder((prev: any) => ({ ...prev, status_pembayaran: "success" }));
 
-                        await updatePaymentStatusToSuccess();   // Memanggil fungsi untuk update status pembayaran
-                        setIsModalOpen(false);  // Menutup modal
-                        setIsSuccessModalOpen(true);    // Menampilkan modal success
-                        clearInterval(interval);    // Menghentikan polling
+                        await updatePaymentStatusToSuccess(); // Memanggil fungsi untuk update status pembayaran
+                        setIsModalOpen(false); // Menutup modal
+                        setIsSuccessModalOpen(true); // Menampilkan modal success
+                        clearInterval(interval); // Menghentikan polling
                     }
                 } catch (error) {
                     console.error("Polling error:", error);
@@ -236,15 +205,10 @@ export default function OrderDetailPage() {
             if (result.success || result.status === "success") {
                 setOrder((prevOrder: any) => ({ ...prevOrder, status_pembayaran: "success" }));
 
-                // Tutup semua modal input/konfirmasi
                 setIsCodConfirmOpen(false);
                 setIsModalOpen(false);
-
-                // Tampilkan modal sukses (Pengganti alert browser)
                 setIsSuccessModalOpen(true);
             } else {
-                // Untuk error, tetap disarankan pakai modal error custom, 
-                // tapi di sini saya fokus ke success modal sesuai permintaan.
                 console.error("Gagal memproses pembayaran");
             }
         } catch (error) {
@@ -254,70 +218,51 @@ export default function OrderDetailPage() {
         }
     };
 
-    // FUNGSI TEMBAK API MIDTRANS QRIS
-    // Ubah bagian fetch di dalam handleQrisPayment
+    // FUNGSI TEMBAK API XENDIT QRIS
     const handleQrisPayment = async () => {
         setIsPaying(true);
         setPaymentMethod("qris");
 
-        // 1. Hitung ulang total berdasarkan item agar PASTI SAMA
-        const items = order.details.map((item: { product: { id: any; nama: string; }; harga_saat_beli: any; jumlah: any; }) => ({
-            id: String(item.product.id).substring(0, 50),
-            price: Math.round(Number(item.harga_saat_beli)),
-            quantity: Number(item.jumlah),
-            name: item.product.nama.substring(0, 50)
-        }));
+        const itemsTotal = order.details.reduce((sum: number, item: any) => {
+            return sum + (Math.round(Number(item.harga_saat_beli)) * Number(item.jumlah));
+        }, 0);
 
-        // 2. Hitung total dari item (price * quantity)
-        const itemsTotal = items.reduce((sum: number, item: { price: number; quantity: number; }) => sum + (item.price * item.quantity), 0);
-
-        // 3. Tambahkan ongkir (asumsikan ongkir adalah komponen tambahan)
         const shippingCost = Math.round(Number(order.ongkos_kirim));
         const grossAmount = itemsTotal + shippingCost;
 
+        // Set waktu kadaluarsa QR (misal 15 menit dari sekarang)
+        const expiryDate = new Date();
+        expiryDate.setMinutes(expiryDate.getMinutes() + 15);
+
         try {
-            const response = await fetch('/api/midtrans', {
+            const response = await fetch('https://api.xendit.co/qr_codes', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'api-version': '2022-07-31',
+                    'Content-Type': 'application/json',
+                    'Authorization': XENDIT_AUTH
+                },
                 body: JSON.stringify({
-                    payment_type: "qris",
-                    transaction_details: {
-                        order_id: `EVOMI-${order.id}-${Date.now()}`,
-                        gross_amount: grossAmount // Harus sama dengan total di bawah
-                    },
-                    item_details: [
-                        ...items,
-                        {
-                            id: "ONGKIR",
-                            price: shippingCost,
-                            quantity: 1,
-                            name: "Ongkos Kirim"
-                        }
-                    ],
-                    customer_details: {
-                        first_name: "Customer",
-                        last_name: "Evomi",
-                        email: "customer@example.com",
-                    },
-                    qris: { acquirer: "gopay" }
+                    reference_id: `EVOMI-ORDER-${order.id}-${Date.now()}`,
+                    type: "DYNAMIC",
+                    currency: "IDR",
+                    amount: grossAmount,
+                    expires_at: expiryDate.toISOString()
                 })
             });
 
-            // ... sisa logic penanganan response tetap sama
-            // Cek jika ada error validation dari Midtrans
             const result = await response.json();
 
-            // Cek jika ada error validation dari Midtrans
-            if (result.status_code === "201") {
+            // Cek jika QR Code berhasil dibuat
+            if (result.id && result.qr_string) {
                 setQrisData(result);
-            } else if (result.validation_messages) {
-                // Ini akan memunculkan pesan error spesifik dari Midtrans
-                alert(`Validation Error: ${result.validation_messages.join(", ")}`);
+            } else if (result.error_code) {
+                alert(`Error Xendit: ${result.message || "Terjadi kesalahan pembuatan QR"}`);
             } else {
-                alert(`Gagal: ${result.status_message || "Terjadi kesalahan sistem"}`);
+                alert(`Gagal membuat QR Code`);
             }
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error creating Xendit QR:", error);
         } finally {
             setIsPaying(false);
         }
@@ -333,34 +278,6 @@ export default function OrderDetailPage() {
 
     return (
         <div className={`${fontCaption.variable} ${fontJudul.variable} min-h-screen bg-[#FBFBF9] font-sans antialiased text-stone-900 selection:bg-amber-100`}>
-
-            {/* MODAL SUKSES */}
-            <AnimatePresence>
-                {isSuccessModalOpen && (
-                    <div className="fixed inset-0 z-[300] flex items-center justify-center p-6">
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm"
-                        />
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                            className="bg-white p-10 rounded-[2.5rem] text-center max-w-sm w-full relative z-10"
-                        >
-                            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <ShieldCheck size={40} className="text-emerald-600" />
-                            </div>
-                            <h3 className={`${fontJudul.className} text-2xl uppercase mb-2`}>Payment Confirmed</h3>
-                            <p className="text-stone-400 text-sm mb-8">Terima kasih, pembayaran pesanan Anda telah berhasil diverifikasi.</p>
-                            <button
-                                onClick={() => setIsSuccessModalOpen(false)}
-                                className="w-full py-4 bg-stone-900 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest"
-                            >
-                                Close
-                            </button>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
 
             {/* --- MODAL SUKSES PEMBAYARAN (CASH & QRIS) --- */}
             <AnimatePresence>
@@ -386,7 +303,7 @@ export default function OrderDetailPage() {
                                 Payment Received
                             </h3>
                             <p className="text-stone-400 text-sm mb-8 leading-relaxed">
-                                Pembayaran tunai Anda telah berhasil dicatat dan diverifikasi oleh sistem Evomi.
+                                Pembayaran pesanan Anda telah berhasil diverifikasi oleh sistem.
                             </p>
 
                             <button
@@ -424,7 +341,6 @@ export default function OrderDetailPage() {
                             </p>
 
                             <div className="space-y-3">
-                                {/* Butang Ya / Bayar */}
                                 <button
                                     onClick={confirmCashPayment}
                                     disabled={isPaying}
@@ -432,8 +348,6 @@ export default function OrderDetailPage() {
                                 >
                                     {isPaying ? <Loader2 className="animate-spin mr-2" size={14} /> : "Ya / Bayar Sekarang"}
                                 </button>
-
-                                {/* Butang Nanti Saja / Cancel */}
                                 <button
                                     onClick={() => setIsCodConfirmOpen(false)}
                                     disabled={isPaying}
@@ -472,7 +386,6 @@ export default function OrderDetailPage() {
                             <div className="p-8 space-y-4">
                                 {!qrisData ? (
                                     <>
-                                        {/* Opsi Cash */}
                                         <button
                                             onClick={handleCashPayment}
                                             disabled={isPaying}
@@ -487,7 +400,6 @@ export default function OrderDetailPage() {
                                             </div>
                                         </button>
 
-                                        {/* Opsi QRIS */}
                                         <button
                                             onClick={handleQrisPayment}
                                             disabled={isPaying}
@@ -503,12 +415,12 @@ export default function OrderDetailPage() {
                                         </button>
                                     </>
                                 ) : (
-                                    /* Tampilan QR Code Setelah di-Generate */
+                                    /* Tampilan QR Code Xendit Menggunakan pihak ke-3 Render API */
                                     <div className="flex flex-col items-center text-center py-4">
                                         <div className="bg-stone-50 p-6 rounded-[2rem] border border-stone-100 mb-6">
-                                            {/* Midtrans memberikan URL image QRIS di actions[0].url */}
+                                            {/* Render QR string menjadi gambar */}
                                             <img
-                                                src={qrisData.actions?.[0]?.url}
+                                                src={`https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(qrisData.qr_string)}`}
                                                 alt="QRIS Code"
                                                 className="w-64 h-64 object-contain"
                                             />
@@ -529,10 +441,8 @@ export default function OrderDetailPage() {
                 )}
             </AnimatePresence>
 
-            {/* NAVBAR - Updated to Evomi Blue */}
+            {/* NAVBAR */}
             <nav className="fixed w-full z-[100] bg-[#0071bc]/90 backdrop-blur-xl border-b border-white/5 h-20 flex items-center px-8">
-
-                {/* BARU: Memanggil Komponen Wavy Curve */}
                 <WavyNavbarGradient />
                 <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
                     <Link href="/orders" className="flex items-center space-x-3 text-white/60 hover:text-white transition-all group">
@@ -545,7 +455,6 @@ export default function OrderDetailPage() {
             </nav>
 
             <main className="pt-40 pb-20 px-6 max-w-7xl mx-auto">
-
                 {/* HEADER INFO */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
@@ -565,7 +474,6 @@ export default function OrderDetailPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-
                     {/* LEFT CONTENT: ITEMS & SHIPPING */}
                     <div className="lg:col-span-8 space-y-8">
                         <section className="bg-white rounded-[2.5rem] border border-stone-100 overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.02)]">
