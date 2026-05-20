@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Github, Twitter, Linkedin, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
+import { FaGithub, FaTwitter, FaLinkedin } from "react-icons/fa6";
 
 interface FooterLink {
   label: string;
@@ -41,9 +42,9 @@ const footerSections: FooterSection[] = [
 ];
 
 const socialLinks = [
-  { icon: Github, href: "https://github.com", label: "GitHub" },
-  { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-  { icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
+  { icon: FaGithub, href: "https://github.com", label: "GitHub" },
+  { icon: FaTwitter, href: "https://twitter.com", label: "Twitter" },
+  { icon: FaLinkedin, href: "https://linkedin.com", label: "LinkedIn" },
   { icon: Mail, href: "mailto:hello@evomi.com", label: "Email" },
 ];
 
