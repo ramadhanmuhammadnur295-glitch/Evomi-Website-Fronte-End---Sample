@@ -6,24 +6,23 @@ import { motion } from "framer-motion";
 import localFont from "next/font/local";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import { ChevronRight, Package, Calendar, Tag } from "lucide-react";
+import { ChevronRight, Package, Calendar, Tag, ChevronLeft } from "lucide-react";
 import WavyNavbarGradient from "@/components/WavyNavbarGradient";
 
 // String global url
 import { BASE_URL } from "@/src/config/strings";
 
-// Tambahkan ini di atas komponen OrderHistoryPage
 const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.15 // Memberi jeda antar item saat muncul
+            staggerChildren: 0.15 
         }
     }
 };
 
-const itemVariants = {  // Variants untuk animasi item
+const itemVariants = { 
     hidden: { opacity: 0, y: 30 },
     visible: {
         opacity: 1,
@@ -39,13 +38,12 @@ const fontJudul = localFont({
     display: "swap",
 });
 
-const fontCaption = localFont({ // Font untuk caption
+const fontCaption = localFont({ 
     src: "../fonts/Nohemi-Regular.otf",
     variable: "--font-body",
     display: "swap",
 });
 
-// Komponen utama
 export default function OrderHistoryPage() {
     const router = useRouter();
     const [user, setUser] = useState<any>(null);
@@ -53,7 +51,10 @@ export default function OrderHistoryPage() {
     const [loading, setLoading] = useState(true);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // 1. EFFECT AWAL: Cek Auth & Load User Data
+    // --- PAGINATION STATE ---
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
     useEffect(() => {
         const token = localStorage.getItem("access_token");
         const savedUser = localStorage.getItem("user_data");
@@ -74,7 +75,9 @@ export default function OrderHistoryPage() {
                     },
                 });
                 const result = await response.json();
-                setOrders(result.data || result);
+                // Urutkan order terbaru di atas (opsional, jika API belum mengurutkan)
+                const fetchedOrders = result.data || result;
+                setOrders(fetchedOrders);
             } catch (error) {
                 console.error("Gagal mengambil riwayat pesanan:", error);
             } finally {
@@ -85,11 +88,9 @@ export default function OrderHistoryPage() {
         fetchOrders();
     }, [router]);
 
-    // 2. TAMBAHKAN INI: Logika Status Online / Offline (Beacon API)
     useEffect(() => {
         if (!user) return;
 
-        // Fungsi untuk set Online saat masuk page
         const setOnlineStatus = async () => {
             try {
                 await fetch(`${BASE_URL}/api/user/status`, {
@@ -107,7 +108,6 @@ export default function OrderHistoryPage() {
 
         setOnlineStatus();
 
-        // Fungsi Beacon untuk set Offline (saat browser tutup/pindah)
         const handleOfflineBeacon = () => {
             const url = `${BASE_URL}/api/user/status-beacon`;
             const data = JSON.stringify({
@@ -118,20 +118,16 @@ export default function OrderHistoryPage() {
             navigator.sendBeacon(url, blob);
         };
 
-        // Event listener browser
         window.addEventListener('beforeunload', handleOfflineBeacon);
 
         return () => {
-            // Jalankan saat pindah halaman/unmount
             handleOfflineBeacon();
             window.removeEventListener('beforeunload', handleOfflineBeacon);
         };
     }, [user]);
 
-    // 3. UPDATE: Fungsi Logout dengan penambahan status offline
     const handleLogout = async () => {
         try {
-            // Set offline secara eksplisit saat logout
             const token = localStorage.getItem("access_token");
             await fetch(`${BASE_URL}/api/user/status`, {
                 method: "POST",
@@ -152,7 +148,7 @@ export default function OrderHistoryPage() {
     };
 
     const getStatusStyle = (status: string) => {
-        switch (status.toLowerCase()) {
+        switch (status?.toLowerCase()) {
             case "success": return "bg-emerald-50 text-emerald-700 border-emerald-100";
             case "pending": return "bg-amber-50 text-amber-700 border-amber-100";
             case "failed": case "expired": return "bg-rose-50 text-rose-700 border-rose-100";
@@ -160,13 +156,31 @@ export default function OrderHistoryPage() {
         }
     };
 
+    // --- PAGINATION LOGIC ---
+    const totalPages = Math.ceil(orders.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentOrders = orders.slice(startIndex, startIndex + itemsPerPage);
+
+    // Fungsi untuk navigasi halaman
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(prev => prev + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll ke atas saat ganti page
+        }
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(prev => prev - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
     return (
         <div className={`${fontCaption.variable} ${fontJudul.variable} min-h-screen bg-[#FBFBF9] font-sans antialiased text-stone-900 selection:bg-amber-100`}>
 
-            {/* NAVBAR - Premium Dark Glassmorphism */}
+            {/* NAVBAR */}
             <nav className="fixed w-full z-[100] bg-[#0071bc]/90 backdrop-blur-xl border-b border-white/10 shadow-sm">
-
-                {/* BARU: Memanggil Komponen Wavy Curve */}
                 <WavyNavbarGradient />
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <Link href="/" className="hover:opacity-70 transition-opacity">
@@ -211,7 +225,6 @@ export default function OrderHistoryPage() {
 
             {/* MAIN CONTENT */}
             <main className="pt-40 pb-24 px-6 max-w-5xl mx-auto">
-                {/* HEADER */}
                 <header className="mb-16">
                     <div className="flex items-center space-x-4 mb-4">
                         <div className="w-10 h-[1px] bg-stone-300"></div>
@@ -228,74 +241,100 @@ export default function OrderHistoryPage() {
                         <p className="text-stone-400 text-[10px] tracking-[0.3em] uppercase font-bold">Retreiving Archives...</p>
                     </div>
                 ) : orders.length > 0 ? (
-                    <motion.div
-                        variants={containerVariants}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, amount: 0.1 }}
-                        className="space-y-8"
-                    >
-                        {orders.map((order, idx) => (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.1 }}
-                                key={order.id}
-                                className="bg-white border border-stone-100 rounded-[2.5rem] overflow-hidden hover:shadow-[0_20px_50px_rgba(0,0,0,0.03)] transition-all duration-700 group"
-                            >
-                                <div className="p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-
-                                    {/* Info Utama */}
-                                    <div className="flex items-start space-x-8">
-                                        <div className="w-24 h-28 bg-stone-50 rounded-2xl flex-shrink-0 relative overflow-hidden border border-stone-100 group-hover:border-stone-200 transition-colors">
-                                            <div className="absolute inset-0 flex items-center justify-center text-stone-200 group-hover:text-stone-300 transition-colors">
-                                                <Package size={32} strokeWidth={1} />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            <div className="flex items-center space-x-3">
-                                                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(order.status_pembayaran)}`}>
-                                                    {order.status_pembayaran}
-                                                </span>
-                                                <span className="text-[10px] text-stone-300 font-medium tracking-widest uppercase">#{order.order_number || order.id}</span>
+                    <>
+                        <motion.div
+                            variants={containerVariants}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, amount: 0.1 }}
+                            className="space-y-8"
+                        >
+                            {/* Ubah orders.map menjadi currentOrders.map */}
+                            {currentOrders.map((order, idx) => (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.1 }}
+                                    key={order.id}
+                                    className="bg-white border border-stone-100 rounded-[2.5rem] overflow-hidden hover:shadow-[0_20px_50px_rgba(0,0,0,0.03)] transition-all duration-700 group"
+                                >
+                                    <div className="p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                                        <div className="flex items-start space-x-8">
+                                            <div className="w-24 h-28 bg-stone-50 rounded-2xl flex-shrink-0 relative overflow-hidden border border-stone-100 group-hover:border-stone-200 transition-colors">
+                                                <div className="absolute inset-0 flex items-center justify-center text-stone-200 group-hover:text-stone-300 transition-colors">
+                                                    <Package size={32} strokeWidth={1} />
+                                                </div>
                                             </div>
 
-                                            <h3 className={`${fontJudul.className} text-2xl text-stone-800 uppercase leading-tight group-hover:text-amber-900 transition-colors`}>
-                                                {order.items?.[0]?.product_name || "Artisan Fragrance"}
-                                                {order.items?.length > 1 && <span className="text-xs normal-case font-body font-light text-stone-400 ml-3 italic">+{order.items.length - 1} other scents</span>}
-                                            </h3>
+                                            <div className="space-y-3">
+                                                <div className="flex items-center space-x-3">
+                                                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(order.status_pembayaran)}`}>
+                                                        {order.status_pembayaran}
+                                                    </span>
+                                                    <span className="text-[10px] text-stone-300 font-medium tracking-widest uppercase">#{order.order_number || order.id}</span>
+                                                </div>
 
-                                            <div className="flex items-center space-x-4 text-[11px] text-stone-400 font-medium">
-                                                <div className="flex items-center space-x-1.5">
-                                                    <Calendar size={12} className="text-stone-300" />
-                                                    <span>{new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                                                <h3 className={`${fontJudul.className} text-2xl text-stone-800 uppercase leading-tight group-hover:text-amber-900 transition-colors`}>
+                                                    {order.items?.[0]?.product_name || "Artisan Fragrance"}
+                                                    {order.items?.length > 1 && <span className="text-xs normal-case font-body font-light text-stone-400 ml-3 italic">+{order.items.length - 1} other scents</span>}
+                                                </h3>
+
+                                                <div className="flex items-center space-x-4 text-[11px] text-stone-400 font-medium">
+                                                    <div className="flex items-center space-x-1.5">
+                                                        <Calendar size={12} className="text-stone-300" />
+                                                        <span>{new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {/* Harga & Detail Link */}
-                                    <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-6 border-t md:border-t-0 pt-6 md:pt-0 border-stone-50">
-                                        <div className="md:text-right">
-                                            <p className="text-[9px] text-stone-400 uppercase tracking-[0.2em] font-black mb-1">Investment</p>
-                                            <p className={`${fontJudul.className} text-xl text-stone-900`}>Rp {Number(order.total_harga).toLocaleString("id-ID")}</p>
+                                        <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-6 border-t md:border-t-0 pt-6 md:pt-0 border-stone-50">
+                                            <div className="md:text-right">
+                                                <p className="text-[9px] text-stone-400 uppercase tracking-[0.2em] font-black mb-1">Investment</p>
+                                                <p className={`${fontJudul.className} text-xl text-stone-900`}>Rp {Number(order.total_harga).toLocaleString("id-ID")}</p>
+                                            </div>
+
+                                            <Link
+                                                href={`/orders/${order.id}`}
+                                                className="h-12 w-12 md:w-auto md:px-6 bg-stone-50 md:bg-stone-900 md:text-white rounded-full flex items-center justify-center gap-2 hover:bg-amber-900 transition-all group/btn"
+                                            >
+                                                <span className="hidden md:block text-[10px] font-bold uppercase tracking-widest">View Details</span>
+                                                <ChevronRight size={16} className="md:group-hover/btn:translate-x-1 transition-transform" />
+                                            </Link>
                                         </div>
-
-                                        <Link
-                                            href={`/orders/${order.id}`}
-                                            className="h-12 w-12 md:w-auto md:px-6 bg-stone-50 md:bg-stone-900 md:text-white rounded-full flex items-center justify-center gap-2 hover:bg-amber-900 transition-all group/btn"
-                                        >
-                                            <span className="hidden md:block text-[10px] font-bold uppercase tracking-widest">View Details</span>
-                                            <ChevronRight size={16} className="md:group-hover/btn:translate-x-1 transition-transform" />
-                                        </Link>
                                     </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </motion.div>
+                                </motion.div>
+                            ))}
+                        </motion.div>
+
+                        {/* PAGINATION CONTROLS */}
+                        {totalPages > 1 && (
+                            <div className="mt-16 flex items-center justify-center space-x-6">
+                                <button
+                                    onClick={handlePrevPage}
+                                    disabled={currentPage === 1}
+                                    className="h-12 w-12 flex items-center justify-center rounded-full border border-stone-200 text-stone-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-stone-50 transition-all"
+                                    aria-label="Previous Page"
+                                >
+                                    <ChevronLeft size={18} />
+                                </button>
+                                
+                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
+                                    Page <span className="text-stone-900">{currentPage}</span> of {totalPages}
+                                </span>
+
+                                <button
+                                    onClick={handleNextPage}
+                                    disabled={currentPage === totalPages}
+                                    className="h-12 w-12 flex items-center justify-center rounded-full bg-stone-900 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-amber-900 transition-all shadow-md"
+                                    aria-label="Next Page"
+                                >
+                                    <ChevronRight size={18} />
+                                </button>
+                            </div>
+                        )}
+                    </>
                 ) : (
-                    /* EMPTY STATE - Artisan Style */
                     <div className="text-center py-24 bg-white rounded-[3rem] border border-dashed border-stone-200">
                         <div className="w-24 h-24 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-8">
                             <Tag size={32} className="text-stone-200" strokeWidth={1} />
@@ -311,7 +350,6 @@ export default function OrderHistoryPage() {
                 )}
             </main>
 
-            {/* Footer */}
             <footer className="py-12 text-center">
                 <p className="text-[9px] text-stone-300 uppercase tracking-[0.4em] font-bold">Evomi Fragrance House • Jakarta</p>
             </footer>

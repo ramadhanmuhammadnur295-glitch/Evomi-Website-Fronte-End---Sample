@@ -7,6 +7,7 @@ import localFont from "next/font/local";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { SocialIcon } from 'react-social-icons';
+import ArticleCard from "@/components/ArticleCard";
 import { motion, Variants, AnimatePresence } from "framer-motion";
 
 // Komponen Modal & Config (Sesuaikan path import Anda)
@@ -385,53 +386,15 @@ export default function ArtikelPage() {
             {/* ARTICLES GRID */}
             <section className="max-w-7xl mx-auto px-6 md:px-8 pb-32">
                 {isLoading ? (
-                    <div className="text-center py-20 text-stone-400 uppercase tracking-widest text-xs">Memuat Cerita...</div>
+                    <div className="text-center py-20 text-stone-400 uppercase tracking-widest text-xs flex flex-col items-center gap-4">
+                        <div className="w-8 h-8 border-2 border-stone-200 border-t-stone-800 rounded-full animate-spin"></div>
+                        Memuat Cerita...
+                    </div>
                 ) : (
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
                         {currentArticles.map((article) => (
-                            <motion.article key={article.id} className="group cursor-pointer">
-
-                                {/* Gunakan slug untuk Link jika tersedia, fallback ke ID */}
-                                <Link href={`/artikel/${article.id}`} className="block">
-                                    <div className="relative aspect-[16/10] overflow-hidden rounded-2xl mb-6 bg-stone-100 shadow-sm border border-stone-100">
-                                        <Image
-                                            src={article.image_url || "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&q=80&w=800"}
-                                            alt={article.title}
-                                            fill
-                                            className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                                        />
-                                        {article.slug && (
-                                            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm">
-                                                <span className="text-[9px] font-bold tracking-widest text-stone-800 uppercase">{article.slug}</span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center">
-                                            <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
-                                                {new Date(article.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                            </p>
-                                            <span className="text-[9px] text-amber-800/60 font-bold uppercase tracking-tighter italic">{article.author || 'Evomi Editorial'}</span>
-                                        </div>
-
-                                        <h3 className="text-xl md:text-2xl text-stone-800 uppercase leading-snug group-hover:text-amber-800 transition-colors font-bold tracking-tight">
-                                            {article.title}
-                                        </h3>
-
-                                        {/* DESKRIPSI: Sudah dibersihkan dari HTML Quill */}
-                                        <p className="text-stone-500 text-sm leading-relaxed font-light line-clamp-3">
-                                            {getExcerpt(article.content)}
-                                        </p>
-
-                                        <div className="pt-4">
-                                            <p className="inline-block text-[10px] uppercase tracking-widest font-bold text-stone-800 border-b border-stone-200 pb-1 group-hover:border-stone-900 transition-all">
-                                                Read Story
-                                            </p>
-                                        </div>
-                                    </div>
-                                </Link>
-                            </motion.article>
+                            // Memanggil komponen ArticleCard
+                            <ArticleCard key={article.id} article={article} />
                         ))}
                     </motion.div>
                 )}

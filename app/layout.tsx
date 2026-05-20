@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ToastProvider } from "@/components/Toast";
 import type { Metadata } from "next";
 import "./globals.css";
+import ScrollProgressBar from "@/components/ScrollProgressBar";
+
 
 // --------------------------------------------------
 // konfigurasi local font pada next js, ask gemini ai
@@ -57,6 +59,8 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${brandFont.variable} ${bodyFont.variable} min-h-full flex flex-col`}
       > <ToastProvider>
+        {/* Pasang komponen di sini agar aktif di semua halaman */}
+        <ScrollProgressBar />
           {children}
         </ToastProvider>
       </body>
