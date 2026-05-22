@@ -501,7 +501,7 @@ export default function EvomiLandingPage() {
           <motion.div style={{ y: testimonialGlowY }} className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-full bg-stone-800/30 blur-[120px] rounded-full pointer-events-none" />
           <div className="max-w-6xl mx-auto text-center space-y-16 md:space-y-24 relative z-10">
             <motion.h2 initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 1 }} className={`${fontJudul.className} text-3xl md:text-5xl italic leading-tight text-stone-100 font-light`}>
-              "The scent of a woman, <br /> The presence of a soul."
+              "Captured in a scent, <br /> defined by the soul."
             </motion.h2>
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 text-left">
               {[
