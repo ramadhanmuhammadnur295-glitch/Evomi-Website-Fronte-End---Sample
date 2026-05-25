@@ -51,7 +51,6 @@ const itemVars: Variants = {
 };
 
 // --- Fonts ---
-// Catatan: sesuaikan path "./fonts/..." menjadi "../fonts/..." jika file ini berada di dalam folder /artikel
 const fontJudul = localFont({
     src: "../fonts/8 Heavy.ttf",
     variable: "--font-brand",
@@ -67,7 +66,7 @@ const fontCaption = localFont({
 
 export default function ArtikelPage() {
     const router = useRouter();
-    const [articles, setArticles] = useState<any[]>([]); // Ganti dummyArticles[cite: 4]
+    const [articles, setArticles] = useState<any[]>([]); 
     const [isLoading, setIsLoading] = useState(true);
 
     // States untuk Navbar & Global
@@ -126,25 +125,10 @@ export default function ArtikelPage() {
         fetchArticles();
     }, []);
 
-    // 1. Inisialisasi: Load User Data & Mounted State
-    useEffect(() => {
-        setMounted(true);
-        const token = localStorage.getItem("access_token");
-        const savedUser = localStorage.getItem("user_data");
-        if (token && savedUser) {
-            try {
-                setUser(JSON.parse(savedUser));
-            } catch (error) {
-                console.error("Gagal load user:", error);
-            }
-        }
-    }, []);
-
-    // 2. LOGIKA STATUS: Online / Offline (Beacon API)
+    // LOGIKA STATUS: Online / Offline (Beacon API)
     useEffect(() => {
         if (!user) return;
 
-        // Fungsi Set ONLINE saat masuk halaman
         const setOnlineStatus = async () => {
             try {
                 const token = localStorage.getItem("access_token");
@@ -163,7 +147,6 @@ export default function ArtikelPage() {
 
         setOnlineStatus();
 
-        // Fungsi Beacon untuk Set OFFLINE (Sangat stabil untuk tutup tab/browser)
         const handleOfflineBeacon = () => {
             const url = `${BASE_URL}/api/user/status-beacon`;
             const data = JSON.stringify({
@@ -174,22 +157,19 @@ export default function ArtikelPage() {
             navigator.sendBeacon(url, blob);
         };
 
-        // Event listener untuk menutup tab/browser
         window.addEventListener('beforeunload', handleOfflineBeacon);
 
         return () => {
-            // Jalankan offline beacon saat user pindah page (unmount komponen)
             handleOfflineBeacon();
             window.removeEventListener('beforeunload', handleOfflineBeacon);
         };
     }, [user]);
 
-    // 3. UPDATE: Fungsi Logout agar set Offline terlebih dahulu
+    // UPDATE: Fungsi Logout agar set Offline terlebih dahulu
     const handleLogout = async () => {
         try {
             const token = localStorage.getItem("access_token");
 
-            // Set status offline di DB sebelum hapus token
             await fetch(`${BASE_URL}/api/user/status`, {
                 method: "POST",
                 headers: {
@@ -199,7 +179,6 @@ export default function ArtikelPage() {
                 body: JSON.stringify({ is_online: 0 })
             });
 
-            // Panggil API logout bawaan
             await fetch(BASE_URL + "/api/logout", {
                 method: "POST",
                 headers: {
@@ -220,24 +199,6 @@ export default function ArtikelPage() {
         }
     };
 
-    // --- HELPER FUNCTION: Membersihkan HTML dari React Quill ---
-    const getExcerpt = (htmlContent: string, maxLength: number = 120) => {
-        if (!htmlContent) return "";
-
-        // 1. Menghapus semua tag HTML
-        // 2. Mengganti &nbsp; dengan spasi biasa
-        // 3. Mengganti spasi ganda hasil pembersihan tag
-        const plainText = htmlContent
-            .replace(/<[^>]*>?/gm, ' ')
-            .replace(/&nbsp;/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-
-        return plainText.length > maxLength
-            ? plainText.substring(0, maxLength) + "..."
-            : plainText;
-    };
-
     if (!mounted) return null;
 
     return (
@@ -247,50 +208,125 @@ export default function ArtikelPage() {
             <QuizModal isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
             <ChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
-            {/* FLOATING CHAT BUTTON */}
+            {/* ========================================================================= */}
+            {/* FLOATING CHAT BUTTON (PROGRESS ORANGE HOVER)                              */}
+            {/* ========================================================================= */}
             <motion.div initial={{ opacity: 0, scale: 0.5, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 1, duration: 0.8, type: "spring" }} className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[90]">
-                <button onClick={() => setIsChatOpen(!isChatOpen)} className="relative flex items-center justify-center w-14 h-14 bg-stone-900 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-                    {!isChatOpen && <span className="absolute inset-0 rounded-full bg-stone-500 opacity-20 animate-ping group-hover:animate-none"></span>}
-                    <svg className="w-6 h-6 text-[#FBFBF9] relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <button
+                    onClick={() => setIsChatOpen(!isChatOpen)}
+                    className="relative flex items-center justify-center w-14 h-14 bg-stone-900 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.15)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 transition-all duration-300 group/chatbtn z-0"
+                >
+                    <div className="absolute inset-0 w-full h-full rounded-full overflow-hidden -z-10">
+                        <div className="w-full h-full bg-amber-500 scale-x-0 group-hover/chatbtn:scale-x-100 transition-transform duration-500 origin-left" />
+                    </div>
+
+                    {!isChatOpen && (
+                        <span className="absolute inset-0 rounded-full bg-stone-500 opacity-20 animate-ping group-hover/chatbtn:animate-none -z-10"></span>
+                    )}
+
+                    <svg
+                        className="w-6 h-6 text-[#FBFBF9] relative z-10 transition-colors duration-300 group-hover/chatbtn:text-stone-950"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                     </svg>
+
+                    <span className="absolute right-16 px-4 py-2.5 bg-white text-stone-800 text-[10px] font-bold uppercase tracking-[0.2em] rounded-xl opacity-0 pointer-events-none group-hover/chatbtn:opacity-100 transition-all duration-300 shadow-xl border border-stone-100 whitespace-nowrap translate-x-2 group-hover/chatbtn:translate-x-0 z-20">
+                        {isChatOpen ? "Close Chat" : "Chat Admin"}
+                    </span>
                 </button>
             </motion.div>
 
-            {/* NAVBAR */}
+            {/* ========================================================================= */}
+            {/* NAVBAR (PROGRESS ORANGE KIRI-KANAN)                                       */}
+            {/* ========================================================================= */}
             <nav className="fixed w-full z-[100] bg-[#0071bc]/95 backdrop-blur-xl border-b border-white/10 shadow-lg transition-all duration-300">
-
-                {/* BARU: Memanggil Komponen Wavy Curve */}
                 <WavyNavbarGradient />
                 <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
+                    
+                    {/* 1. SEKTOR KIRI: LOGO EVOMI MASKING PROGRESS ORANGE */}
                     <div className="flex-1 md:w-1/3 flex justify-start">
-                        <Link href="/" className="hover:opacity-70 transition-opacity">
-                            <Image src="/img/Logo Evomi.png" alt="Evomi Logo" width={90} height={36} className="brightness-0 invert drop-shadow-sm" />
+                        <Link href="/" className="relative group/logo block overflow-hidden">
+                            <Image
+                                src="/img/Logo Evomi.png"
+                                alt="Evomi Logo"
+                                width={90}
+                                height={36}
+                                className="brightness-0 invert drop-shadow-sm group-hover/logo:opacity-0 transition-opacity duration-300 block"
+                            />
+                            <div 
+                                className="absolute inset-0 scale-x-0 group-hover/logo:scale-x-100 transition-transform duration-500 origin-left bg-amber-500"
+                                style={{
+                                    WebkitMaskImage: "url('/img/Logo Evomi.png')",
+                                    maskImage: "url('/img/Logo Evomi.png')",
+                                    WebkitMaskSize: "contain",
+                                    maskSize: "contain",
+                                    WebkitMaskRepeat: "no-repeat",
+                                    maskRepeat: "no-repeat"
+                                }}
+                            />
                         </Link>
                     </div>
 
+                    {/* 2. SEKTOR TENGAH: NAV MENU DESKTOP UNDERLINE PROGRESS ORANGE */}
                     <div className={`hidden md:flex w-1/3 justify-center items-center space-x-10 ${fontJudul.className} text-[13px] tracking-[0.2em] uppercase text-white`}>
-                        {/* Pakai /#about agar kembali ke home lalu scroll */}
-                        <Link href="/produk" className="hover:text-blue-200 transition-colors">Shop</Link>
-                        <button onClick={() => setIsQuizOpen(true)} className="hover:text-blue-200 transition-colors uppercase">Quiz</button>
-                        <Link href="/artikel" className="text-blue-200 transition-colors">Artikel</Link>
+                        <Link href="/" className="relative group/nav py-1 transition-colors duration-300 hover:text-amber-400">
+                            Home
+                            <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/nav:scale-x-100 transition-transform duration-300 origin-left" />
+                        </Link>
+                        <Link href="/produk" className="relative group/nav py-1 transition-colors duration-300 hover:text-amber-400">
+                            Shop
+                            <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/nav:scale-x-100 transition-transform duration-300 origin-left" />
+                        </Link>
+                        <Link href="/quiz" className="relative group/nav py-1 transition-colors duration-300 hover:text-amber-400">
+                            Quiz
+                            <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/nav:scale-x-100 transition-transform duration-300 origin-left" />
+                        </Link>
+                        <Link href="/artikel" className="relative group/nav py-1 transition-colors duration-300 text-amber-400">
+                            Artikel
+                            <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-100 origin-left" />
+                        </Link>
                     </div>
 
+                    {/* 3. SEKTOR KANAN: USER PROFILE / LOGIN REGISTER */}
                     <div className="flex-1 md:w-1/3 flex justify-end items-center space-x-4">
                         <div className="hidden md:flex items-center space-x-6">
                             {user ? (
                                 <div className="relative">
-                                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="flex items-center space-x-3 border border-white/30 rounded-full p-1 pr-4 bg-white/10 hover:bg-white/20 transition-all">
-                                        <div className="w-8 h-8 rounded-full bg-white text-[#0071bc] flex items-center justify-center text-[10px] font-bold uppercase overflow-hidden">
-                                            {user.image !== 'default-avatar.png' ? (
-                                                <img src={`https://ramadhan.alwaysdata.net/storage/profiles/${user.image}`} alt="Profile" className="w-full h-full object-cover" />
-                                            ) : (user.name.charAt(0))}
+                                    <button
+                                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                        className="group/userbtn btn relative flex items-center space-x-3 border border-white/30 rounded-full p-1 pr-4 bg-white/10 transition-all duration-300 backdrop-blur-sm overflow-hidden z-0"
+                                    >
+                                        <div className="absolute inset-0 w-full h-full bg-amber-500 scale-x-0 group-hover/userbtn:scale-x-100 transition-transform duration-500 origin-left -z-10" />
+                                        
+                                        <div className="w-8 h-8 rounded-full bg-white text-[#0071bc] flex items-center justify-center text-[10px] font-bold uppercase overflow-hidden relative z-10 transition-transform duration-300 group-hover/userbtn:scale-95">
+                                            {user.image !== "default-avatar.png" ? (
+                                                <img
+                                                    src={BASE_URL + `/storage/profiles/${user.image}`}
+                                                    alt="Profile"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                user.name.charAt(0)
+                                            )}
                                         </div>
-                                        <span className="text-[10px] font-bold uppercase tracking-widest text-white">{user.username}</span>
+                                        
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-white relative z-10 transition-colors duration-300 group-hover/userbtn:text-stone-950">
+                                            {user.username}
+                                        </span>
                                     </button>
+                                    
                                     <AnimatePresence>
                                         {isMenuOpen && (
-                                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-blue-50 py-2 z-50 overflow-hidden">
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 10 }}
+                                                className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-blue-50 py-2 z-50 overflow-hidden"
+                                            >
                                                 <Link href="/profile" className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-800 hover:bg-blue-50">Profile</Link>
                                                 <Link href="/orders" className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-800 hover:bg-blue-50">Orders</Link>
                                                 <hr className="border-blue-50 my-1" />
@@ -301,8 +337,14 @@ export default function ArtikelPage() {
                                 </div>
                             ) : (
                                 <div className="flex items-center space-x-6">
-                                    <Link href="/login" className="text-[10px] font-bold uppercase tracking-[0.2em] text-white hover:text-blue-100">Login</Link>
-                                    <Link href="/register" className="text-[10px] font-bold uppercase tracking-[0.2em] text-white hover:text-blue-100">Register</Link>
+                                    <Link href="/login" className="relative group/auth py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white hover:text-amber-400 transition-colors duration-300">
+                                        Login
+                                        <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/auth:scale-x-100 transition-transform duration-300 origin-left" />
+                                    </Link>
+                                    <Link href="/register" className="relative group/auth py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white hover:text-amber-400 transition-colors duration-300">
+                                        Register
+                                        <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/auth:scale-x-100 transition-transform duration-300 origin-left" />
+                                    </Link>
                                 </div>
                             )}
                         </div>
@@ -323,8 +365,10 @@ export default function ArtikelPage() {
                             <div className="px-8 py-10 flex flex-col space-y-8">
                                 <div className="space-y-6">
                                     {[
+                                        { name: "Home", href: "/" },
                                         { name: "Shop", href: "/produk" },
                                         { name: "Artikel", href: "/artikel" },
+                                        { name: "Quiz", href: "/quiz" },
                                     ].map((link) => (
                                         <motion.div key={link.name} variants={itemVars}>
                                             <Link href={link.href} onClick={() => setIsMobileMenuOpen(false)} className={`${fontJudul.className} text-2xl tracking-[0.2em] text-white uppercase`}>
@@ -332,11 +376,7 @@ export default function ArtikelPage() {
                                             </Link>
                                         </motion.div>
                                     ))}
-                                    <motion.div variants={itemVars}>
-                                        <button onClick={() => { setIsQuizOpen(true); setIsMobileMenuOpen(false); }} className={`${fontJudul.className} text-2xl tracking-[0.2em] text-white uppercase`}>
-                                            Quiz
-                                        </button>
-                                    </motion.div>
+                                   
                                 </div>
 
                                 {/* User Section for Mobile */}
@@ -344,8 +384,8 @@ export default function ArtikelPage() {
                                     {user ? (
                                         <div className="space-y-6">
                                             <div className="flex items-center space-x-4">
-                                                <div className="w-10 h-10 rounded-full bg-white text-[#0071bc] flex items-center justify-center font-bold">
-                                                    {user.image !== 'default-avatar.png' ? <img src={`https://ramadhan.alwaysdata.net/storage/profiles/${user.image}`} alt="Profile" className="w-full h-full object-cover rounded-full" /> : user.name.charAt(0)}
+                                                <div className="w-10 h-10 rounded-full bg-white text-[#0071bc] flex items-center justify-center font-bold overflow-hidden">
+                                                    {user.image !== 'default-avatar.png' ? <img src={BASE_URL + `/storage/profiles/${user.image}`} alt="Profile" className="w-full h-full object-cover" /> : user.name.charAt(0)}
                                                 </div>
                                                 <span className="text-white font-bold tracking-widest uppercase">{user.username}</span>
                                             </div>
@@ -393,23 +433,18 @@ export default function ArtikelPage() {
                 ) : (
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
                         {currentArticles.map((article) => (
-                            // Memanggil komponen ArticleCard
                             <ArticleCard key={article.id} article={article} />
                         ))}
                     </motion.div>
                 )}
             </section>
 
-            {/* Pagination */}
             {/* PAGINATION CONTROLS */}
             {totalPages > 1 && (
                 <div className="flex flex-col items-center mt-20 pb-32 space-y-6">
-                    {/* Garis Dekoratif Kecil */}
                     <div className="h-[1px] w-24 bg-stone-200"></div>
 
                     <div className="flex items-center space-x-2">
-
-                        {/* Prev Button */}
                         <button
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
@@ -420,7 +455,6 @@ export default function ArtikelPage() {
                             </svg>
                         </button>
 
-                        {/* Number Buttons */}
                         <div className="flex space-x-1">
                             {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
                                 <button
@@ -436,7 +470,6 @@ export default function ArtikelPage() {
                             ))}
                         </div>
 
-                        {/* Next Button */}
                         <button
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages}
@@ -448,7 +481,6 @@ export default function ArtikelPage() {
                         </button>
                     </div>
 
-                    {/* Page Indicator */}
                     <p className="text-[9px] uppercase tracking-[0.3em] text-stone-400 font-bold">
                         Journal Page {currentPage} of {totalPages}
                     </p>
