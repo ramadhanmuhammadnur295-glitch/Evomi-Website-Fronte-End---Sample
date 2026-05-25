@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { motion, Variants, AnimatePresence } from "framer-motion";
 
 // String global url
-import { BASE_URL, HARGA_EVOMI, HARGA_ONGKIR } from "@/src/config/strings";
+import { BASE_URL } from "@/src/config/strings";
 
 import WavyNavbarGradient from "@/components/WavyNavbarGradient";
 import ChatModal from "@/components/ChatModal";
@@ -318,6 +318,7 @@ export default function ProductsPage() {
       <nav className="fixed w-full z-[100] bg-[#0071bc]/95 backdrop-blur-xl border-b border-white/10 shadow-lg transition-all duration-300">
         <WavyNavbarGradient />
         <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
+          
           {/* 1. SEKTOR KIRI: LOGO EVOMI MASKING PROGRESS ORANGE */}
           <div className="flex-1 md:w-1/2 flex justify-start">
             <Link

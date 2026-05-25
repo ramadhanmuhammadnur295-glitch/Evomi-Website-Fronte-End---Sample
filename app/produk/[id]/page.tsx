@@ -49,6 +49,7 @@ const fontCaption = localFont({
   display: "swap",
 });
 
+// 
 export default function ProductDetailPage({
   params,
 }: {

@@ -1,8 +1,8 @@
 
+import ScrollProgressBar from "@/components/ScrollProgressBar";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ToastProvider } from "@/components/Toast";
 import "./globals.css";
-import ScrollProgressBar from "@/components/ScrollProgressBar";
 
 // --------------------------------------------------
 // konfigurasi local font pada next js, ask gemini ai

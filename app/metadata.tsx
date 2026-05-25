@@ -96,6 +96,7 @@ export const produkMetadata: Metadata = {
   },
 };
 
+// artikel meta data
 export const artikelMetadata: Metadata = {
   title: "Artikel & Jurnal",
   description:

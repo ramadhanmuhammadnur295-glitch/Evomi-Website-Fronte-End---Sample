@@ -13,6 +13,8 @@ import ChatModal from "@/components/ChatModal";
 import { BASE_URL } from "@/src/config/strings";
 import { useState, useEffect, useRef } from "react";
 import ImageCarousel from "@/components/ImageCarousel";
+
+// framer motion
 import {
   motion,
   Variants,
@@ -20,6 +22,7 @@ import {
   useTransform,
   AnimatePresence,
 } from "framer-motion";
+
 import WavyNavbarGradient from "@/components/WavyNavbarGradient";
 import TestimonialSection from "@/components/TestimonialSection";
 
@@ -96,6 +99,7 @@ export default function EvomiLandingPage() {
     offset: ["start end", "end start"],
   });
 
+  
   const testimonialGlowY = useTransform(
     testimonialScrollY,
     [0, 1],
@@ -123,6 +127,7 @@ export default function EvomiLandingPage() {
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // slides interval
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -130,6 +135,7 @@ export default function EvomiLandingPage() {
     return () => clearInterval(timer);
   }, []);
 
+  // fetch products
   useEffect(() => {
     setMounted(true);
     const token = localStorage.getItem("access_token");
@@ -156,6 +162,7 @@ export default function EvomiLandingPage() {
     fetchProducts();
   }, []);
 
+  // use effect check status offline / online with beacon / signal website
   useEffect(() => {
     if (!user) return;
 
@@ -190,6 +197,7 @@ export default function EvomiLandingPage() {
     };
   }, [user]);
 
+  // handle logout
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("access_token");
@@ -212,6 +220,7 @@ export default function EvomiLandingPage() {
     setIsMobileMenuOpen(false);
   };
 
+  // section divider
   const SectionDivider = () => (
     <div className="max-w-7xl mx-auto px-6 md:px-8">
       <motion.div
@@ -224,6 +233,7 @@ export default function EvomiLandingPage() {
     </div>
   );
 
+  // mobile menu var
   const mobileMenuVars: Variants = {
     hidden: { opacity: 0, height: 0 },
     visible: {
@@ -243,11 +253,13 @@ export default function EvomiLandingPage() {
     },
   };
 
+  // item var
   const itemVars: Variants = {
     hidden: { opacity: 0, x: -10 },
     visible: { opacity: 1, x: 0 },
   };
 
+  // top four products
   const topFourProducts = products.slice(0, 4);
 
   return (
