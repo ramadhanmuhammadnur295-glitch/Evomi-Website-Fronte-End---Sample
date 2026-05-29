@@ -14,6 +14,58 @@ import { BASE_URL } from "@/src/config/strings";
 import QuizModal from "@/components/QuizModal";
 import ChatModal from "@/components/ChatModal";
 
+// --- Kamus Bahasa Terjemahan ---
+const dict = {
+  id: {
+    loading: "Memuat Esensi...",
+    error: {
+      notFound: "Aroma tidak ditemukan.",
+      back: "Kembali"
+    },
+    chat: {
+      open: "Chat Admin",
+      close: "Tutup Chat"
+    },
+    modal: {
+      title: "Ditambahkan",
+      desc: "telah tersimpan.",
+      bag: "Keranjang",
+      continue: "Lanjutkan"
+    },
+    nav: {
+      back: "Kembali ke Toko"
+    },
+    details: {
+      volume: "Volume",
+      longevity: "Ketahanan"
+    }
+  },
+  en: {
+    loading: "Loading Essence...",
+    error: {
+      notFound: "Fragrance not found.",
+      back: "Back"
+    },
+    chat: {
+      open: "Chat Admin",
+      close: "Close Chat"
+    },
+    modal: {
+      title: "Added to Bag",
+      desc: "has been saved.",
+      bag: "Bag",
+      continue: "Continue"
+    },
+    nav: {
+      back: "Back to Shop"
+    },
+    details: {
+      volume: "Volume",
+      longevity: "Longevity"
+    }
+  }
+};
+
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -24,7 +76,6 @@ const fadeInUp: Variants = {
   },
 };
 
-// Stagger container untuk animasi anak-anak
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -42,23 +93,25 @@ const fontJudul = localFont({
   display: "swap",
 });
 
-// --- Custom Fonts ---
 const fontCaption = localFont({
   src: "./../../fonts/Nohemi-Regular.otf",
   variable: "--font-body",
   display: "swap",
 });
 
-// Product Detail Page
 export default function ProductDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const [showModal, setShowModal] = useState(false); // State for modal
-  const [produk, setProduk] = useState<any>(null); // State for product data
-  const [loading, setLoading] = useState(true); // State for loading
-  const [error, setError] = useState(false); // State for error
+  // State Bahasa Manajemen
+  const [lang, setLang] = useState<"id" | "en">("id");
+  const t = dict[lang];
+
+  const [showModal, setShowModal] = useState(false);
+  const [produk, setProduk] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -71,7 +124,6 @@ export default function ProductDetailPage({
     image: string;
   } | null>(null);
 
-  // 1. Inisialisasi User Data
   useEffect(() => {
     setMounted(true);
     const token = localStorage.getItem("access_token");
@@ -85,11 +137,9 @@ export default function ProductDetailPage({
     }
   }, []);
 
-  // 2. Logika Status Online / Offline (DIPERBARUI)
   useEffect(() => {
     if (!user) return;
 
-    // Fungsi untuk update status via regular API (Online)
     const setStatus = async (status: number) => {
       try {
         const token = localStorage.getItem("access_token");
@@ -106,10 +156,8 @@ export default function ProductDetailPage({
       }
     };
 
-    // Set Online saat masuk halaman
     setStatus(1);
 
-    // Fungsi Beacon untuk Set Offline (Saat browser/tab ditutup)
     const handleOfflineBeacon = () => {
       const url = `${BASE_URL}/api/user/status-beacon`;
       const data = JSON.stringify({
@@ -120,17 +168,14 @@ export default function ProductDetailPage({
       navigator.sendBeacon(url, blob);
     };
 
-    // Event listener untuk menutup tab/browser
     window.addEventListener("beforeunload", handleOfflineBeacon);
 
     return () => {
-      // Jalankan offline beacon saat user berpindah halaman (unmount komponen)
       handleOfflineBeacon();
       window.removeEventListener("beforeunload", handleOfflineBeacon);
     };
   }, [user]);
 
-  // get detail
   useEffect(() => {
     const getDetail = async () => {
       try {
@@ -153,10 +198,10 @@ export default function ProductDetailPage({
         setLoading(false);
       }
     };
-    getDetail(); // Get detail product
+
+    getDetail();
   }, [params]);
 
-  // loading
   if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FBFBF9] text-stone-400 text-[10px] uppercase tracking-widest">
@@ -164,12 +209,11 @@ export default function ProductDetailPage({
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
-          Loading Essence...
+          {t.loading}
         </motion.span>
       </div>
     );
 
-    // error
   if (error || !produk)
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#FBFBF9] px-4 text-center">
@@ -177,13 +221,13 @@ export default function ProductDetailPage({
           404
         </h2>
         <p className="text-stone-500 text-sm mb-8 font-light italic">
-          Aroma tidak ditemukan.
+          {t.error.notFound}
         </p>
         <Link
           href="/produk"
           className="px-8 py-3 bg-stone-900 text-white text-[10px] uppercase tracking-widest font-bold hover:bg-stone-700 transition-all"
         >
-          Kembali
+          {t.error.back}
         </Link>
       </div>
     );
@@ -192,13 +236,10 @@ export default function ProductDetailPage({
     <div
       className={`${fontJudul.variable} ${fontCaption.variable} font-body min-h-screen bg-[#FBFBF9] text-stone-900 selection:bg-amber-200`}
     >
-      {/* MODALS */}
       <QuizModal isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
       <ChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
-      {/* ========================================================================= */}
-      {/* FLOATING CHAT BUTTON (PROGRESS ORANGE HOVER)                              */}
-      {/* ========================================================================= */}
+      {/* Section: Tombol chat mengambang */}
       <motion.div
         initial={{ opacity: 0, scale: 0.5, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -233,12 +274,12 @@ export default function ProductDetailPage({
           </svg>
 
           <span className="absolute right-16 px-4 py-2.5 bg-white text-stone-800 text-[10px] font-bold uppercase tracking-[0.2em] rounded-xl opacity-0 pointer-events-none group-hover/chatbtn:opacity-100 transition-all duration-300 shadow-xl border border-stone-100 whitespace-nowrap translate-x-2 group-hover/chatbtn:translate-x-0 z-20">
-            {isChatOpen ? "Close Chat" : "Chat Admin"}
+            {isChatOpen ? t.chat.close : t.chat.open}
           </span>
         </button>
       </motion.div>
 
-      {/* MODAL SUCCESS - Dengan AnimatePresence */}
+      {/* Section: Modal sukses tambah produk */}
       <AnimatePresence>
         {showModal && (
           <div className="fixed inset-0 z-[999] flex items-center justify-center p-6">
@@ -263,34 +304,27 @@ export default function ProductDetailPage({
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M5 13l4 4L19 7"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h2
-                  className={`${fontJudul.className} text-xl uppercase tracking-widest mb-2`}
-                >
-                  Added to Bag
+                <h2 className={`${fontJudul.className} text-xl uppercase tracking-widest mb-2`}>
+                  {t.modal.title}
                 </h2>
                 <p className="text-stone-500 text-xs mb-8 font-light">
-                  {produk.nama} telah tersimpan.
+                  {produk.nama} {t.modal.desc}
                 </p>
                 <div className="space-y-3">
                   <Link
                     href="/profile"
                     className="block w-full bg-stone-900 text-white py-4 rounded-xl text-[10px] uppercase tracking-[0.2em] font-bold hover:bg-stone-800 transition-colors text-center"
                   >
-                    Bag
+                    {t.modal.bag}
                   </Link>
                   <button
                     onClick={() => setShowModal(false)}
                     className="w-full text-stone-400 text-[10px] uppercase tracking-[0.2em] hover:text-stone-900"
                   >
-                    Continue
+                    {t.modal.continue}
                   </button>
                 </div>
               </div>
@@ -299,14 +333,14 @@ export default function ProductDetailPage({
         )}
       </AnimatePresence>
 
-      {/* NAVBAR DENGAN EFEK PROGRESSIVE ORANGE HOVER */}
+      {/* Section: Navbar detail produk */}
       <nav className="sticky top-0 z-50 bg-[#0071bc] backdrop-blur-xl border-b border-white/10 px-6 py-0 flex items-center justify-between lg:px-16 h-20 shadow-lg">
         <WavyNavbarGradient />
 
-        {/* Container Gabungan untuk Tombol Back dan Teks */}
+        {/* Tombol Back */}
         <Link
           href="/produk"
-          className="group/back flex items-center space-x-2 transition-all duration-300"
+          className="group/back flex items-center space-x-2 transition-all duration-300 w-1/3 justify-start"
         >
           <div className="flex items-center justify-center p-2 rounded-full transition-all duration-300">
             <ArrowLeft
@@ -315,12 +349,10 @@ export default function ProductDetailPage({
             />
           </div>
 
-          {/* Teks dengan Efek Progressive Orange */}
           <div className="relative">
             <span className="text-white uppercase tracking-[0.2em] text-[10px] font-bold group-hover/back:text-amber-400 transition-colors duration-300">
-              Back to Shop
+              {t.nav.back}
             </span>
-            {/* Garis Progress Oranye */}
             <span className="absolute bottom-[-4px] left-0 w-full h-[1px] bg-amber-500 scale-x-0 group-hover/back:scale-x-100 transition-transform duration-500 origin-left" />
           </div>
         </Link>
@@ -329,15 +361,37 @@ export default function ProductDetailPage({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`${fontJudul.className} text-lg tracking-[0.2em] uppercase text-white cursor-default`}
+          className={`${fontJudul.className} text-lg tracking-[0.2em] uppercase text-white cursor-default w-1/3 text-center`}
         >
           Evomi
         </motion.div>
 
-        {/* Penanda (Space untuk menyeimbangkan posisi brand di tengah) */}
-        <div className="w-20" />
+        {/* Sektor Kanan: Toggle Bahasa Masking Capsule */}
+        <div className="w-1/3 flex justify-end">
+          <div className="flex items-center relative bg-white/10 backdrop-blur-md border border-white/20 p-1 rounded-full overflow-hidden">
+            <button
+              onClick={() => setLang("id")}
+              className={`relative z-10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 ${lang === 'id' ? 'text-stone-900' : 'text-white hover:text-amber-400'}`}
+            >
+              ID
+            </button>
+            <button
+              onClick={() => setLang("en")}
+              className={`relative z-10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 ${lang === 'en' ? 'text-stone-900' : 'text-white hover:text-amber-400'}`}
+            >
+              EN
+            </button>
+            <motion.div
+              className="absolute top-1 bottom-1 w-[calc(50%-2px)] bg-amber-500 rounded-full shadow-sm z-0"
+              initial={false}
+              animate={{ left: lang === 'id' ? "4px" : "calc(50% + 2px)" }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            />
+          </div>
+        </div>
       </nav>
 
+      {/* Section: Konten utama detail produk */}
       <main className="max-w-7xl mx-auto px-6 lg:px-16 py-12 lg:py-20">
         <motion.div
           initial="hidden"
@@ -345,7 +399,7 @@ export default function ProductDetailPage({
           variants={staggerContainer}
           className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
         >
-          {/* IMAGE SECTION - Slide in from left */}
+          {/* Galeri gambar produk */}
           <motion.div
             variants={{
               hidden: { opacity: 0, x: -20 },
@@ -367,15 +421,13 @@ export default function ProductDetailPage({
             />
           </motion.div>
 
-          {/* CONTENT SECTION - Staggered fade in */}
+          {/* Informasi produk */}
           <div className="flex flex-col">
             <motion.div variants={fadeInUp} className="mb-10">
               <span className="text-[9px] uppercase tracking-[0.3em] text-stone-400 font-bold mb-4 block">
                 {produk.gender} • {produk.konsentrasi}
               </span>
-              <h1
-                className={`${fontJudul.className} text-5xl lg:text-6xl uppercase leading-none mb-6 text-stone-900`}
-              >
+              <h1 className={`${fontJudul.className} text-5xl lg:text-6xl uppercase leading-none mb-6 text-stone-900`}>
                 {produk.nama}
               </h1>
               <p className="text-xl font-medium text-stone-800">
@@ -384,54 +436,23 @@ export default function ProductDetailPage({
             </motion.div>
 
             <motion.div variants={fadeInUp} className="space-y-8 mb-12">
-              {/* Rich Text Description Container */}
               <div
                 className="
                   prose prose-stone max-w-none
-                  
-                  prose-headings:font-bold
-                  prose-headings:text-stone-900
-                  prose-headings:tracking-tight
-                  prose-h1:text-2xl
-                  prose-h2:text-xl
-                  prose-h3:text-lg
-                  
-                  prose-p:text-stone-600
-                  prose-p:text-sm
-                  prose-p:leading-relaxed
-                  prose-p:font-light
-                  prose-p:mb-4
-                  prose-p:text-justify
-                  
-                  prose-strong:text-stone-900
-                  prose-strong:font-semibold
-                  
-                  prose-a:text-[#0071bc]
-                  prose-a:no-underline
-                  hover:prose-a:underline
-                  
-                  prose-ul:list-disc
-                  prose-ol:list-decimal
-                  prose-li:marker:text-stone-400
-                  prose-li:text-stone-600
-                  prose-li:text-sm
-                  
-                  prose-blockquote:border-l-2
-                  prose-blockquote:border-stone-200
-                  prose-blockquote:bg-transparent
-                  prose-blockquote:pl-6
-                  prose-blockquote:py-1
-                  prose-blockquote:text-stone-600
-                  prose-blockquote:italic
-                  prose-blockquote:font-light
-
-                  break-words
-                  overflow-hidden
+                  prose-headings:font-bold prose-headings:text-stone-900 prose-headings:tracking-tight
+                  prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
+                  prose-p:text-stone-600 prose-p:text-sm prose-p:leading-relaxed prose-p:font-light prose-p:mb-4 prose-p:text-justify
+                  prose-strong:text-stone-900 prose-strong:font-semibold
+                  prose-a:text-[#0071bc] prose-a:no-underline hover:prose-a:underline
+                  prose-ul:list-disc prose-ol:list-decimal
+                  prose-li:marker:text-stone-400 prose-li:text-stone-600 prose-li:text-sm
+                  prose-blockquote:border-l-2 prose-blockquote:border-stone-200 prose-blockquote:bg-transparent prose-blockquote:pl-6 prose-blockquote:py-1 prose-blockquote:text-stone-600 prose-blockquote:italic prose-blockquote:font-light
+                  break-words overflow-hidden
                 "
                 dangerouslySetInnerHTML={{ __html: produk.deskripsi || "" }}
               />
 
-              {/* Vibe Tags Container */}
+              {/* Tag vibe produk */}
               <div className="flex flex-wrap gap-2">
                 {produk.vibe?.split(",").map((v: string, index: number) => (
                   <motion.span
@@ -447,26 +468,26 @@ export default function ProductDetailPage({
               </div>
             </motion.div>
 
-            {/* DETAILS GRID */}
+            {/* Grid detail spesifikasi produk */}
             <motion.div
               variants={fadeInUp}
               className="grid grid-cols-2 gap-8 py-8 border-y border-stone-100 mb-10"
             >
               <div>
                 <p className="text-[9px] uppercase tracking-widest text-stone-400 mb-2">
-                  Volume
+                  {t.details.volume}
                 </p>
                 <p className="text-sm font-bold">{produk.ukuran}</p>
               </div>
               <div>
                 <p className="text-[9px] uppercase tracking-widest text-stone-400 mb-2">
-                  Longevity
+                  {t.details.longevity}
                 </p>
                 <p className="text-sm font-bold">{produk.ketahanan}</p>
               </div>
             </motion.div>
 
-            {/* BUTTON SECTION */}
+            {/* Tombol aksi */}
             <motion.div variants={fadeInUp}>
               <AddToCartButton
                 productId={produk.id}

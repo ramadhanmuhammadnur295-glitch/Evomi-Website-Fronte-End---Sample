@@ -2,17 +2,6 @@
 
 /* =========================================================================
  * IMPORT DEPENDENCIES
- * - Link, Image, localFont, useRouter : utilitas Next.js
- * - SocialIcon    : ikon media sosial untuk footer
- * - QuizModal     : modal kuis rekomendasi produk
- * - ChatModal     : modal chat dengan admin
- * - BASE_URL      : konstanta URL API global
- * - useState, useEffect, useRef : manajemen state, lifecycle, dan ref
- * - ImageCarousel : komponen carousel gambar produk
- * - motion, Variants, useScroll, useTransform, AnimatePresence : Framer Motion
- * - WavyNavbarGradient : dekorasi gelombang di bawah navbar
- * - TestimonialSection : komponen testimoni pelanggan
- * - ThemeToggle   : tombol toggle dark/light mode
  * ========================================================================= */
 import Link from "next/link";
 import Image from "next/image";
@@ -33,12 +22,9 @@ import {
 } from "framer-motion";
 import WavyNavbarGradient from "@/components/WavyNavbarGradient";
 import TestimonialSection from "@/components/TestimonialSection";
-import { ThemeToggle } from "@/components/ToggleTheme";
 
 /* =========================================================================
- * ANIMASI VARIANTS (didefinisikan di luar komponen agar tidak re-create)
- * - fadeInUp       : elemen muncul dari bawah ke atas dengan fade
- * - staggerContainer : wrapper yang men-stagger animasi anak-anaknya
+ * ANIMASI VARIANTS
  * ========================================================================= */
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -59,8 +45,6 @@ const staggerContainer: Variants = {
 
 /* =========================================================================
  * KONFIGURASI FONT LOKAL
- * - fontJudul   : font brand berat untuk heading dan judul besar
- * - fontCaption : font body reguler untuk teks paragraf
  * ========================================================================= */
 const fontJudul = localFont({
   src: "./fonts/8 Heavy.ttf",
@@ -75,24 +59,115 @@ const fontCaption = localFont({
 });
 
 /* =========================================================================
- * KOMPONEN UTAMA: EvomiLandingPage
- * Halaman utama landing page Evomi Fragrance House.
- * Berisi: Navbar, Hero, Crafting Memories, Image Carousel,
- * Signature Collection, Metrics, Testimonial, dan Footer.
+ * DICTIONARY TERJEMAHAN BAHASA
+ * ========================================================================= */
+const dict = {
+  id: {
+    nav: { about: "Tentang", collection: "Koleksi", shop: "Belanja", quiz: "Kuis", article: "Artikel", login: "Masuk", register: "Daftar", profile: "Profil", orders: "Pesanan", logout: "Keluar" },
+    hero: {
+      slides: [
+        {
+          tagline: "Rumah Wewangian Artisan",
+          title: "EVOMI",
+          desc: "Kurasi aroma yang melampaui waktu."
+        },
+        {
+          tagline: "Setiap Versi Diriku",
+          title: "ESENSI",
+          desc: "Menemukan jati diri melalui setiap semprotan."
+        },
+        {
+          tagline: "Uniseks & Tahan Lama",
+          title: "DIRACIK",
+          desc: "Ketahanan aroma hingga 12 jam lebih."
+        },
+      ],
+      cta: "Jelajahi Koleksi"
+    },
+    about: {
+      subtitle: "Seni Olfaktori Kami",
+      title: "Merajut ",
+      titleHighlight: "Kenangan",
+      desc: "Aroma bukan sekadar wewangian; ia adalah mesin waktu tak kasat mata yang mengunci momen, emosi, dan jati diri. Di Evomi, kami meracik setiap partikel esensial untuk menjadi narasi abadi dari setiap langkah perjalanan hidup Anda.",
+      cards: [
+        { num: "01", label: "Seleksi", title: "Kurasi Bahan Premium", desc: "Mengekstrak elemen organik terbaik dari berbagai penjuru dunia untuk memastikan kemurnian dan konsistensi aroma di setiap tetesnya." },
+        { num: "02", label: "Alkimia", title: "Seni Keseimbangan Notes", desc: "Perpaduan presisi yang harmonis antara top, middle, dan base notes untuk menciptakan transisi wewangian yang halus dan memikat." },
+        { num: "03", label: "Resonansi", title: "Resonansi Karakter", desc: "Setiap racikan dirancang secara emosional untuk memperkuat impresi visual, meningkatkan kepercayaan diri, dan mengekspresikan aura unik Anda." },
+        { num: "04", label: "Ketahanan", title: "Jejak Kehadiran Abadi", desc: "Konsentrasi konsentrat yang tinggi menghasilkan tingkat sillage dan proyeksi prima, meninggalkan impresi mendalam bahkan setelah Anda berlalu." },
+      ]
+    },
+    carousel: { title: "Karakter Produk", subtitle: "Koleksi" },
+    signature: { title: "Esensi Khas", subtitle: "Koleksi Unggulan", btnHover: "Lihat Produk", viewAll: "Lihat Semua Koleksi" },
+    metrics: [
+      { title: "12J+", desc: "Proyeksi" },
+      { title: "Artisan", desc: "Batch" },
+      { title: "Daur Ulang", desc: "Kaca" },
+      { title: "Organik", desc: "Esensi" },
+    ],
+    testimonial: { quote: "\"Tertangkap dalam aroma, \n didefinisikan oleh jiwa.\"" },
+    footer: {
+      desc: "Menghadirkan pengalaman sensorik melalui kurasi aroma terbaik. Dedikasi pada seni artisan fragrance.",
+      contact: "Hubungi Kami",
+      newsletterTitle: "Buletin",
+      newsletterDesc: "Dapatkan akses eksklusif ke rilis terbaru kami.",
+      placeholder: "Alamat email Anda",
+      subscribe: "Berlangganan"
+    }
+  },
+  en: {
+    nav: { about: "About", collection: "Collection", shop: "Shop", quiz: "Quiz", article: "Article", login: "Login", register: "Register", profile: "Profile", orders: "Orders", logout: "Logout" },
+    hero: {
+      slides: [
+        { tagline: "The Artisan Fragrance House", title: "EVOMI", desc: "Curating scents that transcend time." },
+        { tagline: "Every Version of Me", title: "ESSENCE", desc: "Discovering true self through every spray." },
+        { tagline: "Unisex & Long Lasting", title: "CRAFTED", desc: "Fragrance endurance up to 12 hours or more." },
+      ],
+      cta: "Explore Collection"
+    },
+    about: {
+      subtitle: "Our Olfactory Art",
+      title: "Crafting ",
+      titleHighlight: "Memories",
+      desc: "Aroma is not just a fragrance; it is an invisible time machine that locks in moments, emotions, and identity. At Evomi, we craft every essential particle to become a timeless narrative of every step in your life's journey.",
+      cards: [
+        { num: "01", label: "Selection", title: "Premium Material Curation", desc: "Extracting the best organic elements from around the world to ensure purity and consistency of aroma in every drop." },
+        { num: "02", label: "Alchemy", title: "The Art of Notes Balance", desc: "A harmonious precision blend between top, middle, and base notes to create a smooth and captivating fragrance transition." },
+        { num: "03", label: "Resonance", title: "Character Resonance", desc: "Every blend is emotionally designed to strengthen visual impression, boost confidence, and express your unique aura." },
+        { num: "04", label: "Longevity", title: "Eternal Presence Trail", desc: "High concentration of extracts produces prime sillage and projection levels, leaving a deep impression even after you have passed." },
+      ]
+    },
+    carousel: { title: "Product Characters", subtitle: "Collections" },
+    signature: { title: "Signature Essence", subtitle: "Featured Collection", btnHover: "View Product", viewAll: "View All Collection" },
+    metrics: [
+      { title: "12H+", desc: "Projection" },
+      { title: "Artisan", desc: "Batch" },
+      { title: "Recycled", desc: "Glass" },
+      { title: "Organic", desc: "Essence" },
+    ],
+    testimonial: { quote: "\"Captured in a scent, \n defined by the soul.\"" },
+    footer: {
+      desc: "Delivering a sensory experience through the best curation of aromas. Dedicated to the art of artisan fragrance.",
+      contact: "Contact Us",
+      newsletterTitle: "The Newsletter",
+      newsletterDesc: "Get exclusive access to our latest releases.",
+      placeholder: "Your email address",
+      subscribe: "Subscribe"
+    }
+  }
+};
+
+/* =========================================================================
+ * KOMPONEN UTAMA
  * ========================================================================= */
 export default function EvomiLandingPage() {
   const router = useRouter();
 
   /* -----------------------------------------------------------------------
    * STATE
-   * - user             : data user yang sedang login (null jika belum login)
-   * - isMenuOpen       : kontrol dropdown menu profil user di desktop
-   * - products         : array produk dari API untuk ditampilkan di grid
-   * - mounted          : flag hydration — mencegah mismatch SSR/CSR
-   * - isMobileMenuOpen : kontrol visibilitas menu mobile
-   * - isQuizOpen       : kontrol visibilitas modal kuis
-   * - isChatOpen       : kontrol visibilitas modal chat
    * ----------------------------------------------------------------------- */
+  const [lang, setLang] = useState<"id" | "en">("id"); // STATE BAHASA
+  const t = dict[lang]; // Pointer bahasa aktif
+
   const [user, setUser] = useState<{
     id: any;
     email: string;
@@ -100,6 +175,7 @@ export default function EvomiLandingPage() {
     username: string;
     image: string;
   } | null>(null);
+  
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
   const [mounted, setMounted] = useState(false);
@@ -109,12 +185,6 @@ export default function EvomiLandingPage() {
 
   /* -----------------------------------------------------------------------
    * SCROLL & PARALLAX HOOKS
-   * - scrollYProgress    : progress scroll global untuk progress bar
-   * - heroScrollY        : progress scroll khusus section hero
-   * - heroTextY          : transformasi Y teks hero (parallax lambat)
-   * - heroBgY            : transformasi Y background hero (parallax lebih lambat)
-   * - testimonialScrollY : progress scroll section testimonial
-   * - testimonialGlowY   : transformasi Y efek glow testimonial
    * ----------------------------------------------------------------------- */
   const { scrollYProgress } = useScroll();
   const heroRef = useRef(null);
@@ -126,44 +196,27 @@ export default function EvomiLandingPage() {
   const heroBgY = useTransform(heroScrollY, [0, 1], ["0%", "20%"]);
 
   const testimonialRef = useRef(null);
+
   const { scrollYProgress: testimonialScrollY } = useScroll({
     target: testimonialRef,
     offset: ["start end", "end start"],
   });
+
   const testimonialGlowY = useTransform(
     testimonialScrollY,
     [0, 1],
     ["-40%", "40%"],
   );
 
-  /* -----------------------------------------------------------------------
-   * DATA: heroSlides
-   * Array konten untuk slider hero — berganti setiap 5 detik.
-   * ----------------------------------------------------------------------- */
-  const heroSlides = [
-    { tagline: "The Artisan Fragrance House", title: "EVOMI", desc: "Kurasi aroma yang melampaui waktu." },
-    { tagline: "Every Version of Me", title: "ESSENCE", desc: "Menemukan jati diri melalui setiap semprotan." },
-    { tagline: "Unisex & Long Lasting", title: "CRAFTED", desc: "Ketahanan aroma hingga 12 jam lebih." },
-  ];
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  /* -----------------------------------------------------------------------
-   * EFFECT: Auto-Play Hero Slider
-   * Berganti slide setiap 5000ms secara siklik.
-   * ----------------------------------------------------------------------- */
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+      setCurrentSlide((prev) => (prev + 1) % t.hero.slides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [t.hero.slides.length]);
 
-  /* -----------------------------------------------------------------------
-   * EFFECT: Inisialisasi Data (Mounted, User, Products)
-   * - Set mounted = true untuk menghindari hydration mismatch
-   * - Ambil data user dari localStorage jika sudah login
-   * - Fetch 4 produk pertama dari API untuk ditampilkan di grid
-   * ----------------------------------------------------------------------- */
   useEffect(() => {
     setMounted(true);
     const token = localStorage.getItem("access_token");
@@ -190,12 +243,6 @@ export default function EvomiLandingPage() {
     fetchProducts();
   }, []);
 
-  /* -----------------------------------------------------------------------
-   * EFFECT: Manajemen Status Online/Offline User
-   * - Set status online (1) saat halaman dibuka
-   * - Set status offline (0) via navigator.sendBeacon saat tab/browser ditutup
-   * - Menggunakan Beacon API agar request tetap terkirim saat beforeunload
-   * ----------------------------------------------------------------------- */
   useEffect(() => {
     if (!user) return;
 
@@ -214,26 +261,19 @@ export default function EvomiLandingPage() {
       }
     };
 
-    setStatus(1); // Set online saat halaman dibuka
+    setStatus(1);
 
     const handleUnload = () => {
       const url = `${BASE_URL}/api/user/status-beacon`;
       const data = JSON.stringify({ user_id: user.id, is_online: 0 });
       const blob = new Blob([data], { type: "application/json" });
-      navigator.sendBeacon(url, blob); // Beacon API untuk set offline saat tab ditutup
+      navigator.sendBeacon(url, blob);
     };
 
     window.addEventListener("beforeunload", handleUnload);
     return () => window.removeEventListener("beforeunload", handleUnload);
   }, [user]);
 
-  /* -----------------------------------------------------------------------
-   * FUNGSI: handleLogout
-   * Menangani proses logout user.
-   * - Memanggil API logout untuk invalidasi token di server
-   * - Menghapus token dan data user dari localStorage
-   * - Menutup semua menu dan me-refresh halaman
-   * ----------------------------------------------------------------------- */
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("access_token");
@@ -253,11 +293,6 @@ export default function EvomiLandingPage() {
     setIsMobileMenuOpen(false);
   };
 
-  /* -----------------------------------------------------------------------
-   * KOMPONEN INNER: SectionDivider
-   * Garis horizontal tipis dengan animasi scaleX dari kiri ke kanan
-   * saat masuk viewport. Digunakan sebagai pemisah antar section.
-   * ----------------------------------------------------------------------- */
   const SectionDivider = () => (
     <div className="max-w-7xl mx-auto px-6 md:px-8">
       <motion.div
@@ -270,10 +305,6 @@ export default function EvomiLandingPage() {
     </div>
   );
 
-  /* -----------------------------------------------------------------------
-   * VARIANTS: mobileMenuVars & itemVars
-   * Animasi untuk menu mobile yang expand/collapse dengan stagger anak.
-   * ----------------------------------------------------------------------- */
   const mobileMenuVars: Variants = {
     hidden: { opacity: 0, height: 0 },
     visible: {
@@ -289,41 +320,18 @@ export default function EvomiLandingPage() {
     visible: { opacity: 1, x: 0 },
   };
 
-  /* -----------------------------------------------------------------------
-   * DERIVED DATA: topFourProducts
-   * Mengambil 4 produk pertama dari array products untuk ditampilkan
-   * di section Signature Collection.
-   * ----------------------------------------------------------------------- */
   const topFourProducts = products.slice(0, 4);
 
   return (
-    /* =========================================================================
-     * ROOT WRAPPER
-     * opacity 0→1 setelah mounted untuk mencegah flash konten saat hydration.
-     * Variabel font di-inject ke CSS custom properties via className.
-     * ========================================================================= */
     <div
       style={{ opacity: mounted ? 1 : 0 }}
       className={`${fontCaption.variable} ${fontJudul.variable} selection:bg-amber-200 selection:text-stone-900 transition-opacity duration-500`}
     >
-      {/* =====================================================================
-       * SCROLL PROGRESS BAR
-       * Bar oranye tipis di paling atas layar yang mengisi seiring scroll.
-       * scaleX di-drive oleh scrollYProgress dari Framer Motion.
-       * ===================================================================== */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-amber-500 origin-left z-[110]"
         style={{ scaleX: scrollYProgress }}
       />
 
-      {/* =====================================================================
-       * FLOATING CHAT BUTTON
-       * Tombol bulat mengambang di pojok kanan bawah untuk membuka ChatModal.
-       * - Animasi spring masuk dari bawah dengan delay 1.5s
-       * - Efek hover: overlay oranye dari kiri ke kanan
-       * - Ping animation saat chat belum terbuka
-       * - Tooltip teks muncul saat hover
-       * ===================================================================== */}
       <motion.div
         initial={{ opacity: 0, scale: 0.5, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -334,54 +342,43 @@ export default function EvomiLandingPage() {
           onClick={() => setIsChatOpen(!isChatOpen)}
           className="relative flex items-center justify-center w-14 h-14 bg-stone-900 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.15)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 transition-all duration-300 group/chatbtn z-0"
         >
-          {/* Layer background oranye — overflow-hidden di sini agar tidak memotong tooltip */}
           <div className="absolute inset-0 w-full h-full rounded-full overflow-hidden -z-10">
             <div className="w-full h-full bg-amber-500 scale-x-0 group-hover/chatbtn:scale-x-100 transition-transform duration-500 origin-left" />
           </div>
-          {/* Ping animation — hanya saat chat belum terbuka */}
           {!isChatOpen && (
             <span className="absolute inset-0 rounded-full bg-stone-500 opacity-20 animate-ping group-hover/chatbtn:animate-none -z-10"></span>
           )}
-          {/* Ikon chat SVG */}
           <svg className="w-6 h-6 text-[#FBFBF9] relative z-10 transition-colors duration-300 group-hover/chatbtn:text-stone-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
           </svg>
-          {/* Tooltip teks — muncul saat hover */}
           <span className="absolute right-16 px-4 py-2.5 bg-white text-stone-800 text-[10px] font-bold uppercase tracking-[0.2em] rounded-xl opacity-0 pointer-events-none group-hover/chatbtn:opacity-100 transition-all duration-300 shadow-xl border border-stone-100 whitespace-nowrap translate-x-2 group-hover/chatbtn:translate-x-0 z-20">
             {isChatOpen ? "Close Chat" : "Chat Admin"}
           </span>
         </button>
       </motion.div>
 
-      {/* Modal Chat dan Modal Kuis */}
       <ChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
       <QuizModal isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
 
       <div className="min-h-screen bg-[#FBFBF9] dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans antialiased transition-colors duration-300">
 
-        {/* =================================================================
-         * SEKSI 1: NAVBAR FIXED
-         * Navbar biru transparan yang selalu tampil di atas layar.
-         * Tiga sektor: Logo (kiri), Menu (tengah), User/Auth (kanan).
-         * Semua elemen menggunakan efek progress oranye dari kiri ke kanan.
-         * ================================================================= */}
         <nav className="fixed w-full z-[100] bg-[#0071bc]/95 backdrop-blur-xl border-b border-white/10 shadow-lg transition-all duration-300">
           <WavyNavbarGradient />
           <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
 
-            {/* Sektor Kiri: Logo dengan efek CSS masking oranye saat hover */}
-            <div className="flex-1 md:w-1/2 flex justify-start">
+            {/* Sektor Kiri */}
+            <div className="flex-1 md:w-1/3 flex justify-start">
               <Link href="/" className="relative group/logo block overflow-hidden">
                 <Image src="/img/Logo Evomi.png" alt="Evomi Logo" width={90} height={36} className="brightness-0 invert drop-shadow-sm group-hover/logo:opacity-0 transition-opacity duration-300 block" />
                 <div className="absolute inset-0 scale-x-0 group-hover/logo:scale-x-100 transition-transform duration-500 origin-left bg-amber-500" style={{ WebkitMaskImage: "url('/img/Logo Evomi.png')", maskImage: "url('/img/Logo Evomi.png')", WebkitMaskSize: "contain", maskSize: "contain", WebkitMaskRepeat: "no-repeat", maskRepeat: "no-repeat" }} />
               </Link>
             </div>
 
-            {/* Sektor Tengah: Menu navigasi desktop dengan underline oranye */}
-            <div className={`hidden md:flex w-1/2 justify-center items-center space-x-10 ${fontJudul.className} text-[13px] tracking-[0.2em] uppercase text-white`}>
+            {/* Sektor Tengah */}
+            <div className={`hidden md:flex w-1/3 justify-center items-center space-x-10 ${fontJudul.className} text-[13px] tracking-[0.2em] uppercase text-white`}>
               {[
-                { label: "About", href: "#about", isAnchor: true },
-                { label: "Collection", href: "#product", isAnchor: true },
+                { label: t.nav.about, href: "#about", isAnchor: true },
+                { label: t.nav.collection, href: "#product", isAnchor: true },
               ].map((item) => (
                 <a key={item.label} href={item.href} className="relative group/nav py-1 transition-colors duration-300 hover:text-amber-400">
                   {item.label}
@@ -389,9 +386,9 @@ export default function EvomiLandingPage() {
                 </a>
               ))}
               {[
-                { label: "Shop", href: "/produk" },
-                { label: "Quiz", href: "/quiz" },
-                { label: "Artikel", href: "/artikel" },
+                { label: t.nav.shop, href: "/produk" },
+                { label: t.nav.quiz, href: "/quiz" },
+                { label: t.nav.article, href: "/artikel" },
               ].map((item) => (
                 <Link key={item.label} href={item.href} className="relative group/nav py-1 transition-colors duration-300 hover:text-amber-400">
                   {item.label}
@@ -400,11 +397,33 @@ export default function EvomiLandingPage() {
               ))}
             </div>
 
-            {/* Sektor Kanan: User profile / Login-Register + ThemeToggle + Hamburger */}
-            <div className="flex-1 md:w-1/3 flex justify-end items-center space-x-4">
+            {/* Sektor Kanan: Language Toggle & User Auth */}
+            <div className="flex-1 md:w-1/3 flex justify-end items-center space-x-6">
+
+              {/* Language Toggle */}
+              <div className="hidden md:flex items-center relative bg-white/10 backdrop-blur-md border border-white/20 p-1 rounded-full overflow-hidden">
+                <button
+                  onClick={() => setLang("id")}
+                  className={`relative z-10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 ${lang === 'id' ? 'text-stone-900' : 'text-white hover:text-amber-400'}`}
+                >
+                  ID
+                </button>
+                <button
+                  onClick={() => setLang("en")}
+                  className={`relative z-10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 ${lang === 'en' ? 'text-stone-900' : 'text-white hover:text-amber-400'}`}
+                >
+                  EN
+                </button>
+                <motion.div
+                  className="absolute top-1 bottom-1 w-[calc(50%-2px)] bg-amber-500 rounded-full shadow-sm z-0"
+                  initial={false}
+                  animate={{ left: lang === 'id' ? "4px" : "calc(50% + 2px)" }}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              </div>
+
               <div className="hidden md:flex items-center space-x-6">
                 {user ? (
-                  /* Dropdown profil user saat sudah login */
                   <div className="relative">
                     <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="group/userbtn btn relative flex items-center space-x-3 border border-white/30 rounded-full p-1 pr-4 bg-white/10 transition-all duration-300 backdrop-blur-sm overflow-hidden z-0">
                       <div className="absolute inset-0 w-full h-full bg-amber-500 scale-x-0 group-hover/userbtn:scale-x-100 transition-transform duration-500 origin-left -z-10" />
@@ -420,33 +439,29 @@ export default function EvomiLandingPage() {
                     <AnimatePresence>
                       {isMenuOpen && (
                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-blue-50 py-2 z-50 overflow-hidden">
-                          <Link href="/profile" className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-800 hover:bg-blue-50">Profile</Link>
-                          <Link href="/orders" className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-800 hover:bg-blue-50">Orders</Link>
+                          <Link href="/profile" className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-800 hover:bg-blue-50">{t.nav.profile}</Link>
+                          <Link href="/orders" className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-800 hover:bg-blue-50">{t.nav.orders}</Link>
                           <hr className="border-blue-50 my-1" />
-                          <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-50">Logout</button>
+                          <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-50">{t.nav.logout}</button>
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
                 ) : (
-                  /* Tombol Login dan Register saat belum login */
                   <div className="flex items-center space-x-6">
                     <Link href="/login" className="relative group/auth py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white hover:text-amber-400 transition-colors duration-300">
-                      Login
+                      {t.nav.login}
                       <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/auth:scale-x-100 transition-transform duration-300 origin-left" />
                     </Link>
                     <Link href="/register" className="relative group/auth py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white hover:text-amber-400 transition-colors duration-300">
-                      Register
+                      {t.nav.register}
                       <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/auth:scale-x-100 transition-transform duration-300 origin-left" />
                     </Link>
                   </div>
                 )}
               </div>
 
-              {/* Tombol toggle dark/light mode */}
-              {/* <ThemeToggle /> */}
-
-              {/* Tombol hamburger untuk membuka menu mobile */}
+              {/* Hamburger Mobile */}
               <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden p-2 text-white hover:text-blue-100 focus:outline-none">
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {isMobileMenuOpen ? (
@@ -459,19 +474,26 @@ export default function EvomiLandingPage() {
             </div>
           </div>
 
-          {/* Menu Mobile — expand/collapse dengan animasi stagger */}
+          {/* Menu Mobile */}
           <AnimatePresence>
             {isMobileMenuOpen && (
               <motion.div variants={mobileMenuVars} initial="hidden" animate="visible" exit="exit" className="md:hidden bg-[#0071bc]">
                 <div className="px-8 py-10 flex flex-col space-y-8">
+                  {/* Language Toggle Mobile */}
+                  <motion.div variants={itemVars} className="flex space-x-4 border-b border-white/20 pb-4">
+                    <button onClick={() => setLang("id")} className={`text-sm font-bold uppercase tracking-widest ${lang === 'id' ? 'text-amber-400' : 'text-white'}`}>ID</button>
+                    <span className="text-white/50">|</span>
+                    <button onClick={() => setLang("en")} className={`text-sm font-bold uppercase tracking-widest ${lang === 'en' ? 'text-amber-400' : 'text-white'}`}>EN</button>
+                  </motion.div>
+
                   <div className="space-y-6">
-                    {[{ name: "About", href: "#about" }, { name: "Collection", href: "#product" }, { name: "Shop", href: "/produk" }].map((link) => (
+                    {[{ name: t.nav.about, href: "#about" }, { name: t.nav.collection, href: "#product" }, { name: t.nav.shop, href: "/produk" }].map((link) => (
                       <motion.div key={link.name} variants={itemVars}>
                         <Link href={link.href} onClick={() => setIsMobileMenuOpen(false)} className={`${fontJudul.className} text-2xl tracking-[0.2em] text-white uppercase`}>{link.name}</Link>
                       </motion.div>
                     ))}
-                    <motion.div variants={itemVars}><Link href="/quiz" onClick={() => setIsMobileMenuOpen(false)} className={`${fontJudul.className} text-2xl tracking-[0.2em] text-white uppercase`}>Quiz</Link></motion.div>
-                    <motion.div variants={itemVars}><Link href="/artikel" onClick={() => setIsMobileMenuOpen(false)} className={`${fontJudul.className} text-2xl tracking-[0.2em] text-white uppercase`}>Artikel</Link></motion.div>
+                    <motion.div variants={itemVars}><Link href="/quiz" onClick={() => setIsMobileMenuOpen(false)} className={`${fontJudul.className} text-2xl tracking-[0.2em] text-white uppercase`}>{t.nav.quiz}</Link></motion.div>
+                    <motion.div variants={itemVars}><Link href="/artikel" onClick={() => setIsMobileMenuOpen(false)} className={`${fontJudul.className} text-2xl tracking-[0.2em] text-white uppercase`}>{t.nav.article}</Link></motion.div>
                   </div>
                   <motion.div variants={itemVars} className="pt-8 border-t border-white/10">
                     {user ? (
@@ -483,15 +505,15 @@ export default function EvomiLandingPage() {
                           <span className="text-white font-bold tracking-widest uppercase">{user.username}</span>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                          <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 bg-white/10 rounded-xl text-[10px] font-bold uppercase text-white text-center">Profile</Link>
-                          <Link href="/orders" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 bg-white/10 rounded-xl text-[10px] font-bold uppercase text-white text-center">Orders</Link>
+                          <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 bg-white/10 rounded-xl text-[10px] font-bold uppercase text-white text-center">{t.nav.profile}</Link>
+                          <Link href="/orders" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 bg-white/10 rounded-xl text-[10px] font-bold uppercase text-white text-center">{t.nav.orders}</Link>
                         </div>
-                        <button onClick={handleLogout} className="w-full py-3 border border-red-400/50 rounded-xl text-[10px] font-bold uppercase text-red-300">Logout</button>
+                        <button onClick={handleLogout} className="w-full py-3 border border-red-400/50 rounded-xl text-[10px] font-bold uppercase text-red-300">{t.nav.logout}</button>
                       </div>
                     ) : (
                       <div className="flex flex-col space-y-4">
-                        <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="w-full py-4 bg-white text-[#0071bc] rounded-xl text-center text-[10px] font-bold uppercase tracking-widest">Login</Link>
-                        <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="w-full py-4 border border-white/30 text-white rounded-xl text-center text-[10px] font-bold uppercase tracking-widest">Register</Link>
+                        <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="w-full py-4 bg-white text-[#0071bc] rounded-xl text-center text-[10px] font-bold uppercase tracking-widest">{t.nav.login}</Link>
+                        <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="w-full py-4 border border-white/30 text-white rounded-xl text-center text-[10px] font-bold uppercase tracking-widest">{t.nav.register}</Link>
                       </div>
                     )}
                   </motion.div>
@@ -501,73 +523,51 @@ export default function EvomiLandingPage() {
           </AnimatePresence>
         </nav>
 
-        {/* =================================================================
-         * SEKSI 2: HERO
-         * Full-screen section dengan parallax background dan teks.
-         * Slider berganti setiap 5 detik dengan animasi fade + slide.
-         * Bullet dots di bawah untuk navigasi manual.
-         * ================================================================= */}
+        {/* HERO SECTION */}
         <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden pt-20">
-          {/* Background parallax — bergerak lebih lambat dari teks */}
           <motion.div style={{ y: heroBgY }} className="absolute inset-0 bg-gradient-to-b from-[#FBFBF9] via-stone-50 to-[#F5F5F0] dark:from-stone-950 dark:via-stone-900 dark:to-stone-950 opacity-80 scale-125 origin-top" />
-          {/* Konten teks hero dengan parallax */}
           <motion.div style={{ y: heroTextY }} className="relative z-10 text-center space-y-6 md:space-y-8 max-w-4xl">
             <AnimatePresence mode="wait">
-              <motion.div key={currentSlide} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.8, ease: "circOut" }} className="space-y-6">
-                <p className="text-stone-400 dark:text-stone-500 tracking-[0.5em] uppercase text-xl font-semibold">{heroSlides[currentSlide].tagline}</p>
-                <h1 className={`${fontJudul.className} text-4xl md:text-[130px] uppercase text-stone-900 dark:text-stone-100 drop-shadow-sm`}>{heroSlides[currentSlide].title}</h1>
-                <p className="text-stone-500 dark:text-stone-400 italic max-w-xl mx-auto text-xl md:text-base">{heroSlides[currentSlide].desc}</p>
+              <motion.div key={currentSlide + lang} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.8, ease: "circOut" }} className="space-y-6">
+                <p className="text-stone-400 dark:text-stone-500 tracking-[0.5em] uppercase text-xl font-semibold">{t.hero.slides[currentSlide]?.tagline}</p>
+                <h1 className={`${fontJudul.className} text-4xl md:text-[130px] uppercase text-stone-900 dark:text-stone-100 drop-shadow-sm`}>{t.hero.slides[currentSlide]?.title}</h1>
+                <p className="text-stone-500 dark:text-stone-400 italic max-w-xl mx-auto text-xl md:text-base">{t.hero.slides[currentSlide]?.desc}</p>
               </motion.div>
             </AnimatePresence>
-            {/* Tombol CTA Explore Collection */}
             <motion.div variants={fadeInUp} initial="hidden" animate="visible" className="flex justify-center pt-4">
               <Link href="/produk" className="group relative inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold tracking-widest text-white uppercase bg-stone-900 rounded-full overflow-hidden shadow-lg transition-all duration-300">
-                <span className="relative z-10 group-hover:text-stone-950 transition-colors duration-300">Explore Collection</span>
+                <span className="relative z-10 group-hover:text-stone-950 transition-colors duration-300">{t.hero.cta}</span>
                 <div className="absolute inset-0 bg-amber-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left z-0" />
               </Link>
             </motion.div>
-            {/* Bullet dots navigasi slide */}
             <div className="flex justify-center space-x-3 pt-8">
-              {heroSlides.map((_, index) => (
+              {t.hero.slides.map((_, index) => (
                 <button key={index} onClick={() => setCurrentSlide(index)} className={`h-1 transition-all duration-500 rounded-full ${currentSlide === index ? "w-8 bg-stone-900 dark:bg-stone-100" : "w-4 bg-stone-300 dark:bg-stone-700"}`} />
               ))}
             </div>
           </motion.div>
         </section>
 
-        {/* =================================================================
-         * SEKSI 3: CRAFTING MEMORIES (ABOUT)
-         * Section gelap dengan grid 2 kolom:
-         * - Kiri  : judul "Crafting Memories" + deskripsi filosofi brand
-         * - Kanan : 4 kartu proses (Selection, Alchemy, Resonance, Longevity)
-         * ================================================================= */}
+        {/* ABOUT SECTION */}
         <section id="about" className="relative py-24 md:py-32 bg-stone-950 text-white px-6 overflow-hidden z-20 w-full">
-          {/* Dekorasi blur background */}
           <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[350px] md:w-[500px] h-[350px] md:h-[500px] bg-amber-500/[0.03] blur-[120px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-stone-800/30 blur-[100px] rounded-full pointer-events-none" />
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
-              {/* Kolom kiri: judul dan deskripsi */}
               <div className="md:col-span-5 space-y-6 text-left">
                 <div className="space-y-3">
-                  <span className="text-amber-500 text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold block">Our Olfactory Art</span>
+                  <span className="text-amber-500 text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold block">{t.about.subtitle}</span>
                   <h2 className={`${fontJudul.className} text-3xl md:text-5xl uppercase tracking-tight text-stone-100 leading-tight`}>
-                    Crafting <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 italic">Memories</span>
+                    {t.about.title} <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 italic">{t.about.titleHighlight}</span>
                   </h2>
                 </div>
                 <p className="text-stone-400 text-sm md:text-base leading-relaxed font-light">
-                  Aroma bukan sekadar wewangian; ia adalah mesin waktu tak kasat mata yang mengunci momen, emosi, dan jati diri. Di Evomi, kami meracik setiap partikel esensial untuk menjadi narasi abadi dari setiap langkah perjalanan hidup Anda.
+                  {t.about.desc}
                 </p>
               </div>
-              {/* Kolom kanan: 4 kartu proses */}
               <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-                {[
-                  { num: "01", label: "Selection", title: "Kurasi Bahan Premium", desc: "Mengekstrak elemen organik terbaik dari berbagai penjuru dunia untuk memastikan kemurnian dan konsistensi aroma di setiap tetesnya." },
-                  { num: "02", label: "Alchemy", title: "Seni Keseimbangan Notes", desc: "Perpaduan presisi yang harmonis antara top, middle, dan base notes untuk menciptakan transisi wewangian yang halus dan memikat." },
-                  { num: "03", label: "Resonance", title: "Resonansi Karakter", desc: "Setiap racikan dirancang secara emosional untuk memperkuat impresi visual, meningkatkan kepercayaan diri, dan mengekspresikan aura unik Anda." },
-                  { num: "04", label: "Longevity", title: "Jejak Kehadiran Abadi", desc: "Konsentrasi konsentrat yang tinggi menghasilkan tingkat sillage dan proyeksi prima, meninggalkan impresi mendalam bahkan setelah Anda berlalu." },
-                ].map((card) => (
+                {t.about.cards.map((card) => (
                   <div key={card.num} className="bg-white/[0.02] backdrop-blur-md border border-white/5 p-6 md:p-8 rounded-2xl space-y-4 hover:border-amber-500/20 transition-colors duration-300">
                     <span className="text-[10px] font-mono text-amber-500/60 uppercase tracking-widest block">{card.num} / {card.label}</span>
                     <h3 className="font-semibold text-stone-100 text-base md:text-lg">{card.title}</h3>
@@ -581,18 +581,14 @@ export default function EvomiLandingPage() {
 
         <SectionDivider />
 
-        {/* =================================================================
-         * SEKSI 4: IMAGE CAROUSEL (PRODUCT CHARACTERS)
-         * Menampilkan komponen ImageCarousel dengan judul dan divider.
-         * Animasi fade-in saat section masuk viewport.
-         * ================================================================= */}
+        {/* IMAGE CAROUSEL SECTION */}
         <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="relative py-10 md:py-20 px-6 md:px-16 z-20 bg-[#FBFBF9] dark:bg-stone-950">
           <div className="max-w-7xl mx-auto">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="text-center mb-16 md:mb-24 space-y-4">
-              <h2 className={`${fontJudul.className} text-3xl md:text-5xl uppercase tracking-tight text-stone-800 dark:text-stone-100`}>Product Characters</h2>
+              <h2 className={`${fontJudul.className} text-3xl md:text-5xl uppercase tracking-tight text-stone-800 dark:text-stone-100`}>{t.carousel.title}</h2>
               <div className="flex items-center justify-center space-x-4">
                 <div className="w-8 md:w-12 h-[1px] bg-stone-200"></div>
-                <p className="text-stone-400 tracking-[0.25em] uppercase text-[9px] md:text-xs font-semibold">Collections</p>
+                <p className="text-stone-400 tracking-[0.25em] uppercase text-[9px] md:text-xs font-semibold">{t.carousel.subtitle}</p>
                 <div className="w-8 md:w-12 h-[1px] bg-stone-200"></div>
               </div>
             </motion.div>
@@ -600,33 +596,26 @@ export default function EvomiLandingPage() {
           </div>
         </motion.section>
 
-        {/* =================================================================
-         * SEKSI 5: SIGNATURE COLLECTION (PRODUCT GRID)
-         * Grid 4 kolom menampilkan 4 produk unggulan.
-         * Setiap kartu: thumbnail zoom hover + overlay "Lihat Produk" + info.
-         * Tombol "View All Collection" di bawah grid.
-         * ================================================================= */}
+        {/* SIGNATURE COLLECTION SECTION */}
         <section id="product" className="relative py-20 md:py-32 px-4 md:px-8 bg-white dark:bg-stone-900 border-y border-stone-100 dark:border-stone-800 shadow-[0_0_50px_rgba(0,0,0,0.02)] z-20">
           <div className="max-w-7xl mx-auto">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="text-center mb-16 md:mb-24 space-y-4">
-              <h2 className={`${fontJudul.className} text-3xl md:text-5xl uppercase tracking-tight text-stone-800 dark:text-stone-100`}>Signature Essence</h2>
+              <h2 className={`${fontJudul.className} text-3xl md:text-5xl uppercase tracking-tight text-stone-800 dark:text-stone-100`}>{t.signature.title}</h2>
               <div className="flex items-center justify-center space-x-4">
                 <div className="w-8 md:w-12 h-[1px] bg-stone-200"></div>
-                <p className="text-stone-400 tracking-[0.25em] uppercase text-[9px] md:text-xs font-semibold">Featured Collection</p>
+                <p className="text-stone-400 tracking-[0.25em] uppercase text-[9px] md:text-xs font-semibold">{t.signature.subtitle}</p>
                 <div className="w-8 md:w-12 h-[1px] bg-stone-200"></div>
               </div>
             </motion.div>
-            {/* Grid produk dengan stagger animasi */}
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={staggerContainer} className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
               {topFourProducts.map((parfum) => (
                 <motion.div key={parfum.id} variants={fadeInUp} className="group flex flex-col h-full">
                   <div className="relative aspect-[4/5] overflow-hidden bg-stone-50 mb-5 rounded-2xl border border-stone-100 shadow-sm group-hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-all duration-500">
                     <Image src={parfum.image_url || "/img/placeholder.jpg"} alt={parfum.nama} fill unoptimized className="object-cover transition-transform duration-1000 group-hover:scale-105" />
-                    {/* Overlay "Lihat Produk" — muncul saat hover di desktop */}
                     <Link href={`/produk/${parfum.id}`} className="absolute inset-0 z-10 opacity-0 md:group-hover:opacity-100 bg-stone-900/10 backdrop-blur-[2px] transition-all duration-500 flex items-end p-4">
                       <div className="w-full bg-white/95 backdrop-blur-md py-3.5 text-[10px] uppercase font-bold tracking-widest text-center text-stone-800 translate-y-4 group-hover:translate-y-0 transition-all duration-500 rounded-xl shadow-lg overflow-hidden relative z-0 group/btn">
                         <div className="absolute inset-0 bg-amber-500 scale-x-0 group-hover/btn:scale-x-100 transition-transform duration-500 origin-left -z-10" />
-                        <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-stone-950">Lihat Produk</span>
+                        <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-stone-950">{t.signature.btnHover}</span>
                       </div>
                     </Link>
                   </div>
@@ -638,26 +627,16 @@ export default function EvomiLandingPage() {
                 </motion.div>
               ))}
             </motion.div>
-            {/* Link ke semua produk */}
             <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mt-16 text-center">
-              <Link href="/produk" className="inline-block border-b border-stone-300 pb-1 text-xs uppercase tracking-widest font-bold text-stone-500 hover:text-stone-900 hover:border-stone-900 transition-all">View All Collection</Link>
+              <Link href="/produk" className="inline-block border-b border-stone-300 pb-1 text-xs uppercase tracking-widest font-bold text-stone-500 hover:text-stone-900 hover:border-stone-900 transition-all">{t.signature.viewAll}</Link>
             </motion.div>
           </div>
         </section>
 
-        {/* =================================================================
-         * SEKSI 6: METRICS / INFOGRAPHIC
-         * 4 metrik brand: 12H+ Projection, Artisan Batch, Recycled Glass, Organic Essence.
-         * Teks berubah dari abu-abu ke hitam saat hover.
-         * ================================================================= */}
+        {/* METRICS SECTION */}
         <section className="relative py-20 md:py-28 bg-[#FBFBF9] dark:bg-stone-950 px-6 text-center z-20">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-12">
-            {[
-              { title: "12H+", desc: "Projection" },
-              { title: "Artisan", desc: "Batch" },
-              { title: "Recycled", desc: "Glass" },
-              { title: "Organic", desc: "Essence" },
-            ].map((item, i) => (
+            {t.metrics.map((item, i) => (
               <motion.div key={i} variants={fadeInUp} className="group">
                 <div className={`${fontJudul.className} text-3xl md:text-4xl mb-2 text-stone-300 dark:text-stone-600 group-hover:text-stone-800 dark:group-hover:text-stone-100 transition-colors duration-500`}>{item.title}</div>
                 <p className="text-[10px] uppercase tracking-[0.25em] text-stone-400 font-medium">{item.desc}</p>
@@ -666,18 +645,13 @@ export default function EvomiLandingPage() {
           </motion.div>
         </section>
 
-        {/* =================================================================
-         * SEKSI 7: TESTIMONIAL
-         * Section gelap dengan efek glow parallax di background.
-         * Quote brand di atas, komponen TestimonialSection di bawah.
-         * ================================================================= */}
+        {/* TESTIMONIAL SECTION */}
         <section ref={testimonialRef} className="relative py-24 md:py-32 bg-stone-950 text-white px-6 overflow-hidden z-20">
-          {/* Glow parallax — bergerak seiring scroll section */}
           <motion.div style={{ y: testimonialGlowY }} className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-full bg-stone-800/30 blur-[120px] rounded-full pointer-events-none" />
           <div className="max-w-6xl mx-auto text-center relative z-10">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-16 md:mb-24 space-y-4">
-              <h2 className={`${fontJudul.className} text-3xl md:text-5xl italic leading-tight text-stone-100 font-light`}>
-                "Captured in a scent, <br /> defined by the soul."
+              <h2 className={`${fontJudul.className} text-3xl md:text-5xl italic leading-tight text-stone-100 font-light whitespace-pre-line`}>
+                {t.testimonial.quote}
               </h2>
             </motion.div>
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}>
@@ -686,37 +660,29 @@ export default function EvomiLandingPage() {
           </div>
         </section>
 
-        {/* =================================================================
-         * SEKSI 8: FOOTER
-         * Grid 3 kolom: Brand info, Contact, Newsletter.
-         * Footer bawah: copyright + ikon media sosial.
-         * ================================================================= */}
+        {/* FOOTER SECTION */}
         <motion.footer initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1 }} className="relative z-20 bg-white dark:bg-stone-900 pt-20 pb-10 px-6 md:px-8 border-t border-stone-100 dark:border-stone-800">
           <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-12 mb-16">
-            {/* Kolom brand */}
             <div className="md:col-span-5">
               <h2 className={`${fontJudul.className} text-3xl mb-5 tracking-widest text-stone-900 dark:text-stone-100`}>EVOMI</h2>
-              <p className="max-w-sm text-stone-500 text-sm font-light leading-relaxed">Menghadirkan pengalaman sensorik melalui kurasi aroma terbaik. Dedikasi pada seni artisan fragrance.</p>
+              <p className="max-w-sm text-stone-500 text-sm font-light leading-relaxed">{t.footer.desc}</p>
             </div>
-            {/* Kolom kontak */}
             <div className="md:col-span-3">
-              <h4 className="font-bold text-[11px] uppercase tracking-widest mb-6 text-stone-800 dark:text-stone-200">Contact Us</h4>
+              <h4 className="font-bold text-[11px] uppercase tracking-widest mb-6 text-stone-800 dark:text-stone-200">{t.footer.contact}</h4>
               <ul className="text-stone-500 dark:text-stone-400 space-y-3 text-sm font-light">
                 <li className="hover:text-stone-900 transition-colors cursor-pointer">hello@evomi.com</li>
                 <li>Jakarta, Indonesia</li>
               </ul>
             </div>
-            {/* Kolom newsletter */}
             <div className="md:col-span-4">
-              <h4 className="font-bold text-[11px] uppercase tracking-widest mb-6 text-stone-800 dark:text-stone-200">The Newsletter</h4>
-              <p className="text-stone-400 dark:text-stone-500 text-xs mb-4">Dapatkan akses eksklusif ke rilis terbaru kami.</p>
+              <h4 className="font-bold text-[11px] uppercase tracking-widest mb-6 text-stone-800 dark:text-stone-200">{t.footer.newsletterTitle}</h4>
+              <p className="text-stone-400 dark:text-stone-500 text-xs mb-4">{t.footer.newsletterDesc}</p>
               <div className="flex border-b border-stone-300 dark:border-stone-700 pb-2 focus-within:border-stone-900 dark:focus-within:border-stone-400 transition-colors">
-                <input type="email" placeholder="Your email address" className="bg-transparent w-full text-sm outline-none text-stone-800 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-600" />
-                <button className="text-[10px] uppercase font-bold text-stone-800 dark:text-stone-200 hover:text-amber-800 dark:hover:text-amber-400 transition-colors tracking-wider">Subscribe</button>
+                <input type="email" placeholder={t.footer.placeholder} className="bg-transparent w-full text-sm outline-none text-stone-800 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-600" />
+                <button className="text-[10px] uppercase font-bold text-stone-800 dark:text-stone-200 hover:text-amber-800 dark:hover:text-amber-400 transition-colors tracking-wider">{t.footer.subscribe}</button>
               </div>
             </div>
           </div>
-          {/* Footer bawah: copyright + sosial media */}
           <div className="flex flex-col md:flex-row justify-around items-center text-center text-[10px] text-stone-400 dark:text-stone-600 uppercase tracking-[0.2em] pt-8 border-t border-stone-100 dark:border-stone-800 gap-4">
             <div>&copy; {mounted ? new Date().getFullYear() : "2026"} EVOMI FRAGRANCE HOUSE</div>
             <div className="flex space-x-6">

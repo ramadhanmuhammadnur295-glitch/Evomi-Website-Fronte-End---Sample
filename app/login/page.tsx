@@ -10,20 +10,26 @@ import { Lock, User, Loader2, ArrowLeft } from "lucide-react";
 import { BASE_URL } from "@/src/config/strings";
 
 export default function LoginPage() {
-  // Menggunakan state dan logika dari source asli
-  const [formData, setFormData] = useState({ login: "", password: "" }); 
+  // State untuk menyimpan nilai input login pengguna.
+  const [formData, setFormData] = useState({ login: "", password: "" });
+  // State untuk menyimpan pesan error autentikasi.
   const [error, setError] = useState("");
+  // State untuk menandai proses login sedang berlangsung.
   const [loading, setLoading] = useState(false);
+  // Hook Next.js untuk navigasi antar halaman.
   const router = useRouter();
 
-  // handle submit login
+  // Fungsi untuk mengirim data login ke backend dan menangani respons.
   const handleSubmit = async (e: React.FormEvent) => {
+    // Mencegah refresh halaman setelah form dikirim.
     e.preventDefault();
+    // Menandai proses login dimulai.
     setLoading(true);
+    // Menghapus pesan error sebelumnya.
     setError("");
 
     try {
-      // Menggunakan endpoint dan metode POST sesuai referensi
+      // Mengirim request autentikasi ke endpoint login.
       const response = await fetch(BASE_URL + "/api/login", {
         method: "POST",
         headers: {
@@ -33,26 +39,31 @@ export default function LoginPage() {
         body: JSON.stringify(formData),
       });
 
+      // Mengambil data respons dari server.
       const data = await response.json();
+
+      // Menangani respons gagal dari backend.
       if (!response.ok) throw new Error(data.message || "Kredensial salah.");
 
-      // Menyimpan token dan data user ke localStorage
+      // Menyimpan token dan informasi pengguna ke localStorage.
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("user_data", JSON.stringify(data.user));
 
+      // Redirect ke halaman utama setelah login sukses.
       router.push("/");
       router.refresh();
     } catch (err: any) {
+      // Menyimpan pesan error agar tampil di UI.
       setError(err.message);
     } finally {
+      // Mengakhiri status loading setelah proses selesai.
       setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4 relative">
-      
-      {/* NAVIGASI BACK TO HOME: Meniru pola navigasi pada halaman Register */}
+      {/* Section: Navigasi kembali ke halaman utama */}
       <Link
         href="/"
         className="absolute top-8 left-8 z-50 flex items-center space-x-2 text-slate-400 hover:text-slate-900 transition-colors group"
@@ -63,19 +74,20 @@ export default function LoginPage() {
         </span>
       </Link>
 
-      {/* Dekorasi Background */}
+      {/* Section: Dekorasi latar belakang halaman */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-5%] left-[-5%] w-[35%] h-[35%] bg-slate-100 rounded-full blur-[100px]" />
         <div className="absolute bottom-[-5%] right-[-5%] w-[35%] h-[35%] bg-blue-50/50 rounded-full blur-[100px]" />
       </div>
 
-      <motion.div 
+      {/* Section: Kartu konten login */}
+      <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md z-10"
       >
         <div className="bg-white border border-slate-200 p-10 shadow-[0_8px_40px_rgba(0,0,0,0.03)] rounded-[2.5rem]">
-          {/* Header Portal */}
+          {/* Section: Header halaman */}
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900 leading-tight">
               Welcome back to <br />
@@ -84,15 +96,16 @@ export default function LoginPage() {
             <div className="h-1 w-8 bg-slate-900 mx-auto mt-4 rounded-full" />
           </div>
 
-          {/* Pesan Error */}
+          {/* Section: Pesan error autentikasi */}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 text-xs font-bold rounded-2xl text-center uppercase tracking-wide">
               {error}
             </div>
           )}
 
+          {/* Section: Form login pengguna */}
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Field Username/Email */}
+            {/* Section: Input username atau email */}
             <div className="space-y-2">
               <label className="text-[11px] uppercase tracking-widest text-slate-400 font-bold ml-1">
                 Username or Email
@@ -111,7 +124,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Field Password */}
+            {/* Section: Input password */}
             <div className="space-y-2">
               <label className="text-[11px] uppercase tracking-widest text-slate-400 font-bold ml-1">
                 Password
@@ -130,7 +143,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Tombol Sign In */}
+            {/* Section: Tombol submit login */}
             <button
               type="submit"
               disabled={loading}
@@ -144,7 +157,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Link ke Register */}
+          {/* Section: Link ke halaman register */}
           <div className="mt-12 text-center">
             <p className="text-[13px] text-slate-400 font-medium">
               New to the platform?{" "}

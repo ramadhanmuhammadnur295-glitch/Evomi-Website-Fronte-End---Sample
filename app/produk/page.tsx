@@ -14,6 +14,42 @@ import WavyNavbarGradient from "@/components/WavyNavbarGradient";
 import ChatModal from "@/components/ChatModal";
 import QuizModal from "@/components/QuizModal";
 
+// --- Kamus Bahasa Terjemahan ---
+const dict = {
+  id: {
+    nav: { home: "Home", collection: "Koleksi", quiz: "Kuis", article: "Artikel", contact: "Kontak", profile: "Profil", orders: "Pesanan", logout: "Keluar", login: "Masuk", register: "Daftar" },
+    card: { unisex: "Koleksi Uniseks", viewProduct: "Lihat Produk" },
+    hero: {
+      tagline: "Seni Wewangian",
+      title: "Koleksi Kami",
+      desc: "Dikurasi dengan bahan-bahan organik terbaik untuk menciptakan jejak aroma yang tak terlupakan. Temukan identitas Anda melalui koleksi kami."
+    },
+    pagination: { page: "Halaman", of: "dari" },
+    footer: {
+      tagline: '"Mendefinisikan Ulang Kehadiran Lewat Aroma." Identitas yang tidak terlihat namun paling berkesan.',
+      location: "Lokasi",
+      connect: "Hubungi",
+      handcrafted: "Dibuat dengan bangga di Indonesia"
+    }
+  },
+  en: {
+    nav: { home: "Home", collection: "Collection", quiz: "Quiz", article: "Article", contact: "Contact", profile: "Profile", orders: "Orders", logout: "Logout", login: "Login", register: "Register" },
+    card: { unisex: "Unisex Collection", viewProduct: "View Product" },
+    hero: {
+      tagline: "The Art of Fragrance",
+      title: "Our Collections",
+      desc: "Curated with the finest organic ingredients to create an unforgettable scent trail. Discover your identity through our collection."
+    },
+    pagination: { page: "Page", of: "of" },
+    footer: {
+      tagline: '"Redefining Presence through Scent." An invisible yet most memorable identity.',
+      location: "Location",
+      connect: "Connect",
+      handcrafted: "Handcrafted in Indonesia"
+    }
+  }
+};
+
 // --- Animasi Variants ---
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -71,8 +107,8 @@ const fontCaption = localFont({
   display: "swap",
 });
 
-// Komponen Card
-const ProductCard = ({ parfum }: { parfum: any }) => {
+// Komponen kartu produk (Menerima parameter kamus `t`)
+const ProductCard = ({ parfum, t }: { parfum: any; t: any }) => {
   return (
     <motion.div variants={fadeInUp} className="group flex flex-col h-full">
       <div className="relative aspect-[4/5] overflow-hidden bg-stone-50 mb-5 rounded-2xl border border-stone-100 shadow-sm group-hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-all duration-500">
@@ -94,11 +130,10 @@ const ProductCard = ({ parfum }: { parfum: any }) => {
           href={`/produk/${parfum.id}`}
           className="absolute inset-0 z-10 opacity-0 md:group-hover:opacity-100 bg-stone-900/10 backdrop-blur-[2px] transition-all duration-500 flex items-end p-4"
         >
-          {/* Tombol Lihat Produk dengan animasi hover orange penuh */}
           <div className="w-full bg-white/95 backdrop-blur-md py-3.5 text-[10px] uppercase font-bold tracking-widest text-center text-stone-800 translate-y-4 group-hover:translate-y-0 transition-all duration-500 rounded-xl shadow-lg overflow-hidden relative z-0 group/btn">
             <div className="absolute inset-0 bg-amber-500 scale-x-0 group-hover/btn:scale-x-100 transition-transform duration-500 origin-left -z-10" />
             <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-stone-950">
-              Lihat Produk
+              {t.card.viewProduct}
             </span>
           </div>
         </Link>
@@ -106,7 +141,7 @@ const ProductCard = ({ parfum }: { parfum: any }) => {
 
       <div className="text-center space-y-2 px-2 flex-grow flex flex-col justify-end">
         <span className="text-[8px] md:text-[10px] text-stone-400 uppercase tracking-[0.2em] font-medium">
-          Unisex Collection
+          {t.card.unisex}
         </span>
         <h3
           className={`${fontJudul.className} text-base md:text-xl text-stone-800 uppercase leading-snug line-clamp-1 group-hover:text-amber-800 transition-colors`}
@@ -129,29 +164,20 @@ const ProductCard = ({ parfum }: { parfum: any }) => {
   );
 };
 
-// ============================================================
-// Halaman Produk
-// Menampilkan daftar produk, fitur navigasi, modal chat, dan
-// interaksi pengguna seperti login, logout, serta pagination.
-// ============================================================
-
-// Halaman utama
 export default function ProductsPage() {
   const router = useRouter();
+
+  // State Bahasa Manajemen
+  const [lang, setLang] = useState<"id" | "en">("id");
+  const t = dict[lang];
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
-
-  // States untuk Navbar UI
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // States untuk Modals
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 4;
 
@@ -163,7 +189,6 @@ export default function ProductsPage() {
     image: string;
   } | null>(null);
 
-  // useeffect
   useEffect(() => {
     setMounted(true);
     const token = localStorage.getItem("access_token");
@@ -177,9 +202,9 @@ export default function ProductsPage() {
     }
   }, []);
 
-  // useeffect 2
   useEffect(() => {
     if (!user) return;
+
     const setOnlineStatus = async () => {
       try {
         const token = localStorage.getItem("access_token");
@@ -195,6 +220,7 @@ export default function ProductsPage() {
         console.error("Gagal update status online:", err);
       }
     };
+
     setOnlineStatus();
 
     const handleOfflineBeacon = () => {
@@ -211,7 +237,6 @@ export default function ProductsPage() {
     };
   }, [user]);
 
-  // useeffect 3
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -226,10 +251,10 @@ export default function ProductsPage() {
         setLoading(false);
       }
     };
+
     fetchProducts();
   }, []);
 
-  // handle logout
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("access_token");
@@ -254,15 +279,9 @@ export default function ProductsPage() {
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct,
-  );
-
-  // total pages
+  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(products.length / productsPerPage);
 
-  // paginate
   const paginate = (pageNumber: number) => {
     setCurrentPage(pageNumber);
     const productSection = document.getElementById("collection-grid");
@@ -274,20 +293,16 @@ export default function ProductsPage() {
     }
   };
 
-  // !mounted
   if (!mounted) return null;
 
   return (
     <div
       className={`${fontJudul.variable} ${fontCaption.variable} font-body min-h-screen bg-[#FBFBF9] text-stone-900 selection:bg-amber-200 selection:text-stone-900 antialiased`}
     >
-      {/* MODALS */}
       <QuizModal isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
       <ChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
-      {/* ========================================================================= */}
-      {/* FLOATING CHAT BUTTON (PROGRESS ORANGE HOVER)                              */}
-      {/* ========================================================================= */}
+      {/* Section: Tombol chat mengambang */}
       <motion.div
         initial={{ opacity: 0, scale: 0.5, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -326,15 +341,14 @@ export default function ProductsPage() {
           </span>
         </button>
       </motion.div>
-      {/* ========================================================================= */}
-      {/* NAVBAR: SAMA PERSIS DENGAN LANDING PAGE (PROGRESS ORANGE KIRI-KANAN)      */}
-      {/* ========================================================================= */}
+
+      {/* Section: Navbar */}
       <nav className="fixed w-full z-[100] bg-[#0071bc]/95 backdrop-blur-xl border-b border-white/10 shadow-lg transition-all duration-300">
         <WavyNavbarGradient />
         <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
           
-          {/* 1. SEKTOR KIRI: LOGO EVOMI MASKING PROGRESS ORANGE */}
-          <div className="flex-1 md:w-1/2 flex justify-start">
+          {/* 1. SEKTOR KIRI: LOGO */}
+          <div className="flex-1 md:w-1/3 flex justify-start">
             <Link
               href="/"
               className="relative group/logo block overflow-hidden"
@@ -360,49 +374,72 @@ export default function ProductsPage() {
             </Link>
           </div>
 
-          {/* 2. SEKTOR TENGAH: NAV MENU DESKTOP UNDERLINE PROGRESS ORANGE */}
+          {/* 2. SEKTOR TENGAH: MENU DESKTOP */}
           <div
-            className={`hidden md:flex w-1/2 justify-center items-center space-x-10 ${fontJudul.className} text-[13px] tracking-[0.2em] uppercase text-white`}
+            className={`hidden md:flex w-1/3 justify-center items-center space-x-10 ${fontJudul.className} text-[13px] tracking-[0.2em] uppercase text-white`}
           >
             <Link
               href="/"
               className="relative group/nav py-1 transition-colors duration-300 hover:text-amber-400"
             >
-              Home
+              {t.nav.home}
               <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/nav:scale-x-100 transition-transform duration-300 origin-left" />
             </Link>
             <Link
               href="/produk"
               className="relative group/nav py-1 transition-colors duration-300 text-amber-400"
             >
-              Collection
+              {t.nav.collection}
               <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-100 origin-left" />
             </Link>
             <Link
               href="/quiz"
               className="relative group/nav py-1 transition-colors duration-300 hover:text-amber-400"
             >
-              Quiz
+              {t.nav.quiz}
               <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/nav:scale-x-100 transition-transform duration-300 origin-left" />
             </Link>
             <Link
               href="/artikel"
               className="relative group/nav py-1 transition-colors duration-300 hover:text-amber-400"
             >
-              Artikel
+              {t.nav.article}
               <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/nav:scale-x-100 transition-transform duration-300 origin-left" />
             </Link>
             <a
               href="#footer"
               className="relative group/nav py-1 transition-colors duration-300 hover:text-amber-400"
             >
-              Contact
+              {t.nav.contact}
               <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/nav:scale-x-100 transition-transform duration-300 origin-left" />
             </a>
           </div>
 
-          {/* 3. SEKTOR KANAN: USER PROFILE / LOGIN REGISTER */}
-          <div className="flex-1 md:w-1/3 flex justify-end items-center space-x-4">
+          {/* 3. SEKTOR KANAN: TOGGLE BAHASA & USER MANAGEMENT */}
+          <div className="flex-1 md:w-1/3 flex justify-end items-center space-x-6">
+            
+            {/* Language Toggle Component (Desktop Capsule Look) */}
+            <div className="hidden md:flex items-center relative bg-white/10 backdrop-blur-md border border-white/20 p-1 rounded-full overflow-hidden">
+              <button
+                onClick={() => setLang("id")}
+                className={`relative z-10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 ${lang === 'id' ? 'text-stone-900' : 'text-white hover:text-amber-400'}`}
+              >
+                ID
+              </button>
+              <button
+                onClick={() => setLang("en")}
+                className={`relative z-10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 ${lang === 'en' ? 'text-stone-900' : 'text-white hover:text-amber-400'}`}
+              >
+                EN
+              </button>
+              <motion.div
+                className="absolute top-1 bottom-1 w-[calc(50%-2px)] bg-amber-500 rounded-full shadow-sm z-0"
+                initial={false}
+                animate={{ left: lang === 'id' ? "4px" : "calc(50% + 2px)" }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            </div>
+
             <div className="hidden md:flex items-center space-x-6">
               {user ? (
                 <div className="relative">
@@ -441,20 +478,20 @@ export default function ProductsPage() {
                           href="/profile"
                           className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-800 hover:bg-blue-50"
                         >
-                          Profile
+                          {t.nav.profile}
                         </Link>
                         <Link
                           href="/orders"
                           className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-800 hover:bg-blue-50"
                         >
-                          Orders
+                          {t.nav.orders}
                         </Link>
                         <hr className="border-blue-50 my-1" />
                         <button
                           onClick={handleLogout}
                           className="w-full text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-50"
                         >
-                          Logout
+                          {t.nav.logout}
                         </button>
                       </motion.div>
                     )}
@@ -466,14 +503,14 @@ export default function ProductsPage() {
                     href="/login"
                     className="relative group/auth py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white hover:text-amber-400 transition-colors duration-300"
                   >
-                    Login
+                    {t.nav.login}
                     <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/auth:scale-x-100 transition-transform duration-300 origin-left" />
                   </Link>
                   <Link
                     href="/register"
                     className="relative group/auth py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white hover:text-amber-400 transition-colors duration-300"
                   >
-                    Register
+                    {t.nav.register}
                     <span className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 scale-x-0 group-hover/auth:scale-x-100 transition-transform duration-300 origin-left" />
                   </Link>
                 </div>
@@ -491,19 +528,9 @@ export default function ProductsPage() {
                 viewBox="0 0 24 24"
               >
                 {isMobileMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 8h16M4 16h16"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" />
                 )}
               </svg>
             </button>
@@ -521,12 +548,19 @@ export default function ProductsPage() {
               className="md:hidden bg-[#0071bc] border-t border-white/10"
             >
               <div className="px-8 py-10 flex flex-col space-y-8">
+                {/* Language Toggle Mobile View */}
+                <motion.div variants={itemVars} className="flex space-x-4 border-b border-white/20 pb-4">
+                  <button onClick={() => setLang("id")} className={`text-sm font-bold uppercase tracking-widest ${lang === 'id' ? 'text-amber-400' : 'text-white'}`}>ID</button>
+                  <span className="text-white/50">|</span>
+                  <button onClick={() => setLang("en")} className={`text-sm font-bold uppercase tracking-widest ${lang === 'en' ? 'text-amber-400' : 'text-white'}`}>EN</button>
+                </motion.div>
+
                 <div className="space-y-6">
                   {[
-                    { name: "Home", href: "/" },
-                    { name: "Collection", href: "/produk" },
-                    { name: "Quiz", href: "/quiz" },
-                    { name: "Artikel", href: "/artikel" },
+                    { name: t.nav.home, href: "/" },
+                    { name: t.nav.collection, href: "/produk" },
+                    { name: t.nav.quiz, href: "/quiz" },
+                    { name: t.nav.article, href: "/artikel" },
                   ].map((link) => (
                     <motion.div key={link.name} variants={itemVars}>
                       <Link
@@ -568,21 +602,21 @@ export default function ProductsPage() {
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="px-4 py-3 bg-white/10 rounded-xl text-[10px] font-bold uppercase text-white text-center"
                         >
-                          Profile
+                          {t.nav.profile}
                         </Link>
                         <Link
                           href="/orders"
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="px-4 py-3 bg-white/10 rounded-xl text-[10px] font-bold uppercase text-white text-center"
                         >
-                          Orders
+                          {t.nav.orders}
                         </Link>
                       </div>
                       <button
                         onClick={handleLogout}
                         className="w-full py-3 border border-red-400/50 rounded-xl text-[10px] font-bold uppercase text-red-300"
                       >
-                        Logout
+                        {t.nav.logout}
                       </button>
                     </div>
                   ) : (
@@ -592,14 +626,14 @@ export default function ProductsPage() {
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="w-full py-4 bg-white text-[#0071bc] rounded-xl text-center text-[10px] font-bold uppercase tracking-widest"
                       >
-                        Login
+                        {t.nav.login}
                       </Link>
                       <Link
                         href="/register"
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="w-full py-4 border border-white/30 text-white rounded-xl text-center text-[10px] font-bold uppercase tracking-widest"
                       >
-                        Register
+                        {t.nav.register}
                       </Link>
                     </div>
                   )}
@@ -610,7 +644,7 @@ export default function ProductsPage() {
         </AnimatePresence>
       </nav>
 
-      {/* HEADER SECTION */}
+      {/* Section: Header hero koleksi produk */}
       <section className="pt-40 pb-16 px-6 relative z-10">
         <motion.div
           initial="hidden"
@@ -624,7 +658,7 @@ export default function ProductsPage() {
           >
             <div className="w-8 md:w-12 h-[1px] bg-stone-300"></div>
             <span className="inline-block text-[10px] uppercase tracking-[0.5em] text-stone-400 font-bold">
-              The Art of Fragrance
+              {t.hero.tagline}
             </span>
             <div className="w-8 md:w-12 h-[1px] bg-stone-300"></div>
           </motion.div>
@@ -633,20 +667,18 @@ export default function ProductsPage() {
             variants={fadeInUp}
             className={`${fontJudul.className} text-5xl md:text-7xl text-stone-900 mb-6 leading-tight uppercase tracking-tight`}
           >
-            Our Collections
+            {t.hero.title}
           </motion.h1>
           <motion.p
             variants={fadeInUp}
             className="text-stone-500 max-w-xl mx-auto leading-relaxed text-sm md:text-base font-light italic"
           >
-            Dikurasi dengan bahan-bahan organik terbaik untuk menciptakan jejak
-            aroma yang tak terlupakan. Temukan identitas Anda melalui koleksi
-            kami.
+            {t.hero.desc}
           </motion.p>
         </motion.div>
       </section>
 
-      {/* PRODUCT GRID SECTION */}
+      {/* Section: Grid produk */}
       <section id="collection-grid" className="pb-32 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
           {loading ? (
@@ -669,11 +701,11 @@ export default function ProductsPage() {
                 className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10 md:row-gap-16"
               >
                 {currentProducts.map((parfum: any) => (
-                  <ProductCard key={parfum.id} parfum={parfum} />
+                  <ProductCard key={parfum.id} parfum={parfum} t={t} />
                 ))}
               </motion.div>
 
-              {/* PAGINATION CONTROLS */}
+              {/* Section: Kontrol pagination */}
               {totalPages > 1 && (
                 <div className="flex flex-col items-center mt-24 space-y-6">
                   <div className="h-[1px] w-24 bg-stone-200"></div>
@@ -689,12 +721,7 @@ export default function ProductsPage() {
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          d="M15 19l-7-7 7-7"
-                        />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
 
@@ -727,17 +754,12 @@ export default function ProductsPage() {
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          d="M9 5l7 7-7 7"
-                        />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5l7 7-7 7" />
                       </svg>
                     </button>
                   </div>
                   <p className="text-[9px] uppercase tracking-[0.3em] text-stone-400">
-                    Page {currentPage} of {totalPages}
+                    {t.pagination.page} {currentPage} {t.pagination.of} {totalPages}
                   </p>
                 </div>
               )}
@@ -746,7 +768,7 @@ export default function ProductsPage() {
         </div>
       </section>
 
-      {/* FOOTER */}
+      {/* Section: Footer */}
       <motion.footer
         id="footer"
         initial={{ opacity: 0 }}
@@ -765,13 +787,12 @@ export default function ProductsPage() {
               className="brightness-0"
             />
             <p className="max-w-sm text-stone-500 text-sm font-light leading-relaxed italic">
-              "Redefining Presence through Scent." <br /> Identitas yang tidak
-              terlihat namun paling berkesan.
+              {t.footer.tagline}
             </p>
           </div>
           <div className="space-y-6">
             <h4 className="font-bold text-[11px] uppercase tracking-widest text-stone-800">
-              Location
+              {t.footer.location}
             </h4>
             <p className="text-stone-500 text-sm font-light leading-relaxed">
               Jakarta, Indonesia
@@ -781,7 +802,7 @@ export default function ProductsPage() {
           </div>
           <div className="space-y-6">
             <h4 className="font-bold text-[11px] uppercase tracking-widest text-stone-800">
-              Connect
+              {t.footer.connect}
             </h4>
             <div className="flex flex-col gap-3 text-sm font-light text-stone-500">
               <a href="#" className="hover:text-stone-900 transition-colors">
@@ -796,7 +817,7 @@ export default function ProductsPage() {
 
         <div className="max-w-7xl mx-auto pt-8 border-t border-stone-100 text-[10px] text-stone-400 uppercase tracking-[0.2em] flex flex-col md:flex-row justify-between items-center gap-4">
           <p>© {new Date().getFullYear()} EVOMI FRAGRANCE HOUSE.</p>
-          <p>Handcrafted in Indonesia</p>
+          <p>{t.footer.handcrafted}</p>
         </div>
       </motion.footer>
     </div>
