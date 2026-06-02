@@ -7,13 +7,17 @@ const BASE_URL = "https://evomi-website-fronte-end-sample.vercel.app";
 
 // ─── Metadata global (dipakai di app/layout.tsx) ───────────────────────────
 export const defaultMetadata: Metadata = {
+  
   metadataBase: new URL(BASE_URL),
+
   title: {
     default: "Evomi – Artisan Fragrance House | Parfum Lokal Premium",
     template: "%s | Evomi Fragrance",
   },
+
   description:
     "Evomi menghadirkan parfum artisan dengan botani langka dan teknik ekstraksi modern. Kurasi aroma eksklusif, limited batch, dari Indonesia untuk dunia.",
+
   keywords: [
     "parfum artisan",
     "parfum lokal Indonesia",
@@ -24,6 +28,7 @@ export const defaultMetadata: Metadata = {
     "parfum organik",
     "limited edition parfum",
   ],
+
   authors: [{ name: "Evomi Fragrance House", url: BASE_URL }],
   creator: "Evomi Fragrance House",
   publisher: "Evomi Fragrance House",
@@ -47,7 +52,7 @@ export const defaultMetadata: Metadata = {
     ],
   },
 
-  // Twitter/X Card
+  // Twitter / X Card
   twitter: {
     card: "summary_large_image",
     title: "Evomi – Artisan Fragrance House",

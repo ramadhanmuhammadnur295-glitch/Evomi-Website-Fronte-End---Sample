@@ -70,25 +70,23 @@ const geistMono = Geist_Mono({
  * - suppressHydrationWarning: mencegah warning hydration dari next-themes
  *   yang memodifikasi atribut class pada <html> di sisi client
  * ========================================================================= */
+// layout.tsx
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className="scroll-smooth">
+    // Hapus className="dark" di bawah ini
+    <html lang="id">
       <body
         suppressHydrationWarning
-        className={`${brandFont.variable} ${bodyFont.variable} min-h-full flex flex-col`}
+        className={`${brandFont.variable} ${bodyFont.variable} min-h-full flex flex-col bg-[#FBFBF9] dark:bg-stone-950 text-stone-900 dark:text-stone-100 transition-colors duration-300`}
       >
-        {/* ThemeProvider: attribute="class" menulis kelas "dark" ke <html> */}
-        {/* <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}> */}
         <ToastProvider>
-          {/* ScrollProgressBar aktif di semua halaman */}
           <ScrollProgressBar />
           {children}
         </ToastProvider>
-        {/* </ThemeProvider> */}
       </body>
     </html>
   );
